@@ -193,6 +193,18 @@ int capture(vector<string> &lines,
   fatal("%s exited with unknown wait status %#x", cmd[0], w);
 }
 
+void *xmalloc(size_t n) {
+  void *ptr;
+
+  if(!(ptr = malloc(n)) && n)
+    fatal("out of memory");
+  return ptr;
+}
+
+char *xstrdup(const char *s) {
+  return strcpy((char *)xmalloc(strlen(s) + 1), s);
+}
+
 /*
 Local Variables:
 mode:c++

@@ -67,7 +67,7 @@ static int svn_revert(int nfiles, char **files) {
       case 'R':
       case '!':
       case '~':
-        files.push_back(strdup(status[n].substr(7).c_str()));
+        files.push_back(xstrdup(status[n].substr(7).c_str()));
         break;
       }
     }

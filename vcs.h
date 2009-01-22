@@ -62,6 +62,9 @@ void fatal(const char *msg, ...)
   attribute((noreturn))  
   attribute((format (printf, 1, 2)));
 
+void *xmalloc(size_t n);
+char *xstrdup(const char *s);
+
 #define EXE_END 0
 #define EXE_STR 1
 #define EXE_SKIPSTR 2
