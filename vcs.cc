@@ -67,6 +67,11 @@ static const struct command {
     vcs_remove
   },
   {
+    "status", NULL,
+    "Display current status",
+    vcs_status,
+  },
+  {
     "commit", "ci",
     "Commit changes",
     vcs_commit

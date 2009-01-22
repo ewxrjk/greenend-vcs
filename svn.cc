@@ -79,6 +79,12 @@ static int svn_revert(int nfiles, char **files) {
                    EXE_END);
 }
 
+static int svn_status() {
+  return execute("svn",
+                 EXE_STR, "status",
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -86,6 +92,7 @@ const struct vcs vcs_svn = {
   svn_remove,
   svn_commit,
   svn_revert,
+  svn_status,
 };
 
 /*
