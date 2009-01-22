@@ -80,6 +80,14 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.SS log
+.B vcs
+.B log
+.IR [ FILENAME ]
+.PP
+Display the change history for \fIFILENAME\fR, or for all files if no
+file is specified.
+(Beware, the latter case is very verbose for CVS!)
 .SS remove
 .B vcs
 .B remove
@@ -99,7 +107,23 @@ control unconditionally.
 .B revert
 .RI [ FILENAME ...]
 .PP
-Revert changes to the list files, or to all files if none are listed.
+Revert changes to the listed files, or to all files if none are listed.
+.SS status
+.B vcs
+.B status
+.PP
+Displays a summary of the current status, showing files that have been
+added, edited, removed or are not in version control (and not ignored).
+.PP
+Note that the output format is that of the native version control
+system.
+.SS update
+.B vcs
+.B update
+.PP
+Updates the working tree to the latest revision.
+Note that (currently) it is not possible to update only a subset of files,
+or to synchronize to a non-head revision.
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
 This section describes the supported version control systems.
 Any issues specific to them are describe here.
@@ -122,3 +146,5 @@ rare operations but only some of the time.
 does not attempt to translate the output of native commands to a
 consistent format.
 You get what the native system gives you.
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

@@ -62,11 +62,6 @@ static const struct command {
     vcs_add
   },
   {
-    "remove", "rm",
-    "Remove files",
-    vcs_remove
-  },
-  {
     "commit", "ci",
     "Commit changes",
     vcs_commit
@@ -77,9 +72,29 @@ static const struct command {
     vcs_diff
   },
   {
+    "log", NULL,
+    "Summarize history",
+    vcs_log
+  },
+  {
+    "remove", "rm",
+    "Remove files",
+    vcs_remove
+  },
+  {
     "revert", NULL,
     "Revert changes",
     vcs_revert
+  },
+  {
+    "status", NULL,
+    "Display current status",
+    vcs_status,
+  },
+  {
+    "update", NULL,
+    "Update working tree",
+    vcs_update,
   },
   { 0, 0, 0,0 }                         // that's all
 };

@@ -55,6 +55,25 @@ static int bzr_revert(int nfiles, char **files) {
                  EXE_END);
 }
 
+static int bzr_status() {
+  return execute("bzr",
+                 EXE_STR, "status",
+                 EXE_END);
+}
+
+static int bzr_update() {
+  return execute("bzr",
+                 EXE_STR, "update",
+                 EXE_END);
+}
+
+static int bzr_log(const char *path) {
+  return execute("bzr",
+                 EXE_STR, "log",
+                 EXE_IFSTR(path, path),
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -62,6 +81,9 @@ const struct vcs vcs_bzr = {
   bzr_remove,
   bzr_commit,
   bzr_revert,
+  bzr_status,
+  bzr_update,
+  bzr_log,
 };
 
 /*

@@ -17,52 +17,38 @@
  */
 #include "vcs.h"
 
-/* TODO: git is not supported yet (and guess.cc reflects this, remember to
- * condition git detection back in when you implement git support). */
-
-static int git_diff(int /*nfiles*/, char **/*files*/) {
-  return -1;
-}
-
-static int git_add(int /*binary*/, int /*nfiles*/, char **/*files*/) {
-  return -1;
-}
-
-static int git_remove(int /*force*/, int /*nfiles*/, char **/*files*/) {
-  return -1;
-}
-
-static int git_commit(const char */*msg*/, int /*nfiles*/, char **/*files*/) {
-  return -1;
-}
-
-static int git_revert(int /*nfiles*/, char **/*files*/) {
-  return -1;
-}
-
-static int git_status() {
-  return -1;
-}
-
-static int git_update() {
-  return -1;
-}
-
-static int git_log(const char */*path*/) {
-  return -1;
-}
-
-const struct vcs vcs_git = {
-  "Git",
-  git_diff,
-  git_add,
-  git_remove,
-  git_commit,
-  git_revert,
-  git_status,
-  git_update,
-  git_log,
+static const struct option update_options[] = {
+  { "help", no_argument, 0, 'h' },
+  { 0, 0, 0, 0 },
 };
+
+static void update_help(FILE *fp = stdout) {
+  fprintf(fp, 
+          "Usage:\n"
+          "  vcs update [OPTIONS]\n"
+          "Options:\n"
+          "  --help, -h     Display usage message\n");
+}
+
+int vcs_update(const struct vcs *v, int argc, char **argv) {
+  int n;
+
+  optind = 1;
+  while((n = getopt_long(argc, argv, "+h", update_options, 0)) >= 0) {
+    switch(n) {
+    case 'h':
+      update_help();
+      return 0;
+    default:
+      return 1;
+    }
+  }
+  if(argc != optind) {
+    update_help(stderr);
+    return 1;
+  }
+  return v->update();
+}
 
 /*
 Local Variables:

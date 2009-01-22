@@ -1,3 +1,4 @@
+
 # Process this file with autoconf to produce a configure script.
 #
 # This file is part of VCS

@@ -17,8 +17,8 @@
  */
 #include "vcs.h"
 
-// Guess what VCS is in use; returns a pointer to its operation table or NULL
-// if none can be determined.
+// Guess what VCS is in use; returns a pointer to its operation table.
+// Terminates the process if no VCS can be found.
 const struct vcs *guess() {
   // CVS is easy as it has a CVS directory at every level.
   if(isdir("CVS"))

@@ -67,7 +67,7 @@ static int svn_revert(int nfiles, char **files) {
       case 'R':
       case '!':
       case '~':
-        files.push_back(strdup(status[n].substr(7).c_str()));
+        files.push_back(xstrdup(status[n].substr(7).c_str()));
         break;
       }
     }
@@ -79,6 +79,25 @@ static int svn_revert(int nfiles, char **files) {
                    EXE_END);
 }
 
+static int svn_status() {
+  return execute("svn",
+                 EXE_STR, "status",
+                 EXE_END);
+}
+
+static int svn_update() {
+  return execute("svn",
+                 EXE_STR, "update",
+                 EXE_END);
+}
+
+static int svn_log(const char *path) {
+  return execute("svn",
+                 EXE_STR, "log",
+                 EXE_IFSTR(path, path),
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -86,6 +105,9 @@ const struct vcs vcs_svn = {
   svn_remove,
   svn_commit,
   svn_revert,
+  svn_status,
+  svn_update,
+  svn_log,
 };
 
 /*
