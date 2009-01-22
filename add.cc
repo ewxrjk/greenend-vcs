@@ -16,7 +16,7 @@ static void add_help(FILE *fp = stdout) {
 }
 
 int vcs_add(const struct vcs *v, int argc, char **argv) {
-  int n, binary;
+  int n, binary = 0;
 
   optind = 1;
   while((n = getopt_long(argc, argv, "+hb", add_options, 0)) >= 0) {
