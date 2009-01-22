@@ -1,0 +1,78 @@
+.TH vcs 1
+.SH NAME
+.B vcs
+.I COMMAND
+.RI [ OPTION ...]
+.RI [ ARGUMENTS ...]
+.SH DESCRIPTION
+.B vcs
+guesses what version control system you are using and translates its
+own command set accordingly.
+.PP
+.B vcs
+has a deliberately limited command set.
+The idea is to reliably support common operations rather than to support
+rare operations but only some of the time.
+.SH OPTIONS
+.TP
+.B --help
+Display usage message.
+.TP
+.B --version
+Display version number.
+.SH COMMANDS
+.SS add
+.B vcs
+.B add
+.RB [ --binary | -b ]
+.IR FILENAME ...
+.PP
+Subjects the listed files to version control.
+The files are not committed.
+.PP
+.B --binary
+indicates that the file should not be translated in any way.
+This is suitable for image files, etc.
+Some version control systems can guess automatically but you are recommended
+to use this flag if adding binary files.
+.SS commit
+.B vcs
+.B commit
+.RB [ --message | -m
+.IR MESSAGE ]
+.RI [ FILENAME ...]
+.PP
+Commits the listed files, or all modified files if none are listed.
+.PP
+.B --message
+allows the commit message to be set.
+If none is specified then an editor is started.
+If possible, 
+.B vcs
+lets the native system invoke the editor rather than doing so itself.
+.SS diff
+.B vcs
+.B diff
+.RI [ FILENAME ...]
+.PP
+Displays differences between the last committed version and the
+current checkout.
+If standard output is a terminal then automatically invokes
+.BR PAGER .
+If the pager is
+.BR less (1)
+and a colorized diff is available then that will be used.
+.SS remove
+.B vcs
+.B remove
+.IR FILENAME ...
+.PP
+Removes the named files.
+.SS revert
+.B vcs
+.B revert
+.RI [ FILENAME ...]
+.PP
+Revert changes to the list files, or to all files if none are listed.
+.SH "SUPPORTED SYSTEMS"
+The following version control systems are supported:
