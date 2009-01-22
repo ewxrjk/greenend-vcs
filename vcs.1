@@ -81,9 +81,17 @@ Otherwise only the listed files are diffed.
 .SS remove
 .B vcs
 .B remove
+.RI [ --force | -f ]
 .IR FILENAME ...
 .PP
 Removes the named files.
+.PP
+The default behaviour is the same as the native version control system.
+For instance if it insists that you delete the files first, or only remove
+unchanged files, then so will \fBvcs remove\fR.
+.PP
+With \fB--force\fR, the files will be deleted and removed from version
+control unconditionally.
 .SS revert
 .B vcs
 .B revert

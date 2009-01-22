@@ -14,10 +14,19 @@ static int bzr_add(int binary, int nfiles, char **files) {
                  EXE_END);
 }
 
+static int bzr_remove(int force, int nfiles, char **files) {
+  return execute("bzr",
+                 EXE_STR, "remove",
+                 EXE_IFSTR(force, "--force"),
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
   bzr_add,
+  bzr_remove,
 };
 
 /*

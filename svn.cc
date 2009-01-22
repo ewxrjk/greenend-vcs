@@ -14,10 +14,19 @@ static int svn_add(int binary, int nfiles, char **files) {
                  EXE_END);
 }
 
+static int svn_remove(int force, int nfiles, char **files) {
+  return execute("svn",
+                 EXE_STR, "delete",
+                 EXE_IFSTR(force, "--force"),
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
   svn_add,
+  svn_remove,
 };
 
 /*
