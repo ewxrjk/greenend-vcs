@@ -1,11 +1,15 @@
 #include "vcs.h"
 
+// Global verbose operation flag
+int verbose;
+
 // Table of global options
 static const struct option options[] = {
   { "help", no_argument, 0, 'h' },
   { "commands", no_argument, 0, 'H' },
   { "version", no_argument, 0, 'V' },
   { "guess", no_argument, 0, 'g' },
+  { "verbose", no_argument, 0, 'v' },
   { 0, 0, 0, 0 }
 };
 
@@ -14,6 +18,7 @@ static void help(FILE *fp = stdout) {
   fprintf(fp, "Usage:\n"
 	  "  vcs [OPTIONS] COMMAND ...\n"
 	  "Options:\n"
+          "  -v, --verbose     Verbose operation\n"
 	  "  -h, --help        Display usage message\n"
 	  "  -H, --commands    Display command list\n"
 	  "  -V, --version     Display version number\n"
@@ -26,40 +31,34 @@ static void help(FILE *fp = stdout) {
 static const struct command {
   const char *name;
   const char *description;
-  const char *help;
-  int (*action)(int argc, char **argv);
+  int (*action)(const struct vcs *v, int argc, char **argv);
 } commands[] = {
   {
     "add",
     "Add files to version control",
-    "TODO",
     vcs_add
   },
   {
     "remove",
     "Remove files",
-    "TODO",
     vcs_remove
   },
   {
     "commit",
     "Commit changes",
-    "TODO",
     vcs_commit
   },
   {
     "diff",
     "Display changes",
-    "TODO",
     vcs_diff
   },
   {
     "revert",
     "Revert changes",
-    "TODO",
     vcs_revert
   },
-  { 0, 0, 0, 0 }                        // that's all
+  { 0, 0, 0 }                           // that's all
 };
 
 // Display list of commands
@@ -107,7 +106,7 @@ int main(int argc, char **argv) {
   int n;
 
   // Parse global options
-  while((n = getopt_long(argc, argv, "+hVHg", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVHgv", options, 0)) >= 0) {
     switch(n) {
     case 'h': 
       help();
@@ -118,12 +117,14 @@ int main(int argc, char **argv) {
     case 'H':
       commandlist();
       return 0;
-    case 'g':
-      if(const struct vcs *v = guess()) {
-        puts(v->name);
-        return 0;
-      } else
-        fatal("cannot identify native version control system");
+    case 'g': {
+      const struct vcs *v = guess();
+      puts(v->name);
+      return 0;
+    }
+    case 'v':
+      ++verbose;
+      break;
     default:
       exit(1);
     }
@@ -134,7 +135,8 @@ int main(int argc, char **argv) {
     exit(1);
   }
   const struct command *c = find_command(argv[optind]);
-  fatal("not implemented");
+  const struct vcs *v = guess();
+  return c->action(v, argc - optind, argv + optind);
 }
 
 /*

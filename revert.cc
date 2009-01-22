@@ -1,6 +1,6 @@
 #include "vcs.h"
 
-int vcs_revert(int argc, char **argv) {
+int vcs_revert(const struct vcs *v, int argc, char **argv) {
   assert(!"implemented");
 }
 

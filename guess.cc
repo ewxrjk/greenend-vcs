@@ -21,7 +21,7 @@ const struct vcs *guess() {
       break;
     d = parentdir(d);
   }
-  return 0;
+  fatal("cannot identify native version control system");
 }
 
 /*

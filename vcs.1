@@ -12,6 +12,9 @@ and appear
 .I before
 the command name.
 .TP
+.B --verbose\fR, \fB-v
+Verbose operation.
+.TP
 .B --guess\fR, \fB-g
 Identify the native version control system.
 Normally this is done silently and automatically; this option displays the
@@ -69,6 +72,8 @@ lets the native system invoke the editor rather than doing so itself.
 .PP
 Displays differences between the last committed version and the
 current checkout.
+If no filename is specified then all files are diffed.
+Otherwise only the listed files are diffed.
 .SS remove
 .B vcs
 .B remove

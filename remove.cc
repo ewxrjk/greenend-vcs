@@ -1,6 +1,6 @@
 #include "vcs.h"
 
-int vcs_remove(int argc, char **argv) {
+int vcs_remove(const struct vcs *v, int argc, char **argv) {
   assert(!"implemented");
 }
 

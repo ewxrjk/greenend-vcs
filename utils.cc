@@ -1,5 +1,7 @@
 #include "vcs.h"
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <cerrno>
 
 // Return nonzero if PATH is a directory.  Links to directories count.
 int isdir(const string &path) {
@@ -45,6 +47,40 @@ void fatal(const char *msg, ...) {
   va_end(ap);
   fputc('\n', stderr);
   exit(1);
+}
+
+// Execute a command and return its exit status
+int execute(vector<const char *> &cmd) {
+  pid_t pid;
+  int w, rc;
+  assert(cmd.size() > 0);
+  if(verbose) {
+    for(size_t n = 0; n < cmd.size(); ++n) {
+      if(n)
+	fputc(' ', stderr);
+      fputs(cmd[n], stderr);
+    }
+    fputc('\n', stderr);
+  }
+  switch((pid = fork())) {
+  case 0:
+    cmd.push_back(NULL);
+    execvp(cmd[0], (char **)&cmd[0]);
+    fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
+    _exit(-1);
+  case -1:
+    fatal("forked failed: %s", strerror(errno));
+  }
+  while((rc = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
+    ;
+  if(rc < 0)
+    fatal("waitpid failed: %s", strerror(errno));
+  if(WIFSIGNALED(w))
+    fatal("%s received fatal signal %d (%s)", cmd[0], 
+	  WTERMSIG(w), strsignal(WTERMSIG(w)));
+  if(WIFEXITED(w))
+    return WEXITSTATUS(w);
+  fatal("%s exited with unknown wait status %#x", cmd[0], w);
 }
 
 /*

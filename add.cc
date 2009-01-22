@@ -1,6 +1,6 @@
 #include "vcs.h"
 
-int vcs_add(int argc, char **argv) {
+int vcs_add(const struct vcs *v, int argc, char **argv) {
   assert(!"implemented");
 }
 

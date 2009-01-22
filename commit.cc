@@ -1,6 +1,6 @@
 #include "vcs.h"
 
-int vcs_commit(int argc, char **argv) {
+int vcs_commit(const struct vcs *v, int argc, char **argv) {
   assert(!"implemented");
 }
 
