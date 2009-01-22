@@ -1,7 +1,11 @@
 Current support status:
 
+blank = no
+y = yes
+u = yes but not tested
+
 	add  remove  revert  commit  diff
-cvs     y    y                       y
-bzr     y    y                       y
-svn     y    y                       y
+cvs     y    y               y       y
+bzr     y    y               y       y
+svn     y    y               u       y
 git
