@@ -19,6 +19,7 @@ struct vcs {
   int (*diff)(int nfiles, char **files);
   int (*add)(int binary, int nfiles, char **files);
   int (*remove)(int force, int nfiles, char **files);
+  int (*commit)(const char *msg, int nfiles, char **files);
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git;

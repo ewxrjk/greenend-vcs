@@ -22,11 +22,21 @@ static int bzr_remove(int force, int nfiles, char **files) {
                  EXE_END);
 }
 
+static int bzr_commit(const char *msg, int nfiles, char **files) {
+  return execute("bzr",
+                 EXE_STR, "commit",
+                 EXE_IFSTR(msg, "-m"),
+                 EXE_IFSTR(msg, msg),
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
   bzr_add,
   bzr_remove,
+  bzr_commit,
 };
 
 /*

@@ -23,11 +23,21 @@ static int cvs_remove(int force, int nfiles, char **files) {
                  EXE_END);
 }
 
+static int cvs_commit(const char *msg, int nfiles, char **files) {
+  return execute("cvs",
+                 EXE_STR, "commit",
+                 EXE_IFSTR(msg, "-m"),
+                 EXE_IFSTR(msg, msg),
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
 const struct vcs vcs_cvs = {
   "CVS",
   cvs_diff,
   cvs_add,
   cvs_remove,
+  cvs_commit,
 };
 
 /*
