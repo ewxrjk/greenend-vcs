@@ -1,12 +1,23 @@
 #include "vcs.h"
 
 static int bzr_diff(int nfiles, char **files) {
-  return generic_diff("bzr", nfiles, files);
+  return execute("bzr",
+                 EXE_STR, "diff",
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
+static int bzr_add(int binary, int nfiles, char **files) {
+  return execute("bzr",
+                 EXE_STR, "add",
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
 }
 
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
+  bzr_add,
 };
 
 /*

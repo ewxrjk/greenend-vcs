@@ -49,22 +49,50 @@ void fatal(const char *msg, ...) {
   exit(1);
 }
 
-// Execute a command and return its exit status
-int execute(vector<const char *> &cmd) {
-  pid_t pid;
-  int w, rc;
-  assert(cmd.size() > 0);
-  if(verbose) {
+int execute(const char *prog, ...) {
+  // Assemble the command
+  va_list ap;
+  vector<const char *> cmd;
+  cmd.push_back(prog);
+  va_start(ap, prog);
+  int op;
+  while((op = va_arg(ap, int)) != EXE_END) {
+    switch(op) {
+    case EXE_STR:
+      cmd.push_back(va_arg(ap, char *));
+      break;
+    case EXE_SKIPSTR:
+      va_arg(ap, char *);
+      break;
+    case EXE_STRS: {
+      int count = va_arg(ap, int);
+      char **strs = va_arg(ap, char **);
+      while(count-- > 0)
+        cmd.push_back(*strs++);
+      break;
+    }
+    default:
+      assert(!"unknown execute() op");
+    }
+  }
+  va_end(ap);
+  if(verbose || dryrun) {
+    FILE *fp = dryrun ? stdout : stderr;
     for(size_t n = 0; n < cmd.size(); ++n) {
       if(n)
-	fputc(' ', stderr);
-      fputs(cmd[n], stderr);
+	fputc(' ', fp);
+      fputs(cmd[n], fp);
     }
-    fputc('\n', stderr);
+    fputc('\n', fp);
+    if(dryrun)
+      return 0;
   }
+  // Execute it
+  pid_t pid;
+  int w, rc;
+  cmd.push_back(NULL);
   switch((pid = fork())) {
   case 0:
-    cmd.push_back(NULL);
     execvp(cmd[0], (char **)&cmd[0]);
     fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
     _exit(-1);

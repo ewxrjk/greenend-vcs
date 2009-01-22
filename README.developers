@@ -1,0 +1,7 @@
+Current support status:
+
+	add  remove  revert  commit  diff
+cvs     y                            y
+bzr     y                            y
+svn     y                            y
+git

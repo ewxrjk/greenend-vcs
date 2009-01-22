@@ -15,6 +15,9 @@ the command name.
 .B --verbose\fR, \fB-v
 Verbose operation.
 .TP
+.B --dry-run\fR, \fB-n
+Instead of executing native commands, just display them on standard output.
+.TP
 .B --guess\fR, \fB-g
 Identify the native version control system.
 Normally this is done silently and automatically; this option displays the
@@ -48,8 +51,9 @@ The files are not committed.
 .B --binary
 indicates that the file should not be translated in any way.
 This is suitable for image files, etc.
-Some version control systems can guess automatically but you are recommended
-to use this flag if adding binary files.
+Note that not every native version control system has a corresponding
+option (some prefer to figure it out themselves or do no translation).
+In such cases, the \fB--binary\fR option is ignored.
 .SS commit
 .B vcs
 .B commit
@@ -87,9 +91,17 @@ Removes the named files.
 .PP
 Revert changes to the list files, or to all files if none are listed.
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
-The following native version control systems are supported:
+This section describes the supported version control systems.
+Any issues specific to them are describe here.
+.SS CVS
+Web page: http://www.nongnu.org/cvs/
 .PP
-.B TODO
+CVS does not auto-detect file types, so use of \fBvcs add --binary\fR
+option when adding images files, etc is mandatory.
+.SS Bazaar
+Web page: http://bazaar-vcs.org/
+.SS Subversion
+Web page: http://subversion.tigris.org/
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.

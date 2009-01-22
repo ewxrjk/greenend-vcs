@@ -3,6 +3,9 @@
 // Global verbose operation flag
 int verbose;
 
+// Global dry-run flag
+int dryrun;
+
 // Table of global options
 static const struct option options[] = {
   { "help", no_argument, 0, 'h' },
@@ -10,6 +13,7 @@ static const struct option options[] = {
   { "version", no_argument, 0, 'V' },
   { "guess", no_argument, 0, 'g' },
   { "verbose", no_argument, 0, 'v' },
+  { "dry-run", no_argument, 0, 'n' },
   { 0, 0, 0, 0 }
 };
 
@@ -19,6 +23,7 @@ static void help(FILE *fp = stdout) {
 	  "  vcs [OPTIONS] COMMAND ...\n"
 	  "Options:\n"
           "  -v, --verbose     Verbose operation\n"
+          "  -n, --dry-run     Report what would be done but do nothing\n"
 	  "  -h, --help        Display usage message\n"
 	  "  -H, --commands    Display command list\n"
 	  "  -V, --version     Display version number\n"
@@ -106,7 +111,7 @@ int main(int argc, char **argv) {
   int n;
 
   // Parse global options
-  while((n = getopt_long(argc, argv, "+hVHgv", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVHgvn", options, 0)) >= 0) {
     switch(n) {
     case 'h': 
       help();
@@ -124,6 +129,9 @@ int main(int argc, char **argv) {
     }
     case 'v':
       ++verbose;
+      break;
+    case 'n':
+      dryrun = 1;
       break;
     default:
       exit(1);

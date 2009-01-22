@@ -17,11 +17,13 @@ using namespace std;
 struct vcs {
   const char *name;
   int (*diff)(int nfiles, char **files);
+  int (*add)(int binary, int nfiles, char **files);
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git;
 
 extern int verbose;
+extern int dryrun;
 
 int vcs_add(const struct vcs *v, int argc, char **argv);
 int vcs_remove(const struct vcs *v, int argc, char **argv);
@@ -30,15 +32,18 @@ int vcs_diff(const struct vcs *v, int argc, char **argv);
 int vcs_revert(const struct vcs *v, int argc, char **argv);
 
 const struct vcs *guess();
-int generic_diff(const char *tool, int nfiles, char **files);
 
 int isdir(const string &s);
 string cwd();
 string parentdir(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) attribute((noreturn));
-int execute(vector<const char *> &cmd);
 
+#define EXE_END 0
+#define EXE_STR 1
+#define EXE_SKIPSTR 2
+#define EXE_STRS 3
+int execute(const char *prog, ...);
 
 #endif /* VCS_H */
 
