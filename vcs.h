@@ -58,7 +58,9 @@ int isdir(const string &s);
 string cwd();
 string parentdir(const string &d);
 int isroot(const string &d);
-void fatal(const char *msg, ...) attribute((noreturn));
+void fatal(const char *msg, ...) 
+  attribute((noreturn))  
+  attribute((format (printf, 1, 2)));
 
 #define EXE_END 0
 #define EXE_STR 1
