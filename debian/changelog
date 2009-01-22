@@ -1,3 +1,9 @@
+vcs (0.2) unstable; urgency=low
+
+  * New update, status and log commands
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 22 Jan 2009 20:50:15 +0000
+
 vcs (0.1) unstable; urgency=low
 
   * First release.
