@@ -1,0 +1,46 @@
+VCS
+===
+
+VCS is a wrapper for version control systems.  It presents an
+essentially uniform interface to the user, allowing 'muscle memory' to
+use vcs commands rather than adapt to the version control system
+currently in use.
+
+Currently Bazaar, CVS and Subversion are supported, with a small set
+of commands.  More version control systems and more commands will,
+hopefuly, be added in the future.
+
+Installation
+============
+
+  ./configure
+  make
+  sudo make install
+
+Read 'man vcs' for documentation.
+
+
+Feedback
+========
+
+Please send bug reports, bug fixes, support for your favourite version
+control system to Richard Kettlewell <richard+vcs@sfere.greenend.org.uk>.
+
+
+Copyright
+=========
+
+Copyright (C) 2009 Richard Kettlewell
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
