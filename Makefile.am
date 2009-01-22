@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc \
+vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	add.cc remove.cc commit.cc diff.cc revert.cc \
 	cvs.cc git.cc svn.cc bzr.cc
-man_MANS=vcs.1
+dist_man_MANS=vcs.1

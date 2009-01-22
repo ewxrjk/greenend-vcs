@@ -13,3 +13,4 @@ config.status
 configure
 stamp-h1
 vcs
+*.tar.gz
