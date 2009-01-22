@@ -1,0 +1,20 @@
+Source: vcs
+Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
+Section: devel
+Priority: extra
+Standards-Version: 3.7.2.2
+
+Package: vcs
+Architecture: any
+Section: devel
+Priority: extra
+Depends: ${shlibs:Depends}
+Description: Wrapper for version control systems giving a uniform interface
+ VCS is a wrapper for version control systems.  It presents an
+ essentially uniform interface to the user, allowing 'muscle memory' to
+ use vcs commands rather than adapt to the version control system
+ currently in use.
+ .
+ Currently Bazaar, CVS and Subversion are supported, with a small set
+ of commands.  More version control systems and more commands will,
+ hopefuly, be added in the future.
