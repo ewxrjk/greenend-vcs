@@ -35,35 +35,36 @@ static void help(FILE *fp = stdout) {
 // Table of commands
 static const struct command {
   const char *name;
+  const char *alias;
   const char *description;
   int (*action)(const struct vcs *v, int argc, char **argv);
 } commands[] = {
   {
-    "add",
+    "add", NULL,
     "Add files to version control",
     vcs_add
   },
   {
-    "remove",
+    "remove", "rm",
     "Remove files",
     vcs_remove
   },
   {
-    "commit",
+    "commit", "ci",
     "Commit changes",
     vcs_commit
   },
   {
-    "diff",
+    "diff", NULL,
     "Display changes",
     vcs_diff
   },
   {
-    "revert",
+    "revert", NULL,
     "Revert changes",
     vcs_revert
   },
-  { 0, 0, 0 }                           // that's all
+  { 0, 0, 0,0 }                         // that's all
 };
 
 // Display list of commands
@@ -90,9 +91,11 @@ static const struct command *find_command(const char *cmd) {
   list<int> prefixes;
   for(int n = 0; commands[n].name; ++n) {
     // Exact matches win immediately
-    if(!strcmp(commands[n].name, cmd))
+    if(!strcmp(commands[n].name, cmd)
+       || (commands[n].alias && !strcmp(commands[n].alias, cmd)))
       return &commands[n];
     // Accumulate a list of prefix matches
+    // (NB we don't do prefix-matching on aliases.)
     if(strlen(cmd) < strlen(commands[n].name)
        && !strncmp(cmd, commands[n].name, strlen(cmd)))
       prefixes.push_back(n);
