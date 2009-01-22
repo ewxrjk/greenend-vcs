@@ -30,6 +30,7 @@ int vcs_diff(const struct vcs *v, int argc, char **argv);
 int vcs_revert(const struct vcs *v, int argc, char **argv);
 
 const struct vcs *guess();
+int generic_diff(const char *tool, int nfiles, char **files);
 
 int isdir(const string &s);
 string cwd();

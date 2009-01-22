@@ -1,12 +1,7 @@
 #include "vcs.h"
 
 static int bzr_diff(int nfiles, char **files) {
-  vector<const char *> cmd;
-  cmd.push_back("bzr");
-  cmd.push_back("diff");
-  while(nfiles-- > 0)
-    cmd.push_back(*files++);
-  return execute(cmd);
+  return generic_diff("bzr", nfiles, files);
 }
 
 const struct vcs vcs_bzr = {

@@ -1,7 +1,12 @@
 #include "vcs.h"
 
+static int svn_diff(int nfiles, char **files) {
+  return generic_diff("svn", nfiles, files);
+}
+
 const struct vcs vcs_svn = {
-  "Subversion"
+  "Subversion",
+  svn_diff
 };
 
 /*
