@@ -4,6 +4,7 @@ static const struct option options[] = {
   { "help", no_argument, 0, 'h' },
   { "commands", no_argument, 0, 'H' },
   { "version", no_argument, 0, 'V' },
+  { "guess", no_argument, 0, 'g' },
   { 0, 0, 0, 0 }
 };
 
@@ -14,6 +15,7 @@ static void help(FILE *fp = stdout) {
 	  "  -h, --help        Display usage message\n"
 	  "  -H, --commands    Display command list\n"
 	  "  -V, --version     Display version number\n"
+          "  -g, --guess       Guess which version control system is in use\n"
 	  "\n"
 	  "Use 'vcs COMMAND --help' for per-command help.\n");
 }
@@ -79,7 +81,7 @@ int main(int argc, char **argv) {
   int n;
 
   // Parse global options
-  while((n = getopt_long(argc, argv, "+hV", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVHg", options, 0)) >= 0) {
     switch(n) {
     case 'h': 
       help();
@@ -90,6 +92,12 @@ int main(int argc, char **argv) {
     case 'H':
       commandlist();
       return 0;
+    case 'g':
+      if(const struct vcs *v = guess()) {
+        puts(v->name);
+        return 0;
+      } else
+        fatal("cannot identify native version control system");
     default:
       exit(1);
     }
