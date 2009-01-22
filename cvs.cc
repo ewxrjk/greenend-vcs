@@ -159,6 +159,13 @@ static int cvs_update() {
                  EXE_END);
 }
 
+static int cvs_log(const char *path) {
+  return execute("cvs",
+                 EXE_STR, "log",
+                 EXE_IFSTR(path, path),
+                 EXE_END);
+}
+
 const struct vcs vcs_cvs = {
   "CVS",
   cvs_diff,
@@ -168,6 +175,7 @@ const struct vcs vcs_cvs = {
   cvs_revert,
   cvs_status,
   cvs_update,
+  cvs_log,
 };
 
 /*

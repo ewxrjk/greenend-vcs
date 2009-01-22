@@ -16,5 +16,6 @@
 bin_PROGRAMS=vcs
 vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
+	log.cc \
 	cvs.cc git.cc svn.cc bzr.cc
 dist_man_MANS=vcs.1

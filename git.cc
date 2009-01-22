@@ -48,6 +48,10 @@ static int git_update() {
   return -1;
 }
 
+static int git_log(const char */*path*/) {
+  return -1;
+}
+
 const struct vcs vcs_git = {
   "Git",
   git_diff,
@@ -57,6 +61,7 @@ const struct vcs vcs_git = {
   git_revert,
   git_status,
   git_update,
+  git_log,
 };
 
 /*

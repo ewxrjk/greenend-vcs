@@ -96,6 +96,14 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.SS log
+.B vcs
+.B log
+.IR [ FILENAME ]
+.PP
+Display the change history for \fIFILENAME\fR, or for all files if no
+file is specified.
+(Beware, the latter case is very verbose for CVS!)
 .SS remove
 .B vcs
 .B remove

@@ -91,6 +91,11 @@ static const struct command {
     "Revert changes",
     vcs_revert
   },
+  {
+    "log", NULL,
+    "Summarize history",
+    vcs_log
+  },
   { 0, 0, 0,0 }                         // that's all
 };
 

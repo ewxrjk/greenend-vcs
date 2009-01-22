@@ -67,6 +67,13 @@ static int bzr_update() {
                  EXE_END);
 }
 
+static int bzr_log(const char *path) {
+  return execute("bzr",
+                 EXE_STR, "log",
+                 EXE_IFSTR(path, path),
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -76,6 +83,7 @@ const struct vcs vcs_bzr = {
   bzr_revert,
   bzr_status,
   bzr_update,
+  bzr_log,
 };
 
 /*
