@@ -82,6 +82,11 @@ static const struct command {
     vcs_diff
   },
   {
+    "update", NULL,
+    "Update working tree",
+    vcs_update,
+  },
+  {
     "revert", NULL,
     "Revert changes",
     vcs_revert

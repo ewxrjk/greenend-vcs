@@ -40,6 +40,7 @@ struct vcs {
   int (*commit)(const char *msg, int nfiles, char **files);
   int (*revert)(int nfiles, char **files);
   int (*status)();
+  int (*update)();
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git;
@@ -53,6 +54,7 @@ int vcs_commit(const struct vcs *v, int argc, char **argv);
 int vcs_diff(const struct vcs *v, int argc, char **argv);
 int vcs_revert(const struct vcs *v, int argc, char **argv);
 int vcs_status(const struct vcs *v, int argc, char **argv);
+int vcs_update(const struct vcs *v, int argc, char **argv);
 
 const struct vcs *guess();
 

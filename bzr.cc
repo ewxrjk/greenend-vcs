@@ -61,6 +61,12 @@ static int bzr_status() {
                  EXE_END);
 }
 
+static int bzr_update() {
+  return execute("bzr",
+                 EXE_STR, "update",
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -69,6 +75,7 @@ const struct vcs vcs_bzr = {
   bzr_commit,
   bzr_revert,
   bzr_status,
+  bzr_update,
 };
 
 /*

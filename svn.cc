@@ -85,6 +85,12 @@ static int svn_status() {
                  EXE_END);
 }
 
+static int svn_update() {
+  return execute("svn",
+                 EXE_STR, "update",
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -93,6 +99,7 @@ const struct vcs vcs_svn = {
   svn_commit,
   svn_revert,
   svn_status,
+  svn_update,
 };
 
 /*

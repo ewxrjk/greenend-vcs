@@ -149,7 +149,13 @@ static int cvs_revert(int nfiles, char **files) {
 static int cvs_status() {
   return execute("cvs",
                  EXE_STR, "-n",
-                 EXE_STR, "up",
+                 EXE_STR, "update",
+                 EXE_END);
+}
+
+static int cvs_update() {
+  return execute("cvs",
+                 EXE_STR, "update",
                  EXE_END);
 }
 
@@ -161,6 +167,7 @@ const struct vcs vcs_cvs = {
   cvs_commit,
   cvs_revert,
   cvs_status,
+  cvs_update,
 };
 
 /*
