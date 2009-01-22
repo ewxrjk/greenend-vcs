@@ -1,19 +1,16 @@
 .TH vcs 1
 .SH NAME
-.B vcs
-.I COMMAND
-.RI [ OPTION ...]
-.RI [ ARGUMENTS ...]
+\fBvcs\fR [\fIOPTION\fR...] \fICOMMAND\fR [\fIOPTION\fR...] [\fIARGUMENTS\fR...]
 .SH DESCRIPTION
 .B vcs
 guesses what version control system you are using and translates its
 own command set accordingly.
-.PP
-.B vcs
-has a deliberately limited command set.
-The idea is to reliably support common operations rather than to support
-rare operations but only some of the time.
 .SH OPTIONS
+These options are global to
+.B vcs
+and appear
+.I before
+the command name.
 .TP
 .B --guess\fR, \fB-g
 Identify the native version control system.
@@ -29,6 +26,13 @@ Display usage message.
 .B --version\fR, \fB-V
 Display version number.
 .SH COMMANDS
+Commands may be abbreviated to a non-ambiguous prefix.
+Commands have their own options which must appear
+.I after
+the command name.
+All commands have a
+.B --help
+option (not listed below) which summarizes their usage.
 .SS add
 .B vcs
 .B add
@@ -65,11 +69,6 @@ lets the native system invoke the editor rather than doing so itself.
 .PP
 Displays differences between the last committed version and the
 current checkout.
-If standard output is a terminal then automatically invokes
-.BR PAGER .
-If the pager is
-.BR less (1)
-and a colorized diff is available then that will be used.
 .SS remove
 .B vcs
 .B remove
@@ -82,5 +81,17 @@ Removes the named files.
 .RI [ FILENAME ...]
 .PP
 Revert changes to the list files, or to all files if none are listed.
-.SH "SUPPORTED SYSTEMS"
-The following version control systems are supported:
+.SH "SUPPORTED VERSION CONTROL SYSTEMS"
+The following native version control systems are supported:
+.PP
+.B TODO
+.SH "DESIGN PRINCIPLES"
+.B vcs
+has a deliberately limited command set.
+The idea is to reliably support common operations rather than to support
+rare operations but only some of the time.
+.PP
+.B vcs
+does not attempt to translate the output of native commands to a
+consistent format.
+You get what the native system gives you.

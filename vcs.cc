@@ -1,5 +1,6 @@
 #include "vcs.h"
 
+// Table of global options
 static const struct option options[] = {
   { "help", no_argument, 0, 'h' },
   { "commands", no_argument, 0, 'H' },
@@ -8,6 +9,7 @@ static const struct option options[] = {
   { 0, 0, 0, 0 }
 };
 
+// Display help message
 static void help(FILE *fp = stdout) {
   fprintf(fp, "Usage:\n"
 	  "  vcs [OPTIONS] COMMAND ...\n"
@@ -20,6 +22,7 @@ static void help(FILE *fp = stdout) {
 	  "Use 'vcs COMMAND --help' for per-command help.\n");
 }
 
+// Table of commands
 static const struct command {
   const char *name;
   const char *description;
@@ -59,6 +62,7 @@ static const struct command {
   { 0, 0, 0, 0 }                        // that's all
 };
 
+// Display list of commands
 static void commandlist(FILE *fp = stdout) {
   int n;
   int maxlen = 0;
@@ -75,6 +79,28 @@ static void commandlist(FILE *fp = stdout) {
 	    commands[n].description);
   }
   fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
+}
+
+// Find a command given its name or a unique prefix of it
+static const struct command *find_command(const char *cmd) {
+  list<int> prefixes;
+  for(int n = 0; commands[n].name; ++n) {
+    // Exact matches win immediately
+    if(!strcmp(commands[n].name, cmd))
+      return &commands[n];
+    // Accumulate a list of prefix matches
+    if(strlen(cmd) < strlen(commands[n].name)
+       && !strncmp(cmd, commands[n].name, strlen(cmd)))
+      prefixes.push_back(n);
+  }
+  switch(prefixes.size()) {
+  case 0:
+    fatal("unknown command '%s' (try vcs -H)", cmd);
+  case 1:
+    return &commands[prefixes.front()];
+  default:
+    fatal("'%s' is not a unique prefix (try vcs -H or a longer prefix)", cmd);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -107,7 +133,8 @@ int main(int argc, char **argv) {
     help(stderr);
     exit(1);
   }
-  
+  const struct command *c = find_command(argv[optind]);
+  fatal("not implemented");
 }
 
 /*

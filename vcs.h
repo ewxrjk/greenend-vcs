@@ -3,6 +3,7 @@
 
 #include <config.h>
 #include <string>
+#include <list>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,7 +31,7 @@ int isdir(const string &s);
 string cwd();
 string parentdir(const string &d);
 int isroot(const string &d);
-void fatal(const char *msg, ...);
+void fatal(const char *msg, ...) attribute((noreturn));
 
 #endif /* VCS_H */
 

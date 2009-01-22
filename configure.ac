@@ -14,6 +14,12 @@ if test "$GXX" = yes; then
   CXX="${CXX} -Wall -W"
 fi
 
+AH_BOTTOM([#ifdef __GNUC__
+# define attribute(x) __attribute__(x)
+#else
+# define attribute(x)
+#endif])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
