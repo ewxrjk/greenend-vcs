@@ -49,6 +49,8 @@ void fatal(const char *msg, ...) {
   exit(1);
 }
 
+// Execute a command assembled using EXE_... macros and return its
+// exit code.
 int execute(const char *prog, ...) {
   // Assemble the command
   va_list ap;
@@ -97,8 +99,71 @@ int execute(const char *prog, ...) {
     fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
     _exit(-1);
   case -1:
-    fatal("forked failed: %s", strerror(errno));
+    fatal("fork failed: %s", strerror(errno));
   }
+  while((rc = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
+    ;
+  if(rc < 0)
+    fatal("waitpid failed: %s", strerror(errno));
+  if(WIFSIGNALED(w))
+    fatal("%s received fatal signal %d (%s)", cmd[0], 
+	  WTERMSIG(w), strsignal(WTERMSIG(w)));
+  if(WIFEXITED(w))
+    return WEXITSTATUS(w);
+  fatal("%s exited with unknown wait status %#x", cmd[0], w);
+}
+
+// Execute a command (specified like execl()) and capture its output.
+// Returns exit code.
+int capture(vector<string> &lines,
+            const char *prog,
+            ...) {
+  const char *arg;
+  va_list ap;
+
+  // Construct the command
+  vector<const char *> cmd;
+  cmd.push_back(prog);
+  va_start(ap, prog);
+  while((arg = va_arg(ap, const char *)))
+    cmd.push_back(arg);
+  // Execute it
+  pid_t pid;
+  int w, rc, p[2];
+  cmd.push_back(NULL);
+  if(pipe(p) < 0)
+    fatal("pipe failed: %s", strerror(errno));
+  switch((pid = fork())) {
+  case 0:
+    if(dup2(p[1], 1) < 0) {
+      perror("dup2");
+      _exit(-1);
+    }
+    if(close(p[0]) < 0 || close(p[1]) < 0) {
+      perror("close");
+      _exit(-1);
+    }
+    execvp(cmd[0], (char **)&cmd[0]);
+    fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
+    _exit(-1);
+  case -1:
+    fatal("fork failed: %s", strerror(errno));
+  }
+  FILE *fp;
+  if(close(p[1]) < 0)
+    fatal("close: %s", strerror(errno));
+  if(!(fp = fdopen(p[0], "r")))
+    fatal("fdopen: %s", strerror(errno));
+  int c;
+  do {
+    string line;
+    while((c = getc(fp)) != EOF && c != '\n')
+      line += c;
+    lines.push_back(line);
+  } while(c != EOF);
+  if(ferror(fp))
+    fatal("error reading pipe from %s: %s", cmd[0], strerror(errno));
+  fclose(fp);
   while((rc = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
     ;
   if(rc < 0)

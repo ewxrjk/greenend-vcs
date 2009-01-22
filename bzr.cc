@@ -7,7 +7,7 @@ static int bzr_diff(int nfiles, char **files) {
                  EXE_END);
 }
 
-static int bzr_add(int binary, int nfiles, char **files) {
+static int bzr_add(int /*binary*/, int nfiles, char **files) {
   return execute("bzr",
                  EXE_STR, "add",
                  EXE_STRS, nfiles, files,
@@ -31,12 +31,20 @@ static int bzr_commit(const char *msg, int nfiles, char **files) {
                  EXE_END);
 }
 
+static int bzr_revert(int nfiles, char **files) {
+  return execute("bzr",
+                 EXE_STR, "revert",
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
   bzr_add,
   bzr_remove,
   bzr_commit,
+  bzr_revert,
 };
 
 /*

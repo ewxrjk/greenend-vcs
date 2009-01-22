@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <set>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -20,6 +21,7 @@ struct vcs {
   int (*add)(int binary, int nfiles, char **files);
   int (*remove)(int force, int nfiles, char **files);
   int (*commit)(const char *msg, int nfiles, char **files);
+  int (*revert)(int nfiles, char **files);
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git;
@@ -47,6 +49,10 @@ void fatal(const char *msg, ...) attribute((noreturn));
 #define EXE_STRS 3
 #define EXE_IFSTR(COND, STR) (COND) ? EXE_STR : EXE_SKIPSTR, (STR)
 int execute(const char *prog, ...);
+
+int capture(vector<string> &lines,
+            const char *prog,
+            ...);
 
 #endif /* VCS_H */
 
