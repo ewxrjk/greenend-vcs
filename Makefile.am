@@ -19,7 +19,7 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	log.cc \
 	cvs.cc git.cc svn.cc bzr.cc
 dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs
+TESTS=tests/bzr tests/cvs tests/svn
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules changelog tests/utils.sh $(TESTS)
 
