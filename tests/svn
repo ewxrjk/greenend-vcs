@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,46 +14,26 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
 
+. $srcdir/tests/utils.sh
 
-t_init() {
-    # Skip test if CVS is not installed
-    type $1 >/dev/null 2>&1 || exit 77
+t_init svn
 
-    # Make sure vcs is on the path
-    builddir=`pwd`
-    PATH=$builddir:$PATH
+repo=$testdir/repo
 
-    testdir=$builddir/test-root/$1
+# Create repository
+x svnadmin create $repo
 
-    # Clean up droppings
-    rm -rf $testdir
+# Create an empty project and check it out
+x mkdir project
+x svn import -m 'Import empty directory' project file://$repo/trunk/project
+x rmdir project
+x svn co file:///$repo/trunk/project
 
-    # Enter the test directory
-    mkdir -p $testdir
-    cd $testdir
-}
+t_populate
 
-t_done() {
-    cd /
-    rm -rf $testdir
-}
+x svn co file:///$repo/trunk/project copy
+t_verify
 
-t_populate() {
-    cd project
-    echo one > one
-    echo two > two
-    x vcs add one two
-    x vcs commit -m 'one and two'
-    cd ..
-}
-
-t_verify() {
-    if diff project/one copy/one; then :; else exit 1; fi
-    if diff project/two copy/two; then :; else exit 1; fi
-}
-
-x() {
-    echo ">>>" "$@" >&2
-    "$@"
-}
+t_done
