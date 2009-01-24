@@ -20,4 +20,13 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	cvs.cc git.cc svn.cc bzr.cc
 dist_man_MANS=vcs.1
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules
+	debian/rules changelog
+
+dist: changelog
+
+${srcdir}/changelog:
+	cd ${srcdir} && \
+	if bzr log > changelog.new; then mv changelog.new changelog;\
+	else rm -f changelog.new; fi
+
+.PHONY: changelog

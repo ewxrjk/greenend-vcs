@@ -16,3 +16,4 @@ vcs
 *.tar.gz
 debian/files
 debian/substvars.*
+./changelog
