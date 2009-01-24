@@ -19,4 +19,5 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	log.cc \
 	cvs.cc git.cc svn.cc bzr.cc
 dist_man_MANS=vcs.1
-EXTRA_DIST=CHANGES.html
+EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
+	debian/rules
