@@ -17,3 +17,4 @@ vcs
 debian/files
 debian/substvars.*
 ./changelog
+test-root

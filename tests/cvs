@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,21 +14,26 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
-	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc \
-	cvs.cc git.cc svn.cc bzr.cc
-dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh $(TESTS)
+set -e
 
-dist: changelog
+. $srcdir/tests/utils.sh
 
-${srcdir}/changelog:
-	cd ${srcdir} && \
-	if bzr log > changelog.new; then mv changelog.new changelog;\
-	else rm -f changelog.new; fi
+t_init cvs
 
-.PHONY: changelog
+CVSROOT=$testdir/repo
+export CVSROOT
+
+# Create repository
+x mkdir $CVSROOT
+x cvs -d $CVSROOT init
+
+# Create an empty project and check it out
+x mkdir $CVSROOT/project
+
+x cvs co project
+t_populate
+
+x cvs co -d copy project
+t_verify
+
+t_done

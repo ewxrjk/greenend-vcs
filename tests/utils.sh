@@ -13,21 +13,46 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
-	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc \
-	cvs.cc git.cc svn.cc bzr.cc
-dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh $(TESTS)
 
-dist: changelog
 
-${srcdir}/changelog:
-	cd ${srcdir} && \
-	if bzr log > changelog.new; then mv changelog.new changelog;\
-	else rm -f changelog.new; fi
+t_init() {
+    # Skip test if CVS is not installed
+    type $1 >/dev/null 2>&1 || exit 77
 
-.PHONY: changelog
+    # Make sure vcs is on the path
+    builddir=`pwd`
+    PATH=$builddir:$PATH
+
+    testdir=$builddir/test-root/$1
+
+    # Clean up droppings
+    rm -rf $testdir
+
+    # Enter the test directory
+    mkdir -p $testdir
+    cd $testdir
+}
+
+t_done() {
+    cd /
+    rm -rf $testdir
+}
+
+t_populate() {
+    cd project
+    echo one > one
+    echo two > two
+    x vcs add one two
+    x vcs commit -m 'one and two'
+    cd ..
+}
+
+t_verify() {
+    if diff project/one copy/one; then :; else exit 1; fi
+    if diff project/two copy/two; then :; else exit 1; fi
+}
+
+x() {
+    echo ">>> " "$@" >&2
+    "$@"
+}
