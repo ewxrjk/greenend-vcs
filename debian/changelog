@@ -1,3 +1,10 @@
+vcs (0.DEV) unstable; urgency=low
+
+  * This is the development branch.  Use vcs.rel or a tarball if you want
+    released code.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 24 Jan 2009 10:59:54 +0000
+
 vcs (0.1) unstable; urgency=low
 
   * First release.
