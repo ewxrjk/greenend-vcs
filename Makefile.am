@@ -23,6 +23,9 @@ TESTS=tests/bzr tests/cvs tests/svn
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules changelog tests/utils.sh $(TESTS)
 
+clean-local:
+	rm -rf test-root
+
 dist: changelog
 
 ${srcdir}/changelog:
