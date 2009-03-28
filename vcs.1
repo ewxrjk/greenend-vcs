@@ -80,6 +80,14 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.SS edit
+.B vcs
+.B edit
+.IR FILENAME ...
+.PP
+Makes files editable.
+For most (but not all) version control systems this is not needed and
+is a no-op.
 .SS log
 .B vcs
 .B log
@@ -152,6 +160,26 @@ will commit all your changes, not just those mentioned with
 .PP
 .B "vcs revert"
 will delete newly added files.
+.SS Perforce
+Web page: http://www.perforce.com/
+.PP
+.B "vcs edit"
+(or
+.BR "p4 edit" )
+is required before editing existing files.
+.PP
+.B "vcs commit -m"
+does not work (yet) - you have to enter the description into a change
+form manually.
+.PP
+Perforce will only be detected if at least one of
+.BR P4PORT ,
+.B P4CONFIG
+or
+.B P4CLIENT
+is set, and detection works by invoking
+.B "p4 changes"
+to see if the current directory is inside a P4 workspace.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.
