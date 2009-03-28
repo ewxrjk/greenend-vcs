@@ -111,7 +111,8 @@ Revert changes to the listed files, or to all files if none are listed.
 .PP
 Removed files are resurrected and modified files have any changes undone.
 Some version control systems will save the modified version to a backup file.
-Newly added files are removed from version control but not deleted.
+Newly added files are removed from version control and may be deleted
+(depending on the underlying version control system).
 .SS status
 .B vcs
 .B status
@@ -140,6 +141,17 @@ option when adding images files, etc is mandatory.
 Web page: http://bazaar-vcs.org/
 .SS Subversion
 Web page: http://subversion.tigris.org/
+.SS Git
+Web page: http://git-scm.com/
+.PP
+.B vcs
+has a more CVS-like model than Git; therefore
+.B "vcs commit"
+will commit all your changes, not just those mentioned with
+.BR "git add" .
+.PP
+.B "vcs revert"
+will delete newly added files.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.

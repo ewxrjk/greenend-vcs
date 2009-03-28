@@ -63,9 +63,6 @@ t_revert() {
     echo three > three
     x vcs -v add three
     x vcs -v revert
-    if [ ! -e three ]; then
-	fatal "'three' removed on revert"
-    fi
     cd ..
 
     # 'one' and 'two' should be back to normal; we already have a

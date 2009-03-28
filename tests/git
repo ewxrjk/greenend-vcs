@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,24 +14,27 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
-	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc \
-	cvs.cc git.cc svn.cc bzr.cc
-dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs tests/svn tests/git
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh $(TESTS)
+set -e
 
-clean-local:
-	rm -rf test-root
+. $srcdir/tests/utils.sh
 
-dist: changelog
+t_init git
 
-${srcdir}/changelog:
-	cd ${srcdir} && \
-	if bzr log > changelog.new; then mv changelog.new changelog;\
-	else rm -f changelog.new; fi
+mkdir project
+cd project
+x git init
+cd ..
+t_populate
 
-.PHONY: changelog
+x git clone project copy
+t_verify
+
+t_revert
+cd copy
+if git log three >/dev/null 2>&1; then
+  echo 'three still known to git' >&2
+  exit 1
+fi
+cd ..
+
+t_done
