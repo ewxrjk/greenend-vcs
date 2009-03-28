@@ -26,4 +26,12 @@ t_populate
 x bzr clone project copy
 t_verify
 
+t_revert
+cd copy
+if bzr log three >/dev/null 2>&1; then
+  echo 'three still known to bzr' >&2
+  exit 1
+fi
+cd ..
+
 t_done

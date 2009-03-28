@@ -36,4 +36,13 @@ t_populate
 x svn co file:///$repo/trunk/project copy
 t_verify
 
+t_revert
+cd copy
+x svn status three
+status=$(svn status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
+    fatal "Did not properly revert 'three'"
+fi
+cd ..
+
 t_done

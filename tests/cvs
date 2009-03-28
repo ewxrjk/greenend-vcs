@@ -36,4 +36,12 @@ t_populate
 x cvs co -d copy project
 t_verify
 
+t_revert
+cd copy
+x cvs -n up
+if cvs -n up 2>/dev/null | grep -q three; then
+    fatal "'three' not properly reverted"
+fi
+cd ..
+
 t_done

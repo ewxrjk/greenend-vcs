@@ -16,7 +16,7 @@
 
 
 t_init() {
-    # Skip test if CVS is not installed
+    # Skip test if subject system is not installed
     type $1 >/dev/null 2>&1 || exit 77
 
     # Make sure vcs is on the path
@@ -35,7 +35,7 @@ t_init() {
 
 t_done() {
     cd /
-    rm -rf $testdir
+#    rm -rf $testdir
 }
 
 t_populate() {
@@ -52,7 +52,33 @@ t_verify() {
     if diff project/two copy/two; then :; else exit 1; fi
 }
 
+t_revert() {
+    cd copy
+    echo extra >> one
+    x vcs rm -f two
+    if [ -e two ]; then
+	echo "removed 'two' but it's still there" >&2
+	exit 1
+    fi
+    echo three > three
+    x vcs add three
+    x vcs -v revert
+    cd ..
+
+    # 'one' and 'two' should be back to normal; we already have a
+    # check for that
+    t_verify
+
+    # 'three' should not exist or not be under vc (at all).  The check will
+    # have to be vc-specific.
+}
+
 x() {
     echo ">>>" "$@" >&2
     "$@"
+}
+
+fatal() {
+    echo "$@" >&2
+    exit 1
 }
