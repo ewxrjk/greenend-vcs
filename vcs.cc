@@ -62,6 +62,11 @@ static const struct command {
     vcs_add
   },
   {
+    "annotate", "blame",
+    "Annotate each line with revision number",
+    vcs_annotate
+  },
+  {
     "commit", "ci",
     "Commit changes",
     vcs_commit

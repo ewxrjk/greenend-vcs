@@ -98,6 +98,13 @@ static int svn_log(const char *path) {
                  EXE_END);
 }
 
+static int svn_annotate(const char *path) {
+  return execute("svn",
+                 EXE_STR, "blame",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -109,6 +116,7 @@ const struct vcs vcs_svn = {
   svn_update,
   svn_log,
   NULL,                                 // edit
+  svn_annotate,
 };
 
 /*

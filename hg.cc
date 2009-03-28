@@ -81,6 +81,13 @@ static int hg_log(const char *path) {
                  EXE_END);
 }
 
+static int hg_annotate(const char *path) {
+  return execute("hg",
+                 EXE_STR, "annotate",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_hg = {
   "Mercurial",
   hg_diff,
@@ -92,6 +99,7 @@ const struct vcs vcs_hg = {
   hg_update,
   hg_log,
   NULL,                                 // edit
+  hg_annotate,
 };
 
 /*

@@ -89,6 +89,14 @@ static int p4_log(const char *path) {
                  EXE_END);
 }
 
+static int p4_annotate(const char *path) {
+  return execute("p4",
+                 EXE_STR, "annotate",
+                 EXE_STR, "-c",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_p4 = {
   "Perforce",
   p4_diff,
@@ -100,6 +108,7 @@ const struct vcs vcs_p4 = {
   p4_update,
   p4_log,
   p4_edit,
+  p4_annotate,
 };
 
 /*

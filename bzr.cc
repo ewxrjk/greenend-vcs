@@ -74,6 +74,13 @@ static int bzr_log(const char *path) {
                  EXE_END);
 }
 
+static int bzr_annotate(const char *path) {
+  return execute("bzr",
+                 EXE_STR, "annotate",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -85,6 +92,7 @@ const struct vcs vcs_bzr = {
   bzr_update,
   bzr_log,
   NULL,                                 // edit
+  bzr_annotate,
 };
 
 /*

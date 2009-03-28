@@ -56,6 +56,20 @@ This is suitable for image files, etc.
 Note that not every native version control system has a corresponding
 option (some prefer to figure it out themselves or do no translation).
 In such cases, the \fB--binary\fR option is ignored.
+.SS annotate
+.B vcs
+.B annotate
+.I FILENAME
+.PP
+Outputs the named file with each line annotated with information about
+its origin.
+Depending on the version control system in used, this will usually
+some of the revision number it was last modified in, the date of the
+last revision and the user who modified it.
+.PP
+.B "vcs blame"
+is a synonym for
+.BR "vcs annotate" .
 .SS commit
 .B vcs
 .B commit
@@ -71,6 +85,10 @@ If none is specified then an editor is started.
 If possible, 
 .B vcs
 lets the native system invoke the editor rather than doing so itself.
+.PP
+.B "vcs ci"
+is a synonym for
+.BR "vcs checkin" .
 .SS diff
 .B vcs
 .B diff
@@ -110,6 +128,10 @@ unchanged files, then so will \fBvcs remove\fR.
 .PP
 With \fB--force\fR, the files will be deleted and removed from version
 control unconditionally.
+.PP
+.B "vcs rm"
+is a synonym for
+.BR "vcs remove" .
 .SS revert
 .B vcs
 .B revert

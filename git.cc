@@ -97,6 +97,13 @@ static int git_log(const char *path) {
                  EXE_END);
 }
 
+static int git_annotate(const char *path) {
+  return execute("git",
+                 EXE_STR, "blame",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_git = {
   "Git",
   git_diff,
@@ -108,6 +115,7 @@ const struct vcs vcs_git = {
   git_update,
   git_log,
   NULL,                                 // edit
+  git_annotate,
 };
 
 /*

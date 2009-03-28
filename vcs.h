@@ -43,6 +43,7 @@ struct vcs {
   int (*update)();
   int (*log)(const char *file);
   int (*edit)(int nfiles, char **files); // optional
+  int (*annotate)(const char *file);
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
@@ -59,6 +60,7 @@ int vcs_status(const struct vcs *v, int argc, char **argv);
 int vcs_update(const struct vcs *v, int argc, char **argv);
 int vcs_log(const struct vcs *v, int argc, char **argv);
 int vcs_edit(const struct vcs *v, int argc, char **argv);
+int vcs_annotate(const struct vcs *v, int argc, char **argv);
 
 const struct vcs *guess();
 
