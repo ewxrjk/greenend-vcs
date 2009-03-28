@@ -56,10 +56,16 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
 }
 
 static int p4_revert(int nfiles, char **files) {
-  return execute("p4",
-                 EXE_STR, "revert",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
+  if(nfiles)
+    return execute("p4",
+                   EXE_STR, "revert",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  else
+    return execute("p4",
+                   EXE_STR, "revert",
+                   EXE_STR, "...",
+                   EXE_END);
 }
 
 static int p4_status() {
