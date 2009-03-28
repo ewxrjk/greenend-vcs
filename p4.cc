@@ -17,74 +17,82 @@
  */
 #include "vcs.h"
 
-static int bzr_diff(int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "diff",
+static int p4_edit(int nfiles, char **files) {
+  return execute("p4",
+                 EXE_STR, "edit",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_add(int /*binary*/, int nfiles, char **files) {
-  return execute("bzr",
+static int p4_diff(int nfiles, char **files) {
+  return execute("p4",
+                 EXE_STR, "diff",
+		 EXE_STR, "-du",
+                 EXE_STRS, nfiles, files,
+                 EXE_END);
+}
+
+static int p4_add(int /*binary*/, int nfiles, char **files) {
+  return execute("p4",
                  EXE_STR, "add",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_remove(int force, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "remove",
-                 EXE_IFSTR(force, "--force"),
+static int p4_remove(int /*force*/, int nfiles, char **files) {
+  return execute("p4",
+                 EXE_STR, "delete",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_commit(const char *msg, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "commit",
-                 EXE_IFSTR(msg, "-m"),
-                 EXE_IFSTR(msg, msg),
+static int p4_commit(const char *msg, int nfiles, char **files) {
+  if(msg)
+    fatal("'vcs commit -m' does not work with Perforce backend, sorry");
+  return execute("p4",
+                 EXE_STR, "submit",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_revert(int nfiles, char **files) {
-  return execute("bzr",
+static int p4_revert(int nfiles, char **files) {
+  return execute("p4",
                  EXE_STR, "revert",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_status() {
-  return execute("bzr",
-                 EXE_STR, "status",
+static int p4_status() {
+  return execute("p4",
+                 EXE_STR, "opened",
                  EXE_END);
 }
 
-static int bzr_update() {
-  return execute("bzr",
-                 EXE_STR, "update",
+static int p4_update() {
+  return execute("p4",
+                 EXE_STR, "sync",
+		 EXE_STR, "...",
                  EXE_END);
 }
 
-static int bzr_log(const char *path) {
-  return execute("bzr",
-                 EXE_STR, "log",
+static int p4_log(const char *path) {
+  return execute("p4",
+                 EXE_STR, "filelog",
                  EXE_IFSTR(path, path),
                  EXE_END);
 }
 
-const struct vcs vcs_bzr = {
-  "Bazaar",
-  bzr_diff,
-  bzr_add,
-  bzr_remove,
-  bzr_commit,
-  bzr_revert,
-  bzr_status,
-  bzr_update,
-  bzr_log,
-  NULL,                                 // edit
+const struct vcs vcs_p4 = {
+  "Perforce",
+  p4_diff,
+  p4_add,
+  p4_remove,
+  p4_commit,
+  p4_revert,
+  p4_status,
+  p4_update,
+  p4_log,
+  p4_edit,
 };
 
 /*

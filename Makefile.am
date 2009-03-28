@@ -16,8 +16,8 @@
 bin_PROGRAMS=vcs
 vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc \
-	cvs.cc git.cc svn.cc bzr.cc
+	log.cc edit.cc \
+	cvs.cc git.cc svn.cc bzr.cc p4.cc
 dist_man_MANS=vcs.1
 TESTS=tests/bzr tests/cvs tests/svn tests/git
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \

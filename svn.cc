@@ -108,6 +108,7 @@ const struct vcs vcs_svn = {
   svn_status,
   svn_update,
   svn_log,
+  NULL,                                 // edit
 };
 
 /*

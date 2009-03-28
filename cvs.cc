@@ -205,6 +205,7 @@ const struct vcs vcs_cvs = {
   cvs_status,
   cvs_update,
   cvs_log,
+  NULL,                                 // edit
 };
 
 /*
