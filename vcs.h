@@ -45,7 +45,7 @@ struct vcs {
   int (*edit)(int nfiles, char **files); // optional
 };
 
-extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4;
+extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
 
 extern int verbose;
 extern int dryrun;

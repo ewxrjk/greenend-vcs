@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,24 +14,25 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
-	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc edit.cc \
-	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc
-dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS)
+set -e
 
-clean-local:
-	rm -rf test-root
+. $srcdir/tests/utils.sh
 
-dist: changelog
+t_init hg
 
-${srcdir}/changelog:
-	cd ${srcdir} && \
-	if bzr log > changelog.new; then mv changelog.new changelog;\
-	else rm -f changelog.new; fi
+x hg init project
+t_populate
 
-.PHONY: changelog
+x hg clone project copy
+t_verify
+
+t_revert
+cd copy
+x hg status three
+status=$(hg status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
+    fatal "Did not properly revert 'three'"
+fi
+cd ..
+
+t_done

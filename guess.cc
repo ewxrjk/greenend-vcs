@@ -34,6 +34,8 @@ const struct vcs *guess() {
       return &vcs_bzr;
     if(isdir(d + PATHSEPSTR + ".git"))
       return &vcs_git;
+    if(isdir(d + PATHSEPSTR + ".hg"))
+      return &vcs_hg;
     if(isroot(d))
       break;
     d = parentdir(d);
