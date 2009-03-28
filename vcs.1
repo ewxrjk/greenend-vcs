@@ -137,6 +137,20 @@ system.
 Updates the working tree to the latest revision.
 Note that (currently) it is not possible to update only a subset of files,
 or to synchronize to a non-head revision.
+.PP
+For distributed version control systems this both fetches revisions
+from a parent branch and updates your working tree.
+.PP
+.B "vcs update"
+does not attempt to handle conflicts in a uniform way across version
+control systems.
+You get whatever the underlying system gives you: for instance,
+conflict markers in files, or questions asked during update.
+You may have to run commands such as
+.B "bzr resolve"
+to indicate conflics resolved or
+.B "p4 resolve"
+to perform conflict resolution tool.
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
 This section describes the supported version control systems.
 Any issues specific to them are describe here.
