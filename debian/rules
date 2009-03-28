@@ -69,11 +69,11 @@ pkg-vcs: build
 	 rm -rf debian/vcs
 	 $(MKDIR) debian/vcs/DEBIAN
 	 $(MKDIR) debian/vcs/usr/share/doc/vcs
-	 $(INSTALL_DATA) debian/copyright \
-		debian/vcs/usr/share/doc/vcs/copyright
+	 $(INSTALL_DATA) debian/copyright CHANGES.html changelog \
+		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
 		debian/vcs/usr/share/doc/vcs/changelog.Debian
-	gzip -9 debian/vcs/usr/share/doc/vcs/changelog.Debian
+	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
 	gzip -9f debian/vcs/usr/share/man/man*/*
 	dpkg-shlibdeps -Tdebian/substvars.vcs \

@@ -31,6 +31,16 @@ int isdir(const string &path) {
   return 0;
 }
 
+// Return nonzero if a file exists (even as a dangling link)
+// If we can't tell, we return 0.
+int exists(const string &path) {
+  struct stat s[1];
+
+  if(lstat(path.c_str(), s) < 0)
+    return 0;
+  return 1;
+}
+
 // Return the current working directory
 string cwd() {
   char b[8192];

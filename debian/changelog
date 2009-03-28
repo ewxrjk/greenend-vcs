@@ -1,3 +1,9 @@
+vcs (0.3) unstable; urgency=low
+
+  * Git support.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 28 Mar 2009 13:29:10 +0000
+
 vcs (0.2) unstable; urgency=low
 
   * New update, status and log commands

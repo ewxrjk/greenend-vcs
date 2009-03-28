@@ -61,6 +61,7 @@ int vcs_log(const struct vcs *v, int argc, char **argv);
 const struct vcs *guess();
 
 int isdir(const string &s);
+int exists(const string &path);
 string cwd();
 string parentdir(const string &d);
 int isroot(const string &d);

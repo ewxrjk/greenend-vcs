@@ -1,0 +1,42 @@
+#! /bin/bash
+set -e
+
+make ${DIST:-distcheck}
+
+p=`perl -ne '/^PACKAGE\s*=\s*(\S+)/ && print "$1";' Makefile`
+v=`perl -ne '/^VERSION\s*=\s*(\S+)/ && print "$1";' Makefile`
+
+web=$HOME/public_html/web/2009
+d=$p-$v
+src=$p-$v.tar.gz
+
+# Report and execute a command remotely
+remote() {
+  local h=$1
+  shift
+  echo "$h:" "$@"
+  ssh $h "$@"
+}
+
+# Build .debs and copy to the right place
+build() {
+  local h=$1			# build host
+  local f=$2
+  local vs=$3
+  local dist=$4
+
+  remote $h "mkdir -p _builds"
+  remote $h "rm -rf _builds/*.deb _builds/$d"
+  scp $src $h:_builds/$src
+  remote $h "cd _builds && tar xf $src"
+  if [ "$vs" != "" ]; then
+    remote $h "cd _builds/$d && scripts/setversion $v~$vs 'Backport to $vs' $dist"
+  fi
+  remote $h "cd _builds/$d && fakeroot debian/rules binary"
+  scp $h:_builds/*.deb $web/.
+}
+
+build erjin etch etch oldstable
+build leucomorph lenny "" stable
+build araminta lenny "" stable
+cp $src $web

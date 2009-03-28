@@ -108,6 +108,11 @@ control unconditionally.
 .RI [ FILENAME ...]
 .PP
 Revert changes to the listed files, or to all files if none are listed.
+.PP
+Removed files are resurrected and modified files have any changes undone.
+Some version control systems will save the modified version to a backup file.
+Newly added files are removed from version control and may be deleted
+(depending on the underlying version control system).
 .SS status
 .B vcs
 .B status
@@ -136,6 +141,17 @@ option when adding images files, etc is mandatory.
 Web page: http://bazaar-vcs.org/
 .SS Subversion
 Web page: http://subversion.tigris.org/
+.SS Git
+Web page: http://git-scm.com/
+.PP
+.B vcs
+has a more CVS-like model than Git; therefore
+.B "vcs commit"
+will commit all your changes, not just those mentioned with
+.BR "git add" .
+.PP
+.B "vcs revert"
+will delete newly added files.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.
@@ -143,8 +159,18 @@ The idea is to reliably support common operations rather than to support
 rare operations but only some of the time.
 .PP
 .B vcs
+is not intended to give exactly identical semantics for every version
+control system, just essentially similar ones.
+.PP
+.B vcs
 does not attempt to translate the output of native commands to a
 consistent format.
 You get what the native system gives you.
+.P
+.B vcs
+is intended to be useful rather than to adhere to arbitrary rules.
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>
+.PP
+The VCS home page is:
+.B http://www.greenend.org.uk/rjk/2009/vcs.html

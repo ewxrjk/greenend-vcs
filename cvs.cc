@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
+#include <sstream>
 
 static int cvs_diff(int nfiles, char **files) {
   return execute("cvs",
@@ -136,13 +137,41 @@ static int cvs_revert(int nfiles, char **files) {
   // Remove added files
   for(set<string>::iterator it = added.begin();
       it != added.end();
-      ++it)
-    if(execute("cvs",
-               EXE_STR, "rm",
-               EXE_STR, "-f",
-               EXE_STR, it->c_str(),
+      ++it) {
+    /* - cvs rm insists that the file doesn't exist
+     * - cvs rm -f removes it
+     * ...but we'd like to keep the added file when we revert it.
+     * Hence we move it out of the way to a temporary file for the
+     * duration.
+     */
+    int failed = 0;
+    ostringstream s;
+    // We try to make sure the temporary file doesn't exist.  This is
+    // technically racy but we have a general assumption that there's not too
+    // much else going on anyway.
+    do {
+      s.str().clear();
+      s << *it << ".save." << rand();
+    } while(exists(s.str()));
+    const string save = s.str();
+    if(execute("mv", 
+               EXE_STR, it->c_str(), 
+               EXE_STR, save.c_str(),
                EXE_END))
       return 1;
+    if(execute("cvs",
+               EXE_STR, "rm",
+               EXE_STR, it->c_str(),
+               EXE_END))
+      failed = 1;
+    if(execute("mv", 
+               EXE_STR, save.c_str(),
+               EXE_STR, it->c_str(), 
+               EXE_END))
+      return 1;
+    if(failed)
+      return 1;
+  }
   return 0;
 }
 
