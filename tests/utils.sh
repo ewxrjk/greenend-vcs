@@ -42,8 +42,8 @@ t_populate() {
     cd project
     echo one > one
     echo two > two
-    x vcs add one two
-    x vcs commit -m 'one and two'
+    x vcs -v add one two
+    x vcs -v commit -m 'one and two'
     cd ..
 }
 
@@ -55,14 +55,17 @@ t_verify() {
 t_revert() {
     cd copy
     echo extra >> one
-    x vcs rm -f two
+    x vcs -v rm -f two
     if [ -e two ]; then
 	echo "removed 'two' but it's still there" >&2
 	exit 1
     fi
     echo three > three
-    x vcs add three
+    x vcs -v add three
     x vcs -v revert
+    if [ ! -e three ]; then
+	fatal "'three' removed on revert"
+    fi
     cd ..
 
     # 'one' and 'two' should be back to normal; we already have a

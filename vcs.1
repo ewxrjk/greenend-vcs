@@ -108,6 +108,10 @@ control unconditionally.
 .RI [ FILENAME ...]
 .PP
 Revert changes to the listed files, or to all files if none are listed.
+.PP
+Removed files are resurrected and modified files have any changes undone.
+Some version control systems will save the modified version to a backup file.
+Newly added files are removed from version control but not deleted.
 .SS status
 .B vcs
 .B status

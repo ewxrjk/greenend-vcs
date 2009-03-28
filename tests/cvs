@@ -38,9 +38,10 @@ t_verify
 
 t_revert
 cd copy
-x cvs -n up
-if cvs -n up 2>/dev/null | grep -q three; then
-    fatal "'three' not properly reverted"
+x cvs -n up three
+status=$(cvs -n up three 2>/dev/null)
+if test "x$status" != 'x'; then
+    fatal "Did not properly revert 'three'"
 fi
 cd ..
 
