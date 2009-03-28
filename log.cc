@@ -43,7 +43,7 @@ int vcs_log(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  if(optind - argc > 1) {
+  if(argc - optind > 1) {
     log_help(stderr);
     return 1;
   }
