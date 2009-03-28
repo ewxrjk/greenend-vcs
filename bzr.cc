@@ -84,6 +84,7 @@ const struct vcs vcs_bzr = {
   bzr_status,
   bzr_update,
   bzr_log,
+  NULL,                                 // edit
 };
 
 /*

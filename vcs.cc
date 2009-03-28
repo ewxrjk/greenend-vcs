@@ -72,6 +72,11 @@ static const struct command {
     vcs_diff
   },
   {
+    "edit", NULL,
+    "Edit files",
+    vcs_edit
+  },
+  {
     "log", NULL,
     "Summarize history",
     vcs_log

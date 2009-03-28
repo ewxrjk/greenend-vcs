@@ -42,9 +42,10 @@ struct vcs {
   int (*status)();
   int (*update)();
   int (*log)(const char *file);
+  int (*edit)(int nfiles, char **files); // optional
 };
 
-extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git;
+extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4;
 
 extern int verbose;
 extern int dryrun;
@@ -57,6 +58,7 @@ int vcs_revert(const struct vcs *v, int argc, char **argv);
 int vcs_status(const struct vcs *v, int argc, char **argv);
 int vcs_update(const struct vcs *v, int argc, char **argv);
 int vcs_log(const struct vcs *v, int argc, char **argv);
+int vcs_edit(const struct vcs *v, int argc, char **argv);
 
 const struct vcs *guess();
 

@@ -107,6 +107,7 @@ const struct vcs vcs_git = {
   git_status,
   git_update,
   git_log,
+  NULL,                                 // edit
 };
 
 /*

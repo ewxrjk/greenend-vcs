@@ -17,38 +17,40 @@
  */
 #include "vcs.h"
 
-static const struct option log_options[] = {
+static const struct option edit_options[] = {
   { "help", no_argument, 0, 'h' },
   { 0, 0, 0, 0 },
 };
 
-static void log_help(FILE *fp = stdout) {
+static void edit_help(FILE *fp = stdout) {
   fprintf(fp, 
           "Usage:\n"
-          "  vcs log [OPTIONS] [FILENAME ...]\n"
+          "  vcs edit [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h              Display usage message\n");
 }
 
-int vcs_log(const struct vcs *v, int argc, char **argv) {
+int vcs_edit(const struct vcs *v, int argc, char **argv) {
   int n;
 
   optind = 1;
-  while((n = getopt_long(argc, argv, "+h", log_options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+h", edit_options, 0)) >= 0) {
     switch(n) {
     case 'h':
-      log_help();
+      edit_help();
       return 0;
     default:
       return 1;
     }
   }
-  if(argc - optind > 1) {
-    log_help(stderr);
+  if(argc == optind) {
+    edit_help(stderr);
     return 1;
   }
-  return v->log(argc == optind ? NULL : argv[optind]);
-  
+  if(v->edit)
+    return v->edit(argc - optind, argv + optind);
+  else
+    return 0;
 }
 
 /*

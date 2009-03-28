@@ -38,6 +38,14 @@ const struct vcs *guess() {
       break;
     d = parentdir(d);
   }
+  // Only attempt to detect Perforce if some Perforce-specific environment
+  // variable is set.  Also, we do it last since invoking a program is much
+  // more intrusive than just testing files.
+  if(getenv("P4PORT") || getenv("P4CONFIG") || getenv("P4CLIENT")) {
+    vector<string> lines;
+    if(!capture(lines, "p4", "changes", "-m1", "...", (char *)NULL))
+      return &vcs_p4;
+  }
   fatal("cannot identify native version control system");
 }
 
