@@ -1,0 +1,72 @@
+#! /usr/bin/perl -w
+#
+# scripts/setversion VERSION [DESCRIPTION [DISTRIBUTION]]
+#
+# Sets a new version number, including a debian/changelog entry (albeit
+# a rather terse and informal one).
+
+use strict;
+use POSIX qw(strftime uname);
+
+my $version = shift;
+my $description;
+my $distribution;
+if(@ARGV > 0) {
+    $description = shift;
+} else {
+    $description = "VCS $version";
+}
+if(@ARGV > 0) {
+    $distribution = shift;
+} else {
+    $distribution = "unstable";
+}
+
+my $hostname = (uname)[1];
+$hostname = (gethostbyname($hostname))[0];
+my $logname = (getpwuid($<))[0];
+my $name = (getpwuid($<))[6];
+$name =~ s/,.*//;
+my $email = "$logname\@$hostname";
+if(exists $ENV{"EMAIL"}) {
+    $email = $ENV{"EMAIL"};
+}
+my $date = strftime("%a, %d %b %Y %H:%M:%S %z", localtime);
+
+sub input {
+    my $path = shift;
+    open(C, "<$path") or die "$path: $!\n";
+    my @f = <C>;
+    close C;
+    return @f;
+}
+
+sub output {
+    my $path = shift;
+    my $contents = shift;
+    my $new = "$path.new";
+    (open(O, ">$new")
+     and (print O @$contents)
+     and (close O))
+	or die "$new: $!\n";
+    (rename $new, $path)
+	or die "$new -> $path: $!\n";
+}
+
+my @c = input("configure.ac");
+foreach(@c) {
+    if(/^AC_INIT|AM_INIT/) {
+	s/\[[0-9\.\+]+\]/[$version]/g;
+    }
+}
+output("configure.ac", \@c);
+
+@c = input("debian/changelog");
+unshift(@c,
+	"vcs ($version) $distribution; urgency=low\n",
+	"\n",
+	"  * $description\n",
+	"\n",
+	" -- $name <$email>  $date\n",
+	"\n");
+output("debian/changelog", \@c);

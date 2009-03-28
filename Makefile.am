@@ -21,7 +21,7 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc vcs.h \
 dist_man_MANS=vcs.1
 TESTS=tests/bzr tests/cvs tests/svn tests/git
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh $(TESTS)
+	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS)
 
 clean-local:
 	rm -rf test-root
