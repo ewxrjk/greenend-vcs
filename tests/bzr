@@ -26,6 +26,9 @@ t_populate
 x bzr clone project copy
 t_verify
 
+t_modify
+t_verify
+
 t_revert
 cd copy
 if bzr log three >/dev/null 2>&1; then

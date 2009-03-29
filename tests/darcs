@@ -29,6 +29,9 @@ t_populate
 x darcs get project copy
 t_verify
 
+t_modify
+t_verify
+
 t_revert
 cd copy
 cd ..

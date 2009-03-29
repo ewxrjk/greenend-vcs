@@ -68,9 +68,9 @@ const string uri_scheme(const string &uri) {
 }
 
 static size_t discard(void */*ptr*/, 
-		      size_t size,
-		      size_t nmemb, 
-		      void */*stream*/) {
+                      size_t size,
+                      size_t nmemb, 
+                      void */*stream*/) {
   return size * nmemb;
 }
 
@@ -87,7 +87,7 @@ int uri_exists(const string &uri) {
     // Don't emit a progress bar
     if((rc = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L)))
       fatal("curl_easy_setopt CURLOPT_NOPROGRESS: %d (%s)",
-	    rc, curl_easy_strerror(rc));
+            rc, curl_easy_strerror(rc));
     // Follow redirects
     if((rc = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L)))
       fatal("curl_easy_setopt CURLOPT_FOLLOWLOCATION: %d (%s)",
@@ -126,7 +126,7 @@ int uri_exists(const string &uri) {
   }
   if(verbose)
     fprintf(stderr, "  CURL status: %d (%s)\n  Error: %s\n",
-	    rc, curl_easy_strerror(rc), error);
+            rc, curl_easy_strerror(rc), error);
   return 0;
 }
 

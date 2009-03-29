@@ -28,8 +28,8 @@ static void annotate_help(FILE *fp = stdout) {
           "  vcs annotate [OPTIONS] FILENAME\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-	  "\n"
-	  "Lists each line of FILENAME with its origin.\n");
+          "\n"
+          "Lists each line of FILENAME with its origin.\n");
 }
 
 int vcs_annotate(int argc, char **argv) {

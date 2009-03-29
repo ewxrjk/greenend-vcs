@@ -47,6 +47,16 @@ t_populate() {
     cd ..
 }
 
+t_modify() {
+    cd project
+    echo oneone >> one
+    x vcs -v commit -m 'oneone'
+    cd ..
+    cd copy
+    x vcs -v up
+    cd ..
+}
+
 t_verify() {
     if diff project/one copy/one; then :; else exit 1; fi
     if diff project/two copy/two; then :; else exit 1; fi

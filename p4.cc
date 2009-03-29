@@ -27,7 +27,7 @@ static int p4_edit(int nfiles, char **files) {
 static int p4_diff(int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "diff",
-		 EXE_STR, "-du",
+                 EXE_STR, "-du",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
@@ -77,15 +77,15 @@ static int p4_status() {
 static int p4_update() {
   return execute("p4",
                  EXE_STR, "sync",
-		 EXE_STR, "...",
+                 EXE_STR, "...",
                  EXE_END);
 }
 
 static int p4_log(const char *path) {
   return execute("p4",
                  EXE_STR, "changes",
-		 EXE_STR, "-lt",
-		 EXE_IFSTR(path, path),
+                 EXE_STR, "-lt",
+                 EXE_IFSTR(path, path),
                  EXE_END);
 }
 

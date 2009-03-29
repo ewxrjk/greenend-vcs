@@ -28,8 +28,8 @@ static void clone_help(FILE *fp = stdout) {
           "  vcs clone [OPTIONS] URI [DIRECTORY]\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-	  "\n"
-	  "Creates a local copy of a branch or (part of) a repository.\n");
+          "\n"
+          "Creates a local copy of a branch or (part of) a repository.\n");
 }
 
 int vcs_clone(int argc, char **argv) {
@@ -54,7 +54,7 @@ int vcs_clone(int argc, char **argv) {
     return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
   else
     fatal("guess_branch returned VCS '%s' which has no clone method!",
-	  v->name);
+          v->name);
 }
 
 /*

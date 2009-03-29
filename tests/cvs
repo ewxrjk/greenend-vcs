@@ -36,6 +36,9 @@ t_populate
 x cvs co -d copy project
 t_verify
 
+t_modify
+t_verify
+
 t_revert
 cd copy
 x cvs -n up three

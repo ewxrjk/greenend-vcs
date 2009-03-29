@@ -20,7 +20,7 @@
 static int darcs_diff(int nfiles, char **files) {
   return execute("darcs",
                  EXE_STR, "diff",
-		 EXE_STR, "-u",
+                 EXE_STR, "-u",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
@@ -38,19 +38,19 @@ static int darcs_remove(int force, int nfiles, char **files) {
 
     for(int n = 0; n < nfiles; ++n)
       if(erase(files[n]))
-	rc = 1;
+        rc = 1;
     return rc;
   } else
     return execute("darcs",
-		   EXE_STR, "remove",
-		   EXE_STRS, nfiles, files,
-		   EXE_END);
+                   EXE_STR, "remove",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
 }
 
 static int darcs_commit(const char *msg, int nfiles, char **files) {
   return execute("darcs",
                  EXE_STR, "record",
-		 EXE_STR, "--all",
+                 EXE_STR, "--all",
                  EXE_IFSTR(msg, "-m"),
                  EXE_IFSTR(msg, msg),
                  EXE_STRS, nfiles, files,
@@ -60,7 +60,7 @@ static int darcs_commit(const char *msg, int nfiles, char **files) {
 static int darcs_revert(int nfiles, char **files) {
   return execute("darcs",
                  EXE_STR, "revert",
-		 EXE_STR, "--all",
+                 EXE_STR, "--all",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
@@ -74,6 +74,7 @@ static int darcs_status() {
 static int darcs_update() {
   return execute("darcs",
                  EXE_STR, "pull",
+                 EXE_STR, "--all",
                  EXE_END);
 }
 

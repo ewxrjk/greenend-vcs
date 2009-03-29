@@ -70,7 +70,7 @@ static int hg_status() {
 static int hg_update() {
   return execute("hg",
                  EXE_STR, "pull",
-		 EXE_STR, "--update",
+                 EXE_STR, "--update",
                  EXE_END);
 }
 

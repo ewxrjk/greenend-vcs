@@ -63,7 +63,7 @@ static int bzr_status() {
 
 static int bzr_update() {
   return execute("bzr",
-                 EXE_STR, "update",
+                 EXE_STR, "pull",
                  EXE_END);
 }
 

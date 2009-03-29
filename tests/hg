@@ -26,6 +26,9 @@ t_populate
 x hg clone project copy
 t_verify
 
+t_modify
+t_verify
+
 t_revert
 cd copy
 x hg status three

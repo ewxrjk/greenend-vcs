@@ -36,6 +36,9 @@ t_populate
 x svn co file:///$repo/trunk/project copy
 t_verify
 
+t_modify
+t_verify
+
 t_revert
 cd copy
 x svn status three
