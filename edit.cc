@@ -30,7 +30,7 @@ static void edit_help(FILE *fp = stdout) {
           "  --help, -h              Display usage message\n");
 }
 
-int vcs_edit(const struct vcs *v, int argc, char **argv) {
+int vcs_edit(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -47,6 +47,7 @@ int vcs_edit(const struct vcs *v, int argc, char **argv) {
     edit_help(stderr);
     return 1;
   }
+  const struct vcs *v = guess();
   if(v->edit)
     return v->edit(argc - optind, argv + optind);
   else

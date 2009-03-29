@@ -34,7 +34,7 @@ static void diff_help(FILE *fp = stdout) {
           "are shown.\n");
 }
 
-int vcs_diff(const struct vcs *v, int argc, char **argv) {
+int vcs_diff(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -47,7 +47,7 @@ int vcs_diff(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  return v->diff(argc - optind, argv + optind);
+  return guess()->diff(argc - optind, argv + optind);
 }
 
 /*

@@ -30,7 +30,7 @@ static void revert_help(FILE *fp = stdout) {
           "  --help, -h              Display usage message\n");
 }
 
-int vcs_revert(const struct vcs *v, int argc, char **argv) {
+int vcs_revert(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -43,7 +43,7 @@ int vcs_revert(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  return v->revert(argc - optind, argv + optind);
+  return guess()->revert(argc - optind, argv + optind);
 }
 
 /*

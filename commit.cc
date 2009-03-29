@@ -32,7 +32,7 @@ static void commit_help(FILE *fp = stdout) {
           "  --message, -m MESSAGE   Log message\n");
 }
 
-int vcs_commit(const struct vcs *v, int argc, char **argv) {
+int vcs_commit(int argc, char **argv) {
   int n;
   const char *msg = 0;
 
@@ -49,7 +49,7 @@ int vcs_commit(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  return v->commit(msg, argc - optind, argv + optind);
+  return guess()->commit(msg, argc - optind, argv + optind);
   
 }
 

@@ -214,6 +214,7 @@ const struct vcs vcs_cvs = {
   cvs_log,
   NULL,                                 // edit
   cvs_annotate,
+  NULL,                                 // clone
 };
 
 /*

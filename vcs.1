@@ -70,6 +70,36 @@ last revision and the user who modified it.
 .B "vcs blame"
 is a synonym for
 .BR "vcs annotate" .
+.SS clone
+.B vcs
+.B clone
+.I URI
+.RI [ DIRECTORY ]
+.PP
+Attempts to deduce what version control system is used by
+.IR URI
+and check out a copy.
+If
+.I DIRECTORY
+is specified then that is used, otherwise the leaf name of the URI is used.
+.PP
+In some cases the version control system can be inferred directly from
+the URI, for instance if it is a
+.B git:
+URI.
+In other cases
+.B vcs
+will check for the existence of particular files such as
+.B .git
+or
+.B .bzr
+to figure out what
+version control system is used.
+.PP
+Use the
+.B -v
+option to see details of what it tries, if it isn't working and you
+think it should.
 .SS commit
 .B vcs
 .B commit

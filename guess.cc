@@ -51,6 +51,63 @@ const struct vcs *guess() {
   fatal("cannot identify native version control system");
 }
 
+// Table mapping scheme names to version control systems
+static const struct vcs_scheme {
+  const char *scheme;
+  const struct vcs *vcs;
+} scheme_mapping[] = {
+  { "git", &vcs_git },
+  { "svn", &vcs_svn },
+  { "svn+ssh", &vcs_svn },
+  { 0, 0 }
+};
+
+// Table mapping subdirectories to version control systems
+static const struct vcs_subdir {
+  const char *substring;
+  const char *subdir;
+  const struct vcs *vcs;
+} subdir_mapping[] = {
+  { "git", ".git", &vcs_git },
+  { "bzr", ".bzr", &vcs_bzr },
+  { "hg", ".hg", &vcs_hg },
+  // Last since 'HEAD' isn't a dotfile:
+  { "git", "HEAD", &vcs_git },
+  { 0, 0, 0 }
+};
+
+// Guess what VCS a named branch belongs to
+const struct vcs *guess_branch(string uri) {
+  // Perhaps we can guess just by looking at the URI
+  const string scheme = uri_scheme(uri);
+  if(scheme != "") {
+    for(const struct vcs_scheme *s = scheme_mapping; s->scheme; ++s)
+      if(scheme == s->scheme)
+        return s->vcs;
+  } else {
+    // If there is no scheme then we assume it to be a local URI
+    if(uri.size() && uri.at(0) == '/')
+      uri = "file://" + uri;
+    else
+      uri = "file:///" + cwd() + "/" + uri;
+  }
+
+  // Otherwise we must inspect what we find there.
+
+  // First we try to use substrings as hints
+  for(const struct vcs_subdir *s = subdir_mapping; s->subdir; ++s)
+    if(s->substring && uri.find(s->substring) != string::npos)
+      if(uri_exists(uri + "/" + s->subdir))
+        return s->vcs;
+
+  // Failing that we try without hints
+  for(const struct vcs_subdir *s = subdir_mapping; s->subdir; ++s)
+    if(uri_exists(uri + "/" + s->subdir))
+      return s->vcs;
+  
+  fatal("cannot identify version control system");
+}
+
 /*
 Local Variables:
 mode:c++

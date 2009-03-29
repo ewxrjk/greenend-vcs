@@ -81,6 +81,14 @@ static int bzr_annotate(const char *path) {
                  EXE_END);
 }
 
+static int bzr_clone(const char *uri, const char *dir) {
+  return execute("bzr",
+                 EXE_STR, "clone",
+                 EXE_STR, uri,
+                 EXE_IFSTR(dir, dir),
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -93,6 +101,7 @@ const struct vcs vcs_bzr = {
   bzr_log,
   NULL,                                 // edit
   bzr_annotate,
+  bzr_clone,
 };
 
 /*

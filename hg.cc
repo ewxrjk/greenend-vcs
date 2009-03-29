@@ -88,6 +88,14 @@ static int hg_annotate(const char *path) {
                  EXE_END);
 }
 
+static int hg_clone(const char *uri, const char *dir) {
+  return execute("hg",
+                 EXE_STR, "clone",
+                 EXE_STR, uri,
+                 EXE_IFSTR(dir, dir),
+                 EXE_END);
+}
+
 const struct vcs vcs_hg = {
   "Mercurial",
   hg_diff,
@@ -100,6 +108,7 @@ const struct vcs vcs_hg = {
   hg_log,
   NULL,                                 // edit
   hg_annotate,
+  hg_clone,
 };
 
 /*

@@ -13,6 +13,11 @@ hopefuly, be added in the future.
 Installation
 ============
 
+To build VCS, you will need:
+  GNU C++      http://gcc.gnu.org/
+  cURL         http://curl.haxx.se/
+
+Use the following commands:
   ./configure
   make
   sudo make install

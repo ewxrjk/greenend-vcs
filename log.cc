@@ -30,7 +30,7 @@ static void log_help(FILE *fp = stdout) {
           "  --help, -h     Display usage message\n");
 }
 
-int vcs_log(const struct vcs *v, int argc, char **argv) {
+int vcs_log(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -47,7 +47,7 @@ int vcs_log(const struct vcs *v, int argc, char **argv) {
     log_help(stderr);
     return 1;
   }
-  return v->log(argc == optind ? NULL : argv[optind]);
+  return guess()->log(argc == optind ? NULL : argv[optind]);
   
 }
 

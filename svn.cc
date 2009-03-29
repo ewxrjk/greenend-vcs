@@ -105,6 +105,14 @@ static int svn_annotate(const char *path) {
                  EXE_END);
 }
 
+static int svn_clone(const char *uri, const char *dir) {
+  return execute("svn",
+                 EXE_STR, "checkout",
+                 EXE_STR, uri,
+                 EXE_IFSTR(dir, dir),
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -117,6 +125,7 @@ const struct vcs vcs_svn = {
   svn_log,
   NULL,                                 // edit
   svn_annotate,
+  svn_clone,
 };
 
 /*

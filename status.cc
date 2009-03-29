@@ -30,7 +30,7 @@ static void status_help(FILE *fp = stdout) {
           "  --help, -h     Display usage message\n");
 }
 
-int vcs_status(const struct vcs *v, int argc, char **argv) {
+int vcs_status(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -47,7 +47,7 @@ int vcs_status(const struct vcs *v, int argc, char **argv) {
     status_help(stderr);
     return 1;
   }
-  return v->status();
+  return guess()->status();
 }
 
 /*

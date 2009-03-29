@@ -109,6 +109,7 @@ const struct vcs vcs_p4 = {
   p4_log,
   p4_edit,
   p4_annotate,
+  NULL,                                 // clone
 };
 
 /*

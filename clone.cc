@@ -17,37 +17,42 @@
  */
 #include "vcs.h"
 
-static const struct option annotate_options[] = {
+static const struct option clone_options[] = {
   { "help", no_argument, 0, 'h' },
   { 0, 0, 0, 0 },
 };
 
-static void annotate_help(FILE *fp = stdout) {
+static void clone_help(FILE *fp = stdout) {
   fprintf(fp, 
           "Usage:\n"
-          "  vcs annotate [OPTIONS] FILENAME\n"
+          "  vcs clone [OPTIONS] URI [DIRECTORY]\n"
           "Options:\n"
           "  --help, -h     Display usage message\n");
 }
 
-int vcs_annotate(int argc, char **argv) {
+int vcs_clone(int argc, char **argv) {
   int n;
 
   optind = 1;
-  while((n = getopt_long(argc, argv, "+h", annotate_options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+h", clone_options, 0)) >= 0) {
     switch(n) {
     case 'h':
-      annotate_help();
+      clone_help();
       return 0;
     default:
       return 1;
     }
   }
-  if(argc - optind != 1) {
-    annotate_help(stderr);
+  if(argc - optind < 1 || argc - optind > 2) {
+    clone_help(stderr);
     return 1;
   }
-  return guess()->annotate(argv[optind]);
+  const struct vcs *v = guess_branch(argv[optind]);
+  if(v->clone)
+    return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
+  else
+    fatal("guess_branch returned VCS '%s' which has no clone method!",
+	  v->name);
 }
 
 /*
