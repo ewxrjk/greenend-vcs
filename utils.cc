@@ -215,6 +215,15 @@ char *xstrdup(const char *s) {
   return strcpy((char *)xmalloc(strlen(s) + 1), s);
 }
 
+// Remove a file and report any errors
+int erase(const char *s) {
+  if(remove(s) < 0) {
+    fprintf(stderr, "ERROR: removing %s: %s\n", s, strerror(errno));
+    return -1;
+  } else
+    return 0;
+}
+
 /*
 Local Variables:
 mode:c++

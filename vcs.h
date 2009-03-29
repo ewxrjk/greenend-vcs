@@ -29,6 +29,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <getopt.h>
+#include <errno.h>
 
 #if HAVE_LIBCURL
 # include <curl/curl.h>
@@ -52,6 +53,7 @@ struct vcs {
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
+extern const struct vcs vcs_darcs;
 
 extern int verbose;
 extern int dryrun;
@@ -83,6 +85,7 @@ int isroot(const string &d);
 void fatal(const char *msg, ...) 
   attribute((noreturn))  
   attribute((format (printf, 1, 2)));
+int erase(const char *s);
 
 void *xmalloc(size_t n);
 char *xstrdup(const char *s);
