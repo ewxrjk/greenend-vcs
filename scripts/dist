@@ -40,3 +40,4 @@ build erjin etch etch oldstable
 build leucomorph lenny "" stable
 build araminta lenny "" stable
 cp $src $web
+man -Thtml -l vcs.1 > $web/vcs.1.html
