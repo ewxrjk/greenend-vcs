@@ -96,11 +96,17 @@ char *xstrdup(const char *s);
 #define EXE_SKIPSTR 2
 #define EXE_STRS 3
 #define EXE_IFSTR(COND, STR) (COND) ? EXE_STR : EXE_SKIPSTR, (STR)
+#define EXE_NO_STDOUT 4
+#define EXE_NO_STDERR 5
 int execute(const char *prog, ...);
 
 int capture(vector<string> &lines,
             const char *prog,
             ...);
+int fcapture(unsigned flags,
+             vector<string> &lines,
+             const char *prog,
+             ...);
 int vcapture(vector<string> &lines,
              const vector<string> &command);
 int vccapture(vector<string> &lines,

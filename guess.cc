@@ -26,8 +26,31 @@ const struct vcs *guess() {
   // Subversion too
   if(isdir(".svn"))
     return &vcs_svn;
+  if(isdir(".bzr"))
+    return &vcs_bzr;
+  if(isdir(".git"))
+    return &vcs_git;
+  if(isdir(".hg"))
+    return &vcs_hg;
+  if(isdir("_darcs"))
+    return &vcs_darcs;
+  // Only attempt to detect Perforce if some Perforce-specific environment
+  // variable is set.  We try this _before_ searching parent directories
+  // for a VC-specific subdirectory, so that Perforce checkouts that are
+  // below (e.g.) Bazaar checkouts are correctly matched.  Our own test
+  // scripts are the motivating (and perhaps only) example.
+  if(getenv("P4PORT") || getenv("P4CONFIG") || getenv("P4CLIENT")) {
+    if(!execute("p4",
+                EXE_STR, "changes",
+                EXE_STR, "-m1",
+                EXE_STR, "...",
+                EXE_NO_STDOUT,
+                EXE_NO_STDERR,
+                EXE_END))
+      return &vcs_p4;
+  }
   // Bazaar and Git only have their dot directories at the top level of the
-  // branch.
+  // branch, so we work our way back up.
   string d = cwd();
   for(;;) {
     if(isdir(d + PATHSEPSTR + ".bzr"))
@@ -41,14 +64,6 @@ const struct vcs *guess() {
     if(isroot(d))
       break;
     d = parentdir(d);
-  }
-  // Only attempt to detect Perforce if some Perforce-specific environment
-  // variable is set.  Also, we do it last since invoking a program is much
-  // more intrusive than just testing files.
-  if(getenv("P4PORT") || getenv("P4CONFIG") || getenv("P4CLIENT")) {
-    vector<string> lines;
-    if(!capture(lines, "p4", "changes", "-m1", "...", (char *)NULL))
-      return &vcs_p4;
   }
   fatal("cannot identify native version control system");
 }

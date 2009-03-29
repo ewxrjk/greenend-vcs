@@ -16,8 +16,15 @@
 
 
 t_init() {
-    # Skip test if subject system is not installed
-    type $1 >/dev/null 2>&1 || exit 77
+    # Check all dependencies are present
+    for dep; do
+        if type $dep >/dev/null 2>&1; then
+            :
+        else
+            echo "Cannot test $1 - $dep is not installed" >&2
+            exit 77
+        fi
+    done
 
     # Make sure vcs is on the path
     builddir=`pwd`
@@ -49,9 +56,16 @@ t_populate() {
 
 t_modify() {
     cd project
+    x vcs -v edit one
     echo oneone >> one
-    x vcs -v commit -m 'oneone'
+    x vcs -v edit two
+    echo twotwo >> two
+    x vcs -v commit -m 'oneone' one
+    x vcs -v revert two
     cd ..
+}
+
+t_update() {
     cd copy
     x vcs -v up
     cd ..
@@ -64,6 +78,7 @@ t_verify() {
 
 t_revert() {
     cd copy
+    x vcs -v edit one
     echo extra >> one
     x vcs -v rm -f two
     if [ -e two ]; then

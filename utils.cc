@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <cerrno>
+#include <fcntl.h>
 
 // Return nonzero if PATH is a directory.  Links to directories count.
 int isdir(const string &path) {
@@ -82,6 +83,8 @@ int execute(const char *prog, ...) {
   // Assemble the command
   va_list ap;
   vector<const char *> cmd;
+  int kill_stdout = 0, kill_stderr = 0;
+
   cmd.push_back(prog);
   va_start(ap, prog);
   int op;
@@ -100,6 +103,12 @@ int execute(const char *prog, ...) {
         cmd.push_back(*strs++);
       break;
     }
+    case EXE_NO_STDOUT:
+      kill_stdout = 1;
+      break;
+    case EXE_NO_STDERR:
+      kill_stderr = 1;
+      break;
     default:
       assert(!"unknown execute() op");
     }
@@ -122,6 +131,17 @@ int execute(const char *prog, ...) {
   cmd.push_back(NULL);
   switch((pid = fork())) {
   case 0:
+    if(kill_stdout || kill_stderr) {
+      int nullfd = open("/dev/null", O_WRONLY);
+
+      if(nullfd < 0
+         || (kill_stdout ? dup2(nullfd, 1) < 0 : 0)
+         || (kill_stderr ? dup2(nullfd, 2) < 0 : 0)
+         || close(nullfd) < 0) {
+        perror("plumbing failed");
+        _exit(-1);
+      }
+    }
     execvp(cmd[0], (char **)&cmd[0]);
     fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
     _exit(-1);

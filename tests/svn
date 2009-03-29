@@ -37,6 +37,7 @@ x svn co file:///$repo/trunk/project copy
 t_verify
 
 t_modify
+t_update
 t_verify
 
 t_revert

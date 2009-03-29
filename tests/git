@@ -30,6 +30,7 @@ x git clone project copy
 t_verify
 
 t_modify
+t_update
 t_verify
 
 t_revert
