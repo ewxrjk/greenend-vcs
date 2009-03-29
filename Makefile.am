@@ -22,7 +22,8 @@ vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
 TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS)
+	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS) \
+	README.developers
 
 clean-local:
 	rm -rf test-root

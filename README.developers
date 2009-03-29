@@ -1,0 +1,50 @@
+* Before You Start, And After You Finish
+
+** Availability Of Dependencies 
+
+I need to be able to test any changes you submit.  This means I need
+to be able to get and run any new version control systems that are
+supported without unreasonable effort.
+
+This doesn't mean proprietary version control systems are out of the
+question - some vendors for instance make a limited but adequate (for
+vcs) version of their software available.  But I'm not going to pay
+money just to test compatibility with a system I don't use myself.
+
+** Submitting Patches
+
+Please either send 'diff -u' format patches or make public a Bazaar
+branch that I can clone and merge from.  You should branch from:
+  http://www.greenend.org.uk/rjk/bzr/vcs.dev
+
+I can be emailed at:
+  Richard Kettlewell <rjk@greenend.org.uk>
+
+* Adding Features
+
+** Adding A New Version Control System
+
+Create a *.cc file for the new version control system; for instance
+copy bzr.cc and edit accordingly.
+
+Add detection support to guess() and if appropriate, guess_branch().
+
+Update the man page with at least a pointer to its home page, and list
+any peculiarities.
+
+Add a test script.  Again copy (for instance) tests/bzr and edit
+accordingly.  Remember to update TESTS= in Makefile.am.  If the test's
+dependencies aren't installed the script should 'exit 77'.
+
+** Adding A New Command
+
+Create a *.cc file for the new command, on the pattern of add.cc,
+commit.cc, etc.  Add an entry to commands[] in vcs.cc and to 'struct
+vcs' in vcs.h.
+
+For each version control system add an implementation of the command.
+
+Document the command in the man page, remembering to mention any
+peculiarities specific to particular version control systems.
+
+Ideally, update the test scripts to exercise the new command.
