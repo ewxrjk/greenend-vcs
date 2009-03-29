@@ -154,10 +154,39 @@ int capture(vector<string> &lines,
   va_start(ap, prog);
   while((arg = va_arg(ap, const char *)))
     cmd.push_back(arg);
+  va_end(ap);
+  cmd.push_back(NULL);
+  return vccapture(lines, (char **)&cmd[0]);
+}
+
+// Execute a command (specified in a string) and capture it output.
+// Returns exit code.
+int vcapture(vector<string> &lines,
+             const vector<string> &command) {
+  vector<const char *> cmd;
+  size_t n;
+  
+  for(n = 0; n < command.size(); ++n)
+    cmd.push_back(command[n].c_str());
+  cmd.push_back(NULL);
+  return vccapture(lines, (char **)&cmd[0]);
+}
+
+// Execute a command (specified like execv) and capture it output.
+// Returns exit code.
+int vccapture(vector<string> &lines,
+              char **cmd) {
   // Execute it
   pid_t pid;
   int w, rc, p[2];
-  cmd.push_back(NULL);
+
+  if(debug) {
+    for(size_t n = 0; cmd[n]; ++n) {
+      fputs(n ? " " : "> ", stderr);
+      fputs(cmd[n], stderr);
+    }
+    fputc('\n', stderr);
+  }
   if(pipe(p) < 0)
     fatal("pipe failed: %s", strerror(errno));
   switch((pid = fork())) {
@@ -170,7 +199,7 @@ int capture(vector<string> &lines,
       perror("close");
       _exit(-1);
     }
-    execvp(cmd[0], (char **)&cmd[0]);
+    execvp(cmd[0], cmd);
     fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
     _exit(-1);
   case -1:
@@ -186,11 +215,93 @@ int capture(vector<string> &lines,
     string line;
     while((c = getc(fp)) != EOF && c != '\n')
       line += c;
+    if(debug)
+      fprintf(stderr, "| %s\n", line.c_str());
     lines.push_back(line);
   } while(c != EOF);
   if(ferror(fp))
     fatal("error reading pipe from %s: %s", cmd[0], strerror(errno));
   fclose(fp);
+  while((rc = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
+    ;
+  if(rc < 0)
+    fatal("waitpid failed: %s", strerror(errno));
+  if(WIFSIGNALED(w))
+    fatal("%s received fatal signal %d (%s)", cmd[0], 
+	  WTERMSIG(w), strsignal(WTERMSIG(w)));
+  if(WIFEXITED(w))
+    return WEXITSTATUS(w);
+  fatal("%s exited with unknown wait status %#x", cmd[0], w);
+}
+
+// Execute a command and feed it input.  Returns the exit code.
+int inject(const vector<string> &input,
+           const char *prog,
+           ...) {
+  const char *arg;
+  va_list ap;
+
+  // Construct the command
+  vector<const char *> cmd;
+  cmd.push_back(prog);
+  va_start(ap, prog);
+  while((arg = va_arg(ap, const char *)))
+    cmd.push_back(arg);
+  va_end(ap);
+  cmd.push_back(NULL);
+  return vcinject(input, (char **)&cmd[0]);
+}
+
+// Execute a command and feed it input.  Returns the exit code.
+int vcinject(const vector<string> &input,
+             char **cmd) {
+  // Execute it
+  pid_t pid;
+  int w, rc, p[2];
+
+  if(verbose || dryrun) {
+    FILE *fp = dryrun ? stdout : stderr;
+    for(size_t n = 0; cmd[n]; ++n) {
+      if(n)
+	fputc(' ', fp);
+      fputs(cmd[n], fp);
+    }
+    fputc('\n', fp);
+    for(size_t n = 0; n < input.size(); ++n)
+      printf("| %s\n", input[n].c_str());
+    if(dryrun)
+      return 0;
+  }
+  if(pipe(p) < 0)
+    fatal("pipe failed: %s", strerror(errno));
+  switch((pid = fork())) {
+  case 0:
+    if(dup2(p[0], 0) < 0) {
+      perror("dup2");
+      _exit(-1);
+    }
+    if(close(p[0]) < 0 || close(p[1]) < 0) {
+      perror("close");
+      _exit(-1);
+    }
+    execvp(cmd[0], cmd);
+    fprintf(stderr, "executing %s: %s\n", cmd[0], strerror(errno));
+    _exit(-1);
+  case -1:
+    fatal("fork failed: %s", strerror(errno));
+  }
+  FILE *fp;
+  if(close(p[0]) < 0)
+    fatal("close: %s", strerror(errno));
+  if(!(fp = fdopen(p[1], "w")))
+    fatal("fdopen: %s", strerror(errno));
+  for(size_t n = 0; n < input.size(); ++n) {
+    if(fwrite(input[n].data(), 1, input[n].size(), fp) < input[n].size()
+       || fputc('\n', fp) < 0)
+      fatal("error writing to pipe to %s: %s", cmd[0], strerror(errno));
+  }
+  if(fclose(fp) < 0)
+    fatal("error closing pipe to %s: %s", cmd[0], strerror(errno));
   while((rc = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
     ;
   if(rc < 0)

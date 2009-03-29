@@ -20,6 +20,9 @@
 // Global verbose operation flag
 int verbose;
 
+// Global debug flag
+int debug;
+
 // Global dry-run flag
 int dryrun;
 
@@ -34,6 +37,7 @@ static const struct option options[] = {
   { "guess", no_argument, 0, 'g' },
   { "verbose", no_argument, 0, 'v' },
   { "dry-run", no_argument, 0, 'n' },
+  { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
 
@@ -165,7 +169,7 @@ int main(int argc, char **argv) {
   int n;
 
   // Parse global options
-  while((n = getopt_long(argc, argv, "+hVHgvn46", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
     switch(n) {
     case 'h': 
       help();
@@ -190,6 +194,9 @@ int main(int argc, char **argv) {
     case '4': 
     case '6':
       ipv = n - '0';
+      break;
+    case 'd':
+      debug = 1;
       break;
     default:
       exit(1);

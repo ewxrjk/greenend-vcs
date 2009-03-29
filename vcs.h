@@ -58,6 +58,7 @@ extern const struct vcs vcs_darcs;
 extern int verbose;
 extern int dryrun;
 extern int ipv;
+extern int debug;
 
 int vcs_add(int argc, char **argv);
 int vcs_remove(int argc, char **argv);
@@ -100,6 +101,15 @@ int execute(const char *prog, ...);
 int capture(vector<string> &lines,
             const char *prog,
             ...);
+int vcapture(vector<string> &lines,
+             const vector<string> &command);
+int vccapture(vector<string> &lines,
+              char **cmd);
+int inject(const vector<string> &input,
+           const char *prog,
+           ...);
+int vcinject(const vector<string> &input,
+             char **cmd);
 
 #endif /* VCS_H */
 
