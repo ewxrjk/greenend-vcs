@@ -29,7 +29,10 @@ static void commit_help(FILE *fp = stdout) {
           "  vcs commit [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
           "  --help, -h              Display usage message\n"
-          "  --message, -m MESSAGE   Log message\n");
+          "  --message, -m MESSAGE   Log message\n"
+          "\n"
+          "Commits changes to version control.  If no files are mentioned\n"
+          "then all changed and added files are committed.\n");
 }
 
 int vcs_commit(int argc, char **argv) {

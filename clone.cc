@@ -27,7 +27,9 @@ static void clone_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs clone [OPTIONS] URI [DIRECTORY]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+	  "\n"
+	  "Creates a local copy of a branch or (part of) a repository.\n");
 }
 
 int vcs_clone(int argc, char **argv) {

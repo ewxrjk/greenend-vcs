@@ -25,9 +25,11 @@ static const struct option edit_options[] = {
 static void edit_help(FILE *fp = stdout) {
   fprintf(fp, 
           "Usage:\n"
-          "  vcs edit [OPTIONS] [FILENAME ...]\n"
+          "  vcs edit [OPTIONS] FILENAME ...\n"
           "Options:\n"
-          "  --help, -h              Display usage message\n");
+          "  --help, -h              Display usage message\n"
+          "\n"
+          "Makes files editable.\n");
 }
 
 int vcs_edit(int argc, char **argv) {

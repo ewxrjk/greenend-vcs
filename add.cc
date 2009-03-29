@@ -29,7 +29,9 @@ static void add_help(FILE *fp = stdout) {
           "  vcs add [OPTIONS] FILENAME ...\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-          "  --binary, -b   Files are binary files\n");
+          "  --binary, -b   Files are binary files\n"
+          "\n"
+          "Puts new files under version control.\n");
 }
 
 int vcs_add(int argc, char **argv) {

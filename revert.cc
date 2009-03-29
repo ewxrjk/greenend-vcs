@@ -27,7 +27,10 @@ static void revert_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs revert [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
-          "  --help, -h              Display usage message\n");
+          "  --help, -h              Display usage message\n"
+          "\n"
+          "Reverts your working tree to the last commit, discarding any\n"
+          "changes.\n");
 }
 
 int vcs_revert(int argc, char **argv) {

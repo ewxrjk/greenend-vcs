@@ -27,7 +27,9 @@ static void status_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs status [OPTIONS]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+          "\n"
+          "Displays the current status of your working tree.\n");
 }
 
 int vcs_status(int argc, char **argv) {

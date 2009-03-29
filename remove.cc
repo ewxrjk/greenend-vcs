@@ -29,7 +29,9 @@ static void remove_help(FILE *fp = stdout) {
           "  vcs remove [OPTIONS] FILENAME ...\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-          "  --force, -f    Force removal\n");
+          "  --force, -f    Force removal\n"
+          "\n"
+          "Remove files from version control.\n");
 }
 
 int vcs_remove(int argc, char **argv) {

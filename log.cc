@@ -27,7 +27,9 @@ static void log_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs log [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+          "\n"
+          "Displays the history of files, or of your whole working tree.\n");
 }
 
 int vcs_log(int argc, char **argv) {

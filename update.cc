@@ -27,7 +27,9 @@ static void update_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs update [OPTIONS]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+          "\n"
+          "Update your working tree to the latest version.\n");
 }
 
 int vcs_update(int argc, char **argv) {

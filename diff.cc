@@ -29,6 +29,8 @@ static void diff_help(FILE *fp = stdout) {
           "Options:\n"
           "  --help, -h    Display usage message\n"
           "\n"
+          "Shows differences from last commit.\n"
+          "\n"
           "If no filenames are specified then all changes are shown.\n"
           "If any filenames are specified then only changes to those files\n"
           "are shown.\n");
