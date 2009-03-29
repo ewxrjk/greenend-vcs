@@ -61,7 +61,7 @@ t_modify() {
     x vcs -v edit two
     echo twotwo >> two
     x vcs -v commit -m 'oneone' one
-    x vcs -v revert two
+    x vcs -v revert
     cd ..
 }
 
