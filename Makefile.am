@@ -20,7 +20,7 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc vcs.h \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
 vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs
+TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS)
 
