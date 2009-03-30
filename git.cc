@@ -97,6 +97,21 @@ static int git_log(const char *path) {
                  EXE_END);
 }
 
+static int git_annotate(const char *path) {
+  return execute("git",
+                 EXE_STR, "blame",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
+static int git_clone(const char *uri, const char *dir) {
+  return execute("git",
+                 EXE_STR, "clone",
+                 EXE_STR, uri,
+                 EXE_IFSTR(dir, dir),
+                 EXE_END);
+}
+
 const struct vcs vcs_git = {
   "Git",
   git_diff,
@@ -107,6 +122,9 @@ const struct vcs vcs_git = {
   git_status,
   git_update,
   git_log,
+  NULL,                                 // edit
+  git_annotate,
+  git_clone,
 };
 
 /*

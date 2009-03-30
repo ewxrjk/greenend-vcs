@@ -17,30 +17,30 @@
  */
 #include "vcs.h"
 
-static int bzr_diff(int nfiles, char **files) {
-  return execute("bzr",
+static int hg_diff(int nfiles, char **files) {
+  return execute("hg",
                  EXE_STR, "diff",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_add(int /*binary*/, int nfiles, char **files) {
-  return execute("bzr",
+static int hg_add(int /*binary*/, int nfiles, char **files) {
+  return execute("hg",
                  EXE_STR, "add",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_remove(int force, int nfiles, char **files) {
-  return execute("bzr",
+static int hg_remove(int force, int nfiles, char **files) {
+  return execute("hg",
                  EXE_STR, "remove",
                  EXE_IFSTR(force, "--force"),
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_commit(const char *msg, int nfiles, char **files) {
-  return execute("bzr",
+static int hg_commit(const char *msg, int nfiles, char **files) {
+  return execute("hg",
                  EXE_STR, "commit",
                  EXE_IFSTR(msg, "-m"),
                  EXE_IFSTR(msg, msg),
@@ -48,60 +48,67 @@ static int bzr_commit(const char *msg, int nfiles, char **files) {
                  EXE_END);
 }
 
-static int bzr_revert(int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "revert",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
+static int hg_revert(int nfiles, char **files) {
+  if(nfiles)
+    return execute("hg",
+                   EXE_STR, "revert",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  else
+    return execute("hg",
+                   EXE_STR, "revert",
+                   EXE_STR, "--all",
+                   EXE_END);
 }
 
-static int bzr_status() {
-  return execute("bzr",
+static int hg_status() {
+  return execute("hg",
                  EXE_STR, "status",
                  EXE_END);
 }
 
-static int bzr_update() {
-  return execute("bzr",
+static int hg_update() {
+  return execute("hg",
                  EXE_STR, "pull",
+                 EXE_STR, "--update",
                  EXE_END);
 }
 
-static int bzr_log(const char *path) {
-  return execute("bzr",
+static int hg_log(const char *path) {
+  return execute("hg",
                  EXE_STR, "log",
                  EXE_IFSTR(path, path),
                  EXE_END);
 }
 
-static int bzr_annotate(const char *path) {
-  return execute("bzr",
+static int hg_annotate(const char *path) {
+  return execute("hg",
                  EXE_STR, "annotate",
                  EXE_STR, path,
                  EXE_END);
 }
 
-static int bzr_clone(const char *uri, const char *dir) {
-  return execute("bzr",
+static int hg_clone(const char *uri, const char *dir) {
+  return execute("hg",
                  EXE_STR, "clone",
                  EXE_STR, uri,
                  EXE_IFSTR(dir, dir),
                  EXE_END);
 }
 
-const struct vcs vcs_bzr = {
-  "Bazaar",
-  bzr_diff,
-  bzr_add,
-  bzr_remove,
-  bzr_commit,
-  bzr_revert,
-  bzr_status,
-  bzr_update,
-  bzr_log,
+const struct vcs vcs_hg = {
+  "Mercurial",
+  hg_diff,
+  hg_add,
+  hg_remove,
+  hg_commit,
+  hg_revert,
+  hg_status,
+  hg_update,
+  hg_log,
   NULL,                                 // edit
-  bzr_annotate,
-  bzr_clone,
+  hg_annotate,
+  hg_clone,
 };
 
 /*

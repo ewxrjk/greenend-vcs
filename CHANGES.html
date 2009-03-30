@@ -54,6 +54,31 @@ span.command {
  <body>
   <h1>VCS Change History</h1>
   
+  <h2>Changes in VCS 0.4</h2>
+  
+  <div>
+
+   <p>New version control systems supported:</p>
+
+   <ul>
+    <li><a href="http://www.selenic.com/mercurial/">Mercurial</a></li>
+    <li><a href="http://darcs.net/">Darcs</a></li>
+    <li><a href="http://www.perforce.com">Perforce</a></li>
+   </ul>
+
+   <p>New commands:</p>
+   <ul>
+    <li><tt>vcs annotate</tt> - annotate lines with revision numbers</li>
+    <li><tt>vcs clone</tt> - make a local copy from a repository</li>
+   </ul>
+
+   <p>VCS now depends on <a href="http://curl.haxx.se/">cURL</a>.</p>
+
+   <p>Fix a bug where the detection of the underlying version control system
+   could go into an infinite loop.</p>
+
+  </div>
+  
   <h2>Changes in VCS 0.3</h2>
   
   <div>

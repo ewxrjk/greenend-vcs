@@ -27,10 +27,13 @@ static void revert_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs revert [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
-          "  --help, -h              Display usage message\n");
+          "  --help, -h              Display usage message\n"
+          "\n"
+          "Reverts your working tree to the last commit, discarding any\n"
+          "changes.\n");
 }
 
-int vcs_revert(const struct vcs *v, int argc, char **argv) {
+int vcs_revert(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -43,7 +46,7 @@ int vcs_revert(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  return v->revert(argc - optind, argv + optind);
+  return guess()->revert(argc - optind, argv + optind);
 }
 
 /*

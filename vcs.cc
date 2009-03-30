@@ -20,8 +20,14 @@
 // Global verbose operation flag
 int verbose;
 
+// Global debug flag
+int debug;
+
 // Global dry-run flag
 int dryrun;
+
+// Preferred IP version
+int ipv;
 
 // Table of global options
 static const struct option options[] = {
@@ -31,6 +37,7 @@ static const struct option options[] = {
   { "guess", no_argument, 0, 'g' },
   { "verbose", no_argument, 0, 'v' },
   { "dry-run", no_argument, 0, 'n' },
+  { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
 
@@ -45,6 +52,7 @@ static void help(FILE *fp = stdout) {
 	  "  -H, --commands    Display command list\n"
 	  "  -V, --version     Display version number\n"
           "  -g, --guess       Guess which version control system is in use\n"
+          "  -4, -6            Force IP version for network access\n"
 	  "\n"
 	  "Use 'vcs COMMAND --help' for per-command help.\n");
 }
@@ -54,12 +62,22 @@ static const struct command {
   const char *name;
   const char *alias;
   const char *description;
-  int (*action)(const struct vcs *v, int argc, char **argv);
+  int (*action)(int argc, char **argv);
 } commands[] = {
   {
     "add", NULL,
     "Add files to version control",
     vcs_add
+  },
+  {
+    "annotate", "blame",
+    "Annotate each line with revision number",
+    vcs_annotate
+  },
+  {
+    "clone", "clone",
+    "Check files out of a repository",
+    vcs_clone
   },
   {
     "commit", "ci",
@@ -70,6 +88,11 @@ static const struct command {
     "diff", NULL,
     "Display changes",
     vcs_diff
+  },
+  {
+    "edit", NULL,
+    "Edit files",
+    vcs_edit
   },
   {
     "log", NULL,
@@ -146,7 +169,7 @@ int main(int argc, char **argv) {
   int n;
 
   // Parse global options
-  while((n = getopt_long(argc, argv, "+hVHgvn", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
     switch(n) {
     case 'h': 
       help();
@@ -168,6 +191,13 @@ int main(int argc, char **argv) {
     case 'n':
       dryrun = 1;
       break;
+    case '4': 
+    case '6':
+      ipv = n - '0';
+      break;
+    case 'd':
+      debug = 1;
+      break;
     default:
       exit(1);
     }
@@ -177,9 +207,13 @@ int main(int argc, char **argv) {
     help(stderr);
     exit(1);
   }
+#if HAVE_LIBCURL
+  CURLcode rc = curl_global_init(CURL_GLOBAL_ALL);
+  if(rc)
+    fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
+#endif
   const struct command *c = find_command(argv[optind]);
-  const struct vcs *v = guess();
-  return c->action(v, argc - optind, argv + optind);
+  return c->action(argc - optind, argv + optind);
 }
 
 /*

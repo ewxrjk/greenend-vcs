@@ -1,0 +1,107 @@
+#! /bin/sh
+# This file is part of VCS
+# Copyright (C) 2009 Richard Kettlewell
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+. $srcdir/tests/utils.sh
+
+# This test can only run if you have p4 and p4d installed.
+t_init p4 p4d
+
+# Delete Perforce environment variables
+unset P4CLIENT || true
+unset P4CONFIG || true
+unset P4JOURNAL || true
+unset P4PASSWD || true
+unset P4PORT || true
+unset P4ROOT || true
+unset P4TICKETS || true
+unset P4USER || true
+
+# Create a server
+mkdir repo
+cd repo
+p4d -p 6661 -r . &
+p4dpid=$!
+cd ..
+
+trap "kill $p4dpid && wait $p4dpid" EXIT INT HUP TERM
+
+export P4PORT=localhost:6661
+
+# Wait for server to come up
+while :; do
+  if p4 > /dev/null 2>&1; then
+    break
+  else
+    sleep 1
+  fi
+done
+
+# Create a couple of clients
+LOGNAME=${LOGNAME:-`whoami`}
+HOSTNAME=$(uname -n)
+p4 client -i <<EOF
+Client: client1
+Owner: $LOGNAME
+Host: $HOSTNAME
+Root: $testdir/project
+Options: noallwrite noclobber nocompress unlocked nomodtime normdir
+SubmitOptions:	submitunchanged
+LineEnd: local
+View:
+	//depot/... //client1/...
+EOF
+
+p4 client -i <<EOF
+Client: client2
+Owner: $LOGNAME
+Host: $HOSTNAME
+Root: $testdir/copy
+Options: noallwrite noclobber nocompress unlocked nomodtime normdir
+SubmitOptions:	submitunchanged
+LineEnd: local
+View:
+	//depot/... //client2/...
+EOF
+
+export P4CLIENT=client1
+x p4 sync
+mkdir project
+t_populate
+
+export P4CLIENT=client2
+x p4 sync
+t_verify
+
+export P4CLIENT=client1
+t_modify
+
+export P4CLIENT=client2
+t_update
+t_verify
+
+export P4CLIENT=client2
+t_revert
+cd copy
+#if bzr log three >/dev/null 2>&1; then
+#  echo 'three still known to bzr' >&2
+#  exit 1
+#fi
+cd ..
+
+t_done
+

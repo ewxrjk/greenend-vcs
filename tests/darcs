@@ -18,15 +18,15 @@ set -e
 
 . $srcdir/tests/utils.sh
 
-t_init git
+t_init darcs
 
 mkdir project
 cd project
-x git init
+x darcs init
 cd ..
 t_populate
 
-x git clone project copy
+x darcs get project copy
 t_verify
 
 t_modify
@@ -35,10 +35,6 @@ t_verify
 
 t_revert
 cd copy
-if git log three >/dev/null 2>&1; then
-  echo 'three still known to git' >&2
-  exit 1
-fi
 cd ..
 
 t_done

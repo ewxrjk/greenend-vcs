@@ -18,15 +18,12 @@ set -e
 
 . $srcdir/tests/utils.sh
 
-t_init git
+t_init hg
 
-mkdir project
-cd project
-x git init
-cd ..
+x hg init project
 t_populate
 
-x git clone project copy
+x hg clone project copy
 t_verify
 
 t_modify
@@ -35,9 +32,10 @@ t_verify
 
 t_revert
 cd copy
-if git log three >/dev/null 2>&1; then
-  echo 'three still known to git' >&2
-  exit 1
+x hg status three
+status=$(hg status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
+    fatal "Did not properly revert 'three'"
 fi
 cd ..
 

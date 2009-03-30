@@ -14,24 +14,24 @@ and appear
 .I before
 the command name.
 .TP
-.B --verbose\fR, \fB-v
+.B \-\-verbose\fR, \fB\-v
 Verbose operation.
 .TP
-.B --dry-run\fR, \fB-n
+.B \-\-dry-run\fR, \fB\-n
 Instead of executing native commands, just display them on standard output.
 .TP
-.B --guess\fR, \fB-g
+.B \-\-guess\fR, \fB\-g
 Identify the native version control system.
 Normally this is done silently and automatically; this option displays the
 chosen version control system and then exits.
 .TP
-.B --commands\fR, \fB-H
+.B \-\-commands\fR, \fB\-H
 Displays a list of commands.
 .TP
-.B --help\fR, \fB-h
+.B \-\-help\fR, \fB\-h
 Display usage message.
 .TP
-.B --version\fR, \fB-V
+.B \-\-version\fR, \fB\-V
 Display version number.
 .SH COMMANDS
 Commands may be abbreviated to a non-ambiguous prefix.
@@ -39,38 +39,86 @@ Commands have their own options which must appear
 .I after
 the command name.
 All commands have a
-.B --help
+.B \-\-help
 option (not listed below) which summarizes their usage.
 .SS add
 .B vcs
 .B add
-.RB [ --binary | -b ]
+.RB [ \-\-binary | \-b ]
 .IR FILENAME ...
 .PP
 Subjects the listed files to version control.
 The files are not committed.
 .PP
-.B --binary
+.B \-\-binary
 indicates that the file should not be translated in any way.
 This is suitable for image files, etc.
 Note that not every native version control system has a corresponding
 option (some prefer to figure it out themselves or do no translation).
 In such cases, the \fB--binary\fR option is ignored.
+.SS annotate
+.B vcs
+.B annotate
+.I FILENAME
+.PP
+Outputs the named file with each line annotated with information about
+its origin.
+Depending on the version control system in used, this will usually
+some of the revision number it was last modified in, the date of the
+last revision and the user who modified it.
+.PP
+.B "vcs blame"
+is a synonym for
+.BR "vcs annotate" .
+.SS clone
+.B vcs
+.B clone
+.I URI
+.RI [ DIRECTORY ]
+.PP
+Attempts to deduce what version control system is used by
+.IR URI
+and check out a copy.
+If
+.I DIRECTORY
+is specified then that is used, otherwise the leaf name of the URI is used.
+.PP
+In some cases the version control system can be inferred directly from
+the URI, for instance if it is a
+.B git:
+URI.
+In other cases
+.B vcs
+will check for the existence of particular files such as
+.B .git
+or
+.B .bzr
+to figure out what
+version control system is used.
+.PP
+Use the
+.B -v
+option to see details of what it tries, if it isn't working and you
+think it should.
 .SS commit
 .B vcs
 .B commit
-.RB [ --message | -m
+.RB [ -\-message | \-m
 .IR MESSAGE ]
 .RI [ FILENAME ...]
 .PP
 Commits the listed files, or all modified files if none are listed.
 .PP
-.B --message
+.B \-\-message
 allows the commit message to be set.
 If none is specified then an editor is started.
 If possible, 
 .B vcs
 lets the native system invoke the editor rather than doing so itself.
+.PP
+.B "vcs ci"
+is a synonym for
+.BR "vcs checkin" .
 .SS diff
 .B vcs
 .B diff
@@ -80,6 +128,14 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.SS edit
+.B vcs
+.B edit
+.IR FILENAME ...
+.PP
+Makes files editable.
+For most (but not all) version control systems this is not needed and
+is a no-op.
 .SS log
 .B vcs
 .B log
@@ -91,7 +147,7 @@ file is specified.
 .SS remove
 .B vcs
 .B remove
-.RI [ --force | -f ]
+.RI [ \-\-force | \-f ]
 .IR FILENAME ...
 .PP
 Removes the named files.
@@ -100,8 +156,12 @@ The default behaviour is the same as the native version control system.
 For instance if it insists that you delete the files first, or only remove
 unchanged files, then so will \fBvcs remove\fR.
 .PP
-With \fB--force\fR, the files will be deleted and removed from version
+With \fB\-\-force\fR, the files will be deleted and removed from version
 control unconditionally.
+.PP
+.B "vcs rm"
+is a synonym for
+.BR "vcs remove" .
 .SS revert
 .B vcs
 .B revert
@@ -113,6 +173,9 @@ Removed files are resurrected and modified files have any changes undone.
 Some version control systems will save the modified version to a backup file.
 Newly added files are removed from version control and may be deleted
 (depending on the underlying version control system).
+.PP
+Note that not all version control systems can selectively revert
+individual files.
 .SS status
 .B vcs
 .B status
@@ -129,20 +192,34 @@ system.
 Updates the working tree to the latest revision.
 Note that (currently) it is not possible to update only a subset of files,
 or to synchronize to a non-head revision.
+.PP
+For distributed version control systems this both fetches revisions
+from a parent branch and updates your working tree.
+.PP
+.B "vcs update"
+does not attempt to handle conflicts in a uniform way across version
+control systems.
+You get whatever the underlying system gives you: for instance,
+conflict markers in files, or questions asked during update.
+You may have to run commands such as
+.B "bzr resolve"
+to indicate conflics resolved or
+.B "p4 resolve"
+to perform conflict resolution tool.
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
 This section describes the supported version control systems.
 Any issues specific to them are describe here.
 .SS CVS
 Web page: http://www.nongnu.org/cvs/
 .PP
-CVS does not auto-detect file types, so use of \fBvcs add --binary\fR
+CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
 .SS Bazaar
-Web page: http://bazaar-vcs.org/
+Web page: http://bazaar\-vcs.org/
 .SS Subversion
 Web page: http://subversion.tigris.org/
 .SS Git
-Web page: http://git-scm.com/
+Web page: http://git\-scm.com/
 .PP
 .B vcs
 has a more CVS-like model than Git; therefore
@@ -152,6 +229,30 @@ will commit all your changes, not just those mentioned with
 .PP
 .B "vcs revert"
 will delete newly added files.
+.SS Mercurial
+Web page: http://www.selenic.com/mercurial/
+.SS Darcs
+Web page: http://darcs.net/
+.SS Perforce
+Web page: http://www.perforce.com/
+.PP
+.B "vcs edit"
+(or
+.BR "p4 edit" )
+is required before editing existing files.
+.PP
+.B "vcs commit -m"
+does not work (yet) - you have to enter the description into a change
+form manually.
+.PP
+Perforce will only be detected if at least one of
+.BR P4PORT ,
+.B P4CONFIG
+or
+.B P4CLIENT
+is set, and detection works by invoking
+.B "p4 changes"
+to see if the current directory is inside a P4 workspace.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.

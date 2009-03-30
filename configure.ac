@@ -15,9 +15,9 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_INIT([vcs], [0.3], [richard+vcs@sfere.greenend.org.uk])
+AC_INIT([vcs], [0.4], [richard+vcs@sfere.greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
-AM_INIT_AUTOMAKE(vcs, [0.3])
+AM_INIT_AUTOMAKE(vcs, [0.4])
 AC_CONFIG_SRCDIR([vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
@@ -25,6 +25,7 @@ AC_SET_MAKE
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
+LIBCURL_CHECK_CONFIG
 
 if test "$GXX" = yes; then
   CXX="${CXX} -Wall -W -Wmissing-declarations -pedantic -Werror"

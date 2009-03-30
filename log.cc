@@ -27,10 +27,12 @@ static void log_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs log [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+          "\n"
+          "Displays the history of files, or of your whole working tree.\n");
 }
 
-int vcs_log(const struct vcs *v, int argc, char **argv) {
+int vcs_log(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -43,11 +45,11 @@ int vcs_log(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  if(optind - argc > 1) {
+  if(argc - optind > 1) {
     log_help(stderr);
     return 1;
   }
-  return v->log(argc == optind ? NULL : argv[optind]);
+  return guess()->log(argc == optind ? NULL : argv[optind]);
   
 }
 

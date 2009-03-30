@@ -17,91 +17,102 @@
  */
 #include "vcs.h"
 
-static int bzr_diff(int nfiles, char **files) {
-  return execute("bzr",
+static int darcs_diff(int nfiles, char **files) {
+  return execute("darcs",
                  EXE_STR, "diff",
+                 EXE_STR, "-u",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_add(int /*binary*/, int nfiles, char **files) {
-  return execute("bzr",
+static int darcs_add(int /*binary*/, int nfiles, char **files) {
+  return execute("darcs",
                  EXE_STR, "add",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_remove(int force, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "remove",
-                 EXE_IFSTR(force, "--force"),
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
+static int darcs_remove(int force, int nfiles, char **files) {
+  if(force) {
+    int rc = 0;
+
+    for(int n = 0; n < nfiles; ++n)
+      if(erase(files[n]))
+        rc = 1;
+    return rc;
+  } else
+    return execute("darcs",
+                   EXE_STR, "remove",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
 }
 
-static int bzr_commit(const char *msg, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "commit",
+static int darcs_commit(const char *msg, int nfiles, char **files) {
+  return execute("darcs",
+                 EXE_STR, "record",
+                 EXE_STR, "--all",
                  EXE_IFSTR(msg, "-m"),
                  EXE_IFSTR(msg, msg),
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_revert(int nfiles, char **files) {
-  return execute("bzr",
+static int darcs_revert(int nfiles, char **files) {
+  return execute("darcs",
                  EXE_STR, "revert",
+                 EXE_STR, "--all",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
 
-static int bzr_status() {
-  return execute("bzr",
-                 EXE_STR, "status",
+static int darcs_status() {
+  return execute("darcs",
+                 EXE_STR, "whatsnew",
                  EXE_END);
 }
 
-static int bzr_update() {
-  return execute("bzr",
+static int darcs_update() {
+  return execute("darcs",
                  EXE_STR, "pull",
+                 EXE_STR, "--all",
                  EXE_END);
 }
 
-static int bzr_log(const char *path) {
-  return execute("bzr",
-                 EXE_STR, "log",
+static int darcs_log(const char *path) {
+  return execute("darcs",
+                 EXE_STR, "changes",
                  EXE_IFSTR(path, path),
                  EXE_END);
 }
 
-static int bzr_annotate(const char *path) {
-  return execute("bzr",
+static int darcs_annotate(const char *path) {
+  return execute("darcs",
                  EXE_STR, "annotate",
                  EXE_STR, path,
                  EXE_END);
 }
 
-static int bzr_clone(const char *uri, const char *dir) {
-  return execute("bzr",
-                 EXE_STR, "clone",
+static int darcs_clone(const char *uri, const char *dir) {
+  return execute("darcs",
+                 EXE_STR, "get",
                  EXE_STR, uri,
                  EXE_IFSTR(dir, dir),
                  EXE_END);
 }
 
-const struct vcs vcs_bzr = {
+const struct vcs vcs_darcs = {
   "Bazaar",
-  bzr_diff,
-  bzr_add,
-  bzr_remove,
-  bzr_commit,
-  bzr_revert,
-  bzr_status,
-  bzr_update,
-  bzr_log,
+  darcs_diff,
+  darcs_add,
+  darcs_remove,
+  darcs_commit,
+  darcs_revert,
+  darcs_status,
+  darcs_update,
+  darcs_log,
   NULL,                                 // edit
-  bzr_annotate,
-  bzr_clone,
+  darcs_annotate,
+  darcs_clone,
 };
 
 /*

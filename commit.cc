@@ -29,10 +29,13 @@ static void commit_help(FILE *fp = stdout) {
           "  vcs commit [OPTIONS] [FILENAME ...]\n"
           "Options:\n"
           "  --help, -h              Display usage message\n"
-          "  --message, -m MESSAGE   Log message\n");
+          "  --message, -m MESSAGE   Log message\n"
+          "\n"
+          "Commits changes to version control.  If no files are mentioned\n"
+          "then all changed and added files are committed.\n");
 }
 
-int vcs_commit(const struct vcs *v, int argc, char **argv) {
+int vcs_commit(int argc, char **argv) {
   int n;
   const char *msg = 0;
 
@@ -49,7 +52,7 @@ int vcs_commit(const struct vcs *v, int argc, char **argv) {
       return 1;
     }
   }
-  return v->commit(msg, argc - optind, argv + optind);
+  return guess()->commit(msg, argc - optind, argv + optind);
   
 }
 

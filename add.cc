@@ -29,10 +29,12 @@ static void add_help(FILE *fp = stdout) {
           "  vcs add [OPTIONS] FILENAME ...\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-          "  --binary, -b   Files are binary files\n");
+          "  --binary, -b   Files are binary files\n"
+          "\n"
+          "Puts new files under version control.\n");
 }
 
-int vcs_add(const struct vcs *v, int argc, char **argv) {
+int vcs_add(int argc, char **argv) {
   int n, binary = 0;
 
   optind = 1;
@@ -52,7 +54,7 @@ int vcs_add(const struct vcs *v, int argc, char **argv) {
     add_help(stderr);
     return 1;
   }
-  return v->add(binary, argc - optind, argv + optind);
+  return guess()->add(binary, argc - optind, argv + optind);
   
 }
 

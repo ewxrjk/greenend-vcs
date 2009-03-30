@@ -27,10 +27,12 @@ static void status_help(FILE *fp = stdout) {
           "Usage:\n"
           "  vcs status [OPTIONS]\n"
           "Options:\n"
-          "  --help, -h     Display usage message\n");
+          "  --help, -h     Display usage message\n"
+          "\n"
+          "Displays the current status of your working tree.\n");
 }
 
-int vcs_status(const struct vcs *v, int argc, char **argv) {
+int vcs_status(int argc, char **argv) {
   int n;
 
   optind = 1;
@@ -47,7 +49,7 @@ int vcs_status(const struct vcs *v, int argc, char **argv) {
     status_help(stderr);
     return 1;
   }
-  return v->status();
+  return guess()->status();
 }
 
 /*

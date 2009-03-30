@@ -195,6 +195,13 @@ static int cvs_log(const char *path) {
                  EXE_END);
 }
 
+static int cvs_annotate(const char *path) {
+  return execute("cvs",
+                 EXE_STR, "annotate",
+                 EXE_STR, path,
+                 EXE_END);
+}
+
 const struct vcs vcs_cvs = {
   "CVS",
   cvs_diff,
@@ -205,6 +212,9 @@ const struct vcs vcs_cvs = {
   cvs_status,
   cvs_update,
   cvs_log,
+  NULL,                                 // edit
+  cvs_annotate,
+  NULL,                                 // clone
 };
 
 /*

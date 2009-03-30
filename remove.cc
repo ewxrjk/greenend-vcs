@@ -29,10 +29,12 @@ static void remove_help(FILE *fp = stdout) {
           "  vcs remove [OPTIONS] FILENAME ...\n"
           "Options:\n"
           "  --help, -h     Display usage message\n"
-          "  --force, -f    Force removal\n");
+          "  --force, -f    Force removal\n"
+          "\n"
+          "Remove files from version control.\n");
 }
 
-int vcs_remove(const struct vcs *v, int argc, char **argv) {
+int vcs_remove(int argc, char **argv) {
   int n, force = 0;
 
   optind = 1;
@@ -52,7 +54,7 @@ int vcs_remove(const struct vcs *v, int argc, char **argv) {
     remove_help(stderr);
     return 1;
   }
-  return v->remove(force, argc - optind, argv + optind);
+  return guess()->remove(force, argc - optind, argv + optind);
   
 }
 

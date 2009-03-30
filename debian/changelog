@@ -1,3 +1,11 @@
+vcs (0.4) unstable; urgency=low
+
+  * Mercurial, Darcs and Perforce support
+  * 'vcs annotate' and 'vcs clone'
+  * Fix infinite loop bug in detection code
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Mon, 30 Mar 2009 20:27:49 +0100
+
 vcs (0.3) unstable; urgency=low
 
   * Git support.
