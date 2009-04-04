@@ -75,9 +75,14 @@ pkg-vcs: build
 		debian/vcs/usr/share/doc/vcs/changelog.Debian
 	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
+	strip --remove-section=.comment debian/vcs/usr/bin/vcs
 	gzip -9f debian/vcs/usr/share/man/man*/*
 	dpkg-shlibdeps -Tdebian/substvars.vcs \
 		debian/vcs/usr/bin/*
+	cd debian/vcs && \
+		find -name DEBIAN -prune -o -type f -print \
+			| sed 's/^\.\///' \
+			| xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -pvcs -Pdebian/vcs -Tdebian/substvars.vcs
 	chown -R root:root debian/vcs
 	chmod -R g-ws debian/vcs
