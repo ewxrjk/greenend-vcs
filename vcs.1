@@ -206,6 +206,28 @@ You may have to run commands such as
 to indicate conflics resolved or
 .B "p4 resolve"
 to perform conflict resolution tool.
+.SH ENVIRONMENT
+.TP
+.B VCS_PAGER
+.TP
+.B VCS_DIFF_PAGER
+.B "vcs diff"
+will filter its output through \fBVCS_DIFF_PAGER\fR or, if that is not
+set, \fBVCS_PAGER\fR.
+.B "vcs log"
+and
+.B "vcs annotate"
+will filter their output through \fBVCS_PAGER\fR.
+.IP
+The pager command is executed via the shell.
+In both cases no filter will be done executed if standard output is
+not a terminal.
+.IP
+You might, for example, set these as follows:
+.IP
+.B "VCS_PAGER=less"
+.br
+.B "VCS_DIFF_PAGER=\(aqcolordiff|less -R\(aq"
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
 This section describes the supported version control systems.
 Any issues specific to them are describe here.

@@ -116,6 +116,8 @@ int inject(const vector<string> &input,
            ...);
 int vcinject(const vector<string> &input,
              char **cmd);
+void redirect(const char *pager);
+void await_redirect();
 
 #endif /* VCS_H */
 

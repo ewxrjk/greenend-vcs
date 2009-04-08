@@ -355,6 +355,48 @@ int erase(const char *s) {
     return 0;
 }
 
+static pid_t pager_pid = -1;
+
+// Redirect output if not a terminal
+void redirect(const char *pager) {
+  int p[2];
+
+  if(!pager)
+    return;
+  if(!isatty(1))
+    return;
+  if(pipe(p) < 0)
+    fatal("pipe failed: %s", strerror(errno));
+  switch((pager_pid = fork())) {
+  case 0:
+    if(dup2(p[0], 0) < 0) {
+      perror("dup2");
+      _exit(-1);
+    }
+    if(close(p[0]) < 0 || close(p[1]) < 0) {
+      perror("close");
+      _exit(-1);
+    }
+    execlp("/bin/sh", "sh", "-c", pager, (char *)NULL);
+    perror("executing sh");
+    _exit(-1);
+  case -1:
+    fatal("fork failed: %s", strerror(errno));
+  }
+  if(dup2(p[1], 1) < 0)
+    fatal("dup2");
+  if(close(p[0]) < 0 || close(p[1]) < 0)
+    fatal("close");
+}
+
+void await_redirect() {
+  int w;
+
+  if(pager_pid != -1)
+    while(waitpid(pager_pid, &w, 0) < 0 && errno == EINTR)
+      ;
+}
+
 /*
 Local Variables:
 mode:c++

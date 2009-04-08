@@ -49,6 +49,7 @@ int vcs_annotate(int argc, char **argv) {
     annotate_help(stderr);
     return 1;
   }
+  redirect(getenv("VCS_PAGER"));
   return guess()->annotate(argv[optind]);
 }
 
