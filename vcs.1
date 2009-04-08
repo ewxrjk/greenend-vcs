@@ -241,9 +241,10 @@ Web page: http://www.perforce.com/
 .BR "p4 edit" )
 is required before editing existing files.
 .PP
-.B "vcs commit -m"
-does not work (yet) - you have to enter the description into a change
-form manually.
+Commands that apply to multiple files are applied only to files in or
+below the current directory.
+The only exception to this is \fBvcs log\fR which applies to the whole
+depot.
 .PP
 Perforce will only be detected if at least one of
 .BR P4PORT ,

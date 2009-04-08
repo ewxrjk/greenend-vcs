@@ -56,6 +56,9 @@ static int p4_remove(int /*force*/, int nfiles, char **files) {
 
 static int p4_commit(const char *msg, int nfiles, char **files) {
   if(msg) {
+    // If there's a message to include we must cobble together a suitable
+    // change.  We do this by getting the default change and then editing it to
+    // our taste.
     int rc;
     vector<string> change;
     vector<string>::size_type n, m;
@@ -76,22 +79,18 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
     // Insert the user's message instead
     change.insert(change.begin() + n, string("\t") + msg);
     ++n;
-    
-    // Now the file list.  If no arguments were specified then the list present
-    // will be suitable.  Otherwise we must limit it to those specified.
-
-    // If they didn't specify any files, get a list
-    if(nfiles) {
-      // Find the Files: section
-      while(n < change.size() && change[n] != "Files:")
-        ++n;
-      // Erase it
+    // Find the Files: section
+    while(n < change.size() && change[n] != "Files:")
       ++n;
-      while(n < change.size()
-            && change[n].size()
-            && (change[n].at(0) == '\t'
-                || change[n].at(0) == ' '))
-        change.erase(change.begin() + n);
+    // Erase it
+    ++n;
+    while(n < change.size()
+          && change[n].size()
+          && (change[n].at(0) == '\t'
+              || change[n].at(0) == ' '))
+      change.erase(change.begin() + n);
+
+    if(nfiles) {
       // Translate the list of files to submit
       vector<string> cmd;
       vector<string> where;
@@ -107,6 +106,23 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
       for(m = 0; m < where.size(); ++m) {
         change.insert(change.begin() + n,
                       "\t" + where[m].substr(0, where[m].find(' ')));
+        ++n;
+      }
+    } else {
+      vector<string> opened;
+      if((rc = capture(opened, "p4", "opened", "...", (char *)NULL)))
+        fatal("'p4 opened ...' exited with status %d", rc);
+      // Drop blanks
+      while(opened.size()
+            and opened.back().size() == 0)
+        opened.pop_back();
+      // Anything to commit?
+      if(!opened.size())
+        fatal("no open files below current directory");
+      // Construct the File: section
+      for(m = 0; m < opened.size(); ++m) {
+        change.insert(change.begin() + n,
+                      "\t" + opened[m].substr(0, opened[m].find('#')));
         ++n;
       }
     }
