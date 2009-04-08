@@ -54,6 +54,21 @@ span.command {
  <body>
   <h1>VCS Change History</h1>
   
+  <h2>Changes in VCS 0.5</h2>
+
+  <div>
+
+   <p>Perforce support is now more self-consistent.  In particular <tt>vcs
+   diff</tt> and <tt>vcs commit</tt> now have a default of <tt>...</tt>,
+   applying them to just the current directory and its children rather than the
+   whole workspace.</p>
+
+   <p>New environment variables <tt>VCS_PAGER</tt> and <tt>VCS_DIFF_PAGER</tt>
+   allow you to feed log and diff output through colorizers and into pagers
+   automatically.  See the man page for details.</p>
+
+  </div>  
+
   <h2>Changes in VCS 0.4</h2>
   
   <div>
