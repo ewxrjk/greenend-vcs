@@ -25,11 +25,19 @@ static int p4_edit(int nfiles, char **files) {
 }
 
 static int p4_diff(int nfiles, char **files) {
-  return execute("p4",
-                 EXE_STR, "diff",
-                 EXE_STR, "-du",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
+  if(nfiles)
+    return execute("p4",
+                   EXE_STR, "diff",
+                   EXE_STR, "-du",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  else
+    return execute("p4",
+                   EXE_STR, "diff",
+                   EXE_STR, "-du",
+                   EXE_STR, "...",
+                   EXE_END);
+    
 }
 
 static int p4_add(int /*binary*/, int nfiles, char **files) {
