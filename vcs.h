@@ -78,7 +78,10 @@ const struct vcs *guess_branch(string uri);
 const string uri_scheme(const string &uri);
 int uri_exists(const string &uri);
 
-int isdir(const string &s);
+int isdir(const string &s,
+          int links_count = 1);
+int isreg(const string &s,
+          int links_count = 1);
 int exists(const string &path);
 string cwd();
 string parentdir(const string &d);
@@ -118,6 +121,16 @@ int vcinject(const vector<string> &input,
              char **cmd);
 void redirect(const char *pager);
 void await_redirect();
+int readline(const string &path, FILE *fp, string &l);
+void init_global_ignores();
+void read_ignores(list<string> &ignores, const string &path);
+int is_ignored(const list<string> &ignores,
+               const string &file);
+void listfiles(string path,
+               list<string> &files,
+               set<string> &ignored);
+
+extern list<string> global_ignores;
 
 #endif /* VCS_H */
 
