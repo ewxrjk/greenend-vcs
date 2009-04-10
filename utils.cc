@@ -427,6 +427,13 @@ int readline(const string &path, FILE *fp, string &l) {
     return 1;
 }
 
+static string fullpath(const string &path, const string &file) {
+  if(path.size())
+    return path + PATHSEPSTR + file;
+  else
+    return file;
+}
+
 static void listfiles_recurse(string path,
                               list<string> &files,
                               set<string> &ignored) {
@@ -435,10 +442,10 @@ static void listfiles_recurse(string path,
   vector<string> dirs_here, files_here;
   list<string> ignores_here;
 
-  if(!(dp = opendir(path.c_str())))
+  if(!(dp = opendir(path.size() ? path.c_str() : ".")))
     fatal("opening directory %s: %s",
           path.c_str(), strerror(errno));
-  read_ignores(ignores_here, path + PATHSEPSTR + ".vcsignore");
+  read_ignores(ignores_here, fullpath(path, ".vcsignore"));
   for(;;) {
     errno = 0;
     if(!(de = readdir(dp))) {
@@ -448,26 +455,24 @@ static void listfiles_recurse(string path,
       break;
     }
     const string name = de->d_name;
-    const string fullname = path + PATHSEPSTR + "name";
+    const string fullname = fullpath(path, name);
 
     // Skip filesystem scaffolding
     if(name == "."
        || name == "..")
       continue;
-    // Ignored files get listed as such and otherwise, well, ignored.
-    if(is_ignored(ignores_here, name)
-       || is_ignored(global_ignores, name)) {
-      ignored.insert(fullname);
-      continue;
-    }
-    if(isdir(fullname, 0))
-      dirs_here.push_back(fullname);
-    else if(isreg(fullname, 0))
+    // Identify ignored files
+    const int ignoreme = (is_ignored(ignores_here, name)
+                          || is_ignored(global_ignores, name));
+    if(isdir(fullname, 0)) {
+      if(!ignoreme)
+        dirs_here.push_back(fullname);
+    } else if(isreg(fullname, 0)) {
       files_here.push_back(fullname);
-    else
-      // Symlinks, devices and whatnot are, for now at least, implicitly
-      // ignored.
-      ignored.insert(fullname);
+      if(ignoreme)
+        ignored.insert(fullname);
+    }
+    // Symlinks, devices and whatnot are, for now at least, implicitly ignored.
   }
   closedir(dp);
   // Put files into a consistent order (albeit not necessarily a very idiomatic
@@ -490,6 +495,7 @@ static void listfiles_recurse(string path,
 }
 
 // Get a list of files below a directory plus a set of those that are ignored.
+// The ignored files WILL be in the list.
 void listfiles(string path,
                list<string> &files,
                set<string> &ignored) {
@@ -497,6 +503,15 @@ void listfiles(string path,
   ignored.clear();
   init_global_ignores();
   listfiles_recurse(path, files, ignored);
+  if(debug) {
+    fprintf(stderr, "listfiles output:\n");
+    for(list<string>::const_iterator it = files.begin();
+        it != files.end();
+        ++it) {
+      fprintf(stderr, "| %s%s\n", it->c_str(),
+              ignored.find(*it) == ignored.end() ? "" : " - IGNORED");
+    }
+  }
 }
 
 /*
