@@ -39,4 +39,4 @@ ${srcdir}/changelog:
 .PHONY: changelog
 
 coverage: check
-	gcov *.cc | ${srcdir}/scripts/coverage
+	${GCOV} *.cc | ${srcdir}/scripts/coverage
