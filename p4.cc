@@ -17,6 +17,10 @@
  */
 #include "vcs.h"
 
+extern "C" {
+  extern char **environ;
+}
+
 // Parsed 'p4 opened' output
 struct Opened {
   string path;                          // depot path
