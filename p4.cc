@@ -237,7 +237,7 @@ static int p4_status() {
   //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
   // ACTION is add, edit, delete, branch, integrate
   // CHNUM is the change number or 'default'.
-  if((rc = capture(opened, "p4", "opened", "-c", "default", "...", (char *)0)))
+  if((rc = capture(opened, "p4", "opened", "...", (char *)0)))
     fatal("'p4 opened ...' exited with status %d", rc);
 
   // Generate a map from depot path names to what p4 knows about the files
@@ -267,6 +267,9 @@ static int p4_status() {
   vector<string> where;
   if((rc = vcapture(where, cmd)))
     fatal("'p4 where PATHS' exited with status %d", rc);
+
+  if(dryrun)
+    return 0;
 
   // We'll accumulate a list of files that are in p4 but also ignored.
   list<string> known_ignored;
