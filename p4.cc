@@ -17,6 +17,77 @@
  */
 #include "vcs.h"
 
+// Parsed 'p4 opened' output
+struct Opened {
+  string path;                          // depot path
+  int rev;                              // revision number
+  string action;                        // action
+  int chnum;                            // change number, -1 for default
+  string type;                          // file type
+  int locked;                           // true for *locked*
+
+  Opened(): rev(0),
+            chnum(-1),
+            locked(0) {
+  }
+
+  Opened(const string &l) { 
+    parse(l);
+  }
+
+  // Zap everything
+  void clear() {
+    path.clear();
+    rev = 0;
+    action.clear();
+    chnum = -1;
+    type.clear();
+    locked = 0;
+  }
+
+  // Cheesy parser
+  void parse(const string &l) {
+    clear();
+    // Get the depot path
+    string::size_type n = l.find('#');
+    if(n == string::npos)
+      fatal("no '#' found in 'p4 opened' output: %s",
+            l.c_str());
+    path.assign(l, 0, n);
+    // The revision
+    string revs;
+    ++n;
+    while(isdigit(l.at(n)))
+      revs += l[n++];
+    rev = atoi(revs.c_str());
+    // The action
+    while(l.at(n) == ' ' || l.at(n) == '-')
+      ++n;
+    while(l.at(n) != ' ')
+      action += l[n++];
+    // The change
+    string chstr;
+    while(l.at(n) == ' ')
+      ++n;
+    while(l.at(n) != ' ')
+      chstr += l[n++];
+    if(chstr == "default")
+      chnum = -1;
+    else
+      chnum = atoi(chstr.c_str());
+    // The type
+    while(l.at(n) == ' ' || l.at(n) == '(')
+      ++n;
+    while(l.at(n) != ')')
+      type += l[n++];
+    // Lock status
+    while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
+      ++n;
+    if(n < l.size() && l[n] == '*')
+      locked = 1;
+  }
+};
+
 static int p4_edit(int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "edit",
@@ -149,9 +220,102 @@ static int p4_revert(int nfiles, char **files) {
 }
 
 static int p4_status() {
-  return execute("p4",
-                 EXE_STR, "opened",
-                 EXE_END);
+  vector<string> have;
+  vector<string> opened;
+  map<string,string> known;
+  list<string> files;
+  set<string> ignored;
+  int rc;
+
+  // All files, in the form:
+  //   DEPOT-PATH#REV - LOCAL-PATH
+  // NB paths are absolute!
+  if((rc = capture(have, "p4", "have", "...", (char *)NULL)))
+    fatal("'p4 have ...' exited with status %d", rc);
+
+  // Opened files, in the form:
+  //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
+  // ACTION is add, edit, delete, branch, integrate
+  // CHNUM is the change number or 'default'.
+  if((rc = capture(opened, "p4", "opened", "...", (char *)0)))
+    fatal("'p4 opened ...' exited with status %d", rc);
+
+  // Generate a map from depot path names to what p4 knows about the files
+  for(size_t n = 0; n < have.size(); ++n) {
+    const string depot_path(have[n], 0, have[n].find('#'));
+    known[depot_path] = "";
+  }
+  for(size_t n = 0; n < opened.size(); ++n) {
+    if(opened[n].size()) {
+      Opened o(opened[n]);
+      known[o.path] = o.action;
+    }
+  }
+
+  // All files, with relative path names
+  listfiles("", files, ignored);
+  
+  // Use 'p4 where' to map relative filenames to absolute ones
+  vector<string> cmd;
+  cmd.push_back("p4");
+  cmd.push_back("where");
+  // TODO split up if there are huge numbers of files
+  for(list<string>::const_iterator it = files.begin();
+      it != files.end();
+      ++it)
+    cmd.push_back(*it);
+  vector<string> where;
+  if((rc = vcapture(where, cmd)))
+    fatal("'p4 where PATHS' exited with status %d", rc);
+
+  if(dryrun)
+    return 0;
+
+  // We'll accumulate a list of files that are in p4 but also ignored.
+  list<string> known_ignored;
+
+  // Now we can go through the file list in order and say what we know about
+  // each one
+  list<string>::const_iterator it = files.begin();
+  size_t n = 0;
+  while(it != files.end()) {
+    const string depot_path(where[n], 0, where[n].find(' '));
+    const string local_path(*it);
+    const map<string,string>::const_iterator k = known.find(depot_path);
+    string status;
+    
+    if(k != known.end()) {
+      // Perforce knows something about this file
+      status = k->second;
+      if(ignored.find(local_path) != ignored.end())
+        // ...but it's ignored!
+        known_ignored.push_back(local_path);
+    } else {
+      // Perforce knows nothing about this file
+      if(ignored.find(local_path) == ignored.end())
+        // ...and it's not ignored either
+        status = "?";
+    }
+    if(status.size()) {
+      if(printf("%c %s\n",
+                toupper(status[0]), local_path.c_str()) < 0)
+        fatal("error writing to stdout: %s", strerror(errno));
+    }
+
+    ++n;
+    ++it;
+  }
+  // Ensure warnings come right after the output so they are not swamped
+  if(fflush(stdout) < 0)
+    fatal("error writing to stdout: %s", strerror(errno));
+  if(known_ignored.size()) {
+    fprintf(stderr, "WARNING: the following files are known to p4 but also ignored\n");
+    for(list<string>::const_iterator it = known_ignored.begin();
+        it != known_ignored.end();
+        ++it)
+      fprintf(stderr, "%s\n", it->c_str());
+  }
+  return 0;
 }
 
 static int p4_update() {
