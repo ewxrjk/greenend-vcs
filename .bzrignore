@@ -19,3 +19,6 @@ debian/substvars.*
 ./changelog
 *.deb
 test-root
+*.gcda
+*.gcno
+*.gcov
