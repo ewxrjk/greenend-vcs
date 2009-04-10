@@ -50,6 +50,7 @@ t_populate() {
     echo one > one
     echo two > two
     x vcs -v add one two
+    x vcs -v status
     x vcs -v commit -m 'one and two'
     cd ..
 }
@@ -60,6 +61,7 @@ t_modify() {
     echo oneone >> one
     x vcs -v edit two
     echo twotwo >> two
+    x vcs -v status
     x vcs -v commit -m 'oneone' one
     x vcs -v revert
     cd ..
@@ -87,7 +89,9 @@ t_revert() {
     fi
     echo three > three
     x vcs -v add three
+    x vcs -v status
     x vcs -v revert
+    x vcs -v status
     cd ..
 
     # 'one' and 'two' should be back to normal; we already have a

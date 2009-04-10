@@ -23,7 +23,7 @@ dist_man_MANS=vcs.1
 TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS) \
-	README.developers
+	README.developers scripts/coverage scripts/dist
 
 clean-local:
 	rm -rf test-root
@@ -37,3 +37,6 @@ ${srcdir}/changelog:
 	else rm -f changelog.new; fi
 
 .PHONY: changelog
+
+coverage: check
+	${GCOV} *.cc | ${srcdir}/scripts/coverage
