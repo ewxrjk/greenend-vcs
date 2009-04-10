@@ -27,6 +27,7 @@ EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 
 clean-local:
 	rm -rf test-root
+	rm -f *.gcov *.gcda *.gcno
 
 dist: changelog
 
