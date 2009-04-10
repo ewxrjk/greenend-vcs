@@ -88,6 +88,64 @@ struct Opened {
   }
 };
 
+// Compute the number of bytes required for the environment
+static size_t env_size() {
+  char **e = environ;
+  size_t size = 1;
+  while(*e)
+    size += strlen(*e++) + 1;
+  return size;
+}
+
+// Run 'p4 where' on all the listed files, breaking up into multiple
+// invocations to avoid command-line length limits
+static void p4__where(vector<string> &where, const list<string> &files) {
+  where.clear();
+
+  // Figure out how much space we can safely use for the command line
+  size_t limit = sysconf(_SC_ARG_MAX) - 2048;
+  const size_t e = env_size();
+  if(e >= limit)
+    fatal("no space for commands - e=%lu, limit=%lu",
+          (unsigned long)e, (unsigned long)limit);
+  limit -= e;
+  // ARG_MAX is the system limit.  Should be at least 4096.  2048 is clearance
+  // for the subprocess to modify its own environment and a few bytes for the
+  // 'p4 where'.  We subtract the size of the current environment too.
+  //
+  // http://www.in-ulm.de/~mascheck/various/argmax/
+  
+  list<string>::const_iterator it = files.begin();
+  while(it != files.end()) {
+    // Find the next few kilobytes worth of filenames
+    list<string>::const_iterator e = it;
+    vector<string> cmd;
+    cmd.push_back("p4");
+    cmd.push_back("where");
+    size_t total = 0;
+    while(e != files.end()) {
+      size_t here = e->size() + 1;
+
+      if(total + here > limit)
+        break;
+      cmd.push_back(*e);
+      total += here;
+      ++e;
+    }
+    if(e == it)
+      fatal("filename too long: %s", it->c_str());
+    vector<string> someresults;
+    int rc;
+    if((rc = vcapture(someresults, cmd)))
+      fatal("'p4 where PATHS' exited with status %d", rc);
+    while(someresults.size()
+          && someresults.back().size() == 0)
+      someresults.pop_back();
+    where.insert(where.end(), someresults.begin(), someresults.end());
+    it = e;
+  }
+}
+
 static int p4_edit(int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "edit",
@@ -256,17 +314,8 @@ static int p4_status() {
   listfiles("", files, ignored);
   
   // Use 'p4 where' to map relative filenames to absolute ones
-  vector<string> cmd;
-  cmd.push_back("p4");
-  cmd.push_back("where");
-  // TODO split up if there are huge numbers of files
-  for(list<string>::const_iterator it = files.begin();
-      it != files.end();
-      ++it)
-    cmd.push_back(*it);
   vector<string> where;
-  if((rc = vcapture(where, cmd)))
-    fatal("'p4 where PATHS' exited with status %d", rc);
+  p4__where(where, files);
 
   if(dryrun)
     return 0;
