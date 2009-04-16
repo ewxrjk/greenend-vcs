@@ -17,10 +17,6 @@
  */
 #include "vcs.h"
 
-#if HAVE_LIBCURL
-
-static CURL *curl;
-
 static int alpha(int c) {
   switch(c) {
   case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
@@ -66,6 +62,10 @@ const string uri_scheme(const string &uri) {
     return uri.substr(0, n);
   return "";
 }
+
+#if HAVE_LIBCURL
+
+static CURL *curl;
 
 static size_t discard(void */*ptr*/, 
                       size_t size,
@@ -133,7 +133,7 @@ int uri_exists(const string &uri) {
 #else
 
 // Return nonzero if URI exists or zero if it doesn't or we cannot tell
-static int uri_exists(const string &uri) {
+int uri_exists(const string &) {
   /* No curl -> no idea */
   return 0;
 }
