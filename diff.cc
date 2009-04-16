@@ -49,6 +49,10 @@ int vcs_diff(int argc, char **argv) {
       return 1;
     }
   }
+  const char *pager = getenv("VCS_DIFF_PAGER");
+  if(!pager)
+    pager = getenv("VCS_PAGER");
+  redirect(pager);
   return guess()->diff(argc - optind, argv + optind);
 }
 

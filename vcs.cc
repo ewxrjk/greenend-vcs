@@ -213,7 +213,11 @@ int main(int argc, char **argv) {
     fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
 #endif
   const struct command *c = find_command(argv[optind]);
-  return c->action(argc - optind, argv + optind);
+  const int status = c->action(argc - optind, argv + optind);
+  if(fclose(stdout) < 0)
+    fatal("closing stdout: %s", strerror(errno));
+  await_redirect();
+  return status;
 }
 
 /*

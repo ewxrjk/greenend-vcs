@@ -1,0 +1,19 @@
+#! /usr/bin/perl -w
+use strict;
+my $file;
+my %covered = ();
+while(<>) {
+    if(/^File '([^\/]*)'/) {
+        $file = $1;
+    }
+    if(defined $file and /^Lines executed:([\d\.]+)%/) {
+        $covered{$file} = int($1);
+        undef $file;
+    }
+}
+
+my @files = keys %covered;
+@files = sort { $covered{$b} <=> $covered{$a} } @files;
+
+print map(sprintf("%2d%% %s\n", $covered{$_}, $_), @files);
+

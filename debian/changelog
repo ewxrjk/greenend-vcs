@@ -1,3 +1,11 @@
+vcs (0.5) unstable; urgency=low
+
+  * New VCS_PAGER and VCS_DIFF_PAGER environment variables to feed
+    log/diff output through colorizers and to pagers
+  * Improved Perforce support.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 16 Apr 2009 19:02:25 +0100
+
 vcs (0.4) unstable; urgency=low
 
   * Mercurial, Darcs and Perforce support

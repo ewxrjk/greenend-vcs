@@ -139,7 +139,7 @@ is a no-op.
 .SS log
 .B vcs
 .B log
-.IR [ FILENAME ]
+.RI [ FILENAME ]
 .PP
 Display the change history for \fIFILENAME\fR, or for all files if no
 file is specified.
@@ -203,9 +203,31 @@ You get whatever the underlying system gives you: for instance,
 conflict markers in files, or questions asked during update.
 You may have to run commands such as
 .B "bzr resolve"
-to indicate conflics resolved or
+to indicate conflicts resolved or
 .B "p4 resolve"
 to perform conflict resolution tool.
+.SH ENVIRONMENT
+.TP
+.B VCS_PAGER
+.TP
+.B VCS_DIFF_PAGER
+.B "vcs diff"
+will filter its output through \fBVCS_DIFF_PAGER\fR or, if that is not
+set, \fBVCS_PAGER\fR.
+.B "vcs log"
+and
+.B "vcs annotate"
+will filter their output through \fBVCS_PAGER\fR.
+.IP
+The pager command is executed via the shell.
+In both cases no filter will be done executed if standard output is
+not a terminal.
+.IP
+You might, for example, set these as follows:
+.IP
+.B "VCS_PAGER=less"
+.br
+.B "VCS_DIFF_PAGER=\(aqcolordiff|less -R\(aq"
 .SH "SUPPORTED VERSION CONTROL SYSTEMS"
 This section describes the supported version control systems.
 Any issues specific to them are describe here.
@@ -241,9 +263,40 @@ Web page: http://www.perforce.com/
 .BR "p4 edit" )
 is required before editing existing files.
 .PP
-.B "vcs commit -m"
-does not work (yet) - you have to enter the description into a change
-form manually.
+Commands that apply to multiple files are applied only to files in or
+below the current directory.
+The only exception to this is \fBvcs log\fR which applies to the whole
+depot.
+.PP
+.B "vcs status"
+produces CVS-like output summarizing which files are open and which are
+unknown to Perforce.
+The characters at the start of each line have the following meaning:
+.TP
+.B A
+File is opened for add.
+.TP
+.B E
+File is opened for edit.
+.TP
+.B D
+File is opened for delete.
+.TP
+.B B
+File is opened for branch.
+.TP
+.B I
+File is opened for integrate.
+.TP
+.B ?
+File is unknown to Perforce (and not ignored).
+.PP
+You can put filenames or glob patterns in
+.I .vcsignore
+in each directory, or in your home directory, to hide files that
+would otherwise show up as
+.BR ? .
+If you ignore a file that is known to Perforce then a warning is printed.
 .PP
 Perforce will only be detected if at least one of
 .BR P4PORT ,
@@ -264,9 +317,9 @@ is not intended to give exactly identical semantics for every version
 control system, just essentially similar ones.
 .PP
 .B vcs
-does not attempt to translate the output of native commands to a
+does not usually attempt to translate the output of native commands to a
 consistent format.
-You get what the native system gives you.
+As a rule you get what the native system gives you.
 .P
 .B vcs
 is intended to be useful rather than to adhere to arbitrary rules.

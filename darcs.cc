@@ -66,9 +66,12 @@ static int darcs_revert(int nfiles, char **files) {
 }
 
 static int darcs_status() {
-  return execute("darcs",
-                 EXE_STR, "whatsnew",
-                 EXE_END);
+  int rc = execute("darcs",
+                   EXE_STR, "whatsnew",
+                   EXE_STR, "--summary",
+                   EXE_END);
+  // darcs whatsnew exits non-0 if nothing's changed!  Insane.
+  return rc == 1 ? 0 : rc;
 }
 
 static int darcs_update() {

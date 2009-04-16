@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=vcs
-vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc vcs.h \
+vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc ignore.cc vcs.h \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
 	log.cc edit.cc annotate.cc clone.cc \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
@@ -23,10 +23,11 @@ dist_man_MANS=vcs.1
 TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules changelog tests/utils.sh scripts/setversion $(TESTS) \
-	README.developers
+	README.developers scripts/coverage scripts/dist
 
 clean-local:
 	rm -rf test-root
+	rm -f *.gcov *.gcda *.gcno
 
 dist: changelog
 
@@ -36,3 +37,6 @@ ${srcdir}/changelog:
 	else rm -f changelog.new; fi
 
 .PHONY: changelog
+
+coverage: check
+	${GCOV} *.cc | ${srcdir}/scripts/coverage

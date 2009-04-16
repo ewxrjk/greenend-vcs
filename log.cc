@@ -49,8 +49,8 @@ int vcs_log(int argc, char **argv) {
     log_help(stderr);
     return 1;
   }
+  redirect(getenv("VCS_PAGER"));
   return guess()->log(argc == optind ? NULL : argv[optind]);
-  
 }
 
 /*
