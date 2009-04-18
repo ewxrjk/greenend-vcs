@@ -69,7 +69,7 @@ pkg-vcs: build
 	 rm -rf debian/vcs
 	 $(MKDIR) debian/vcs/DEBIAN
 	 $(MKDIR) debian/vcs/usr/share/doc/vcs
-	 $(INSTALL_DATA) debian/copyright CHANGES.html changelog \
+	 $(INSTALL_DATA) debian/copyright CHANGES.html \
 		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
 		debian/vcs/usr/share/doc/vcs/changelog.Debian
