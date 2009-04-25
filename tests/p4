@@ -96,6 +96,16 @@ t_verify
 
 export P4CLIENT=client2
 t_revert
+
+export P4CLIENT=client1
+cd project
+echo > foo@bar
+echo > foo\#bar%wibble\*spong
+vcs -v status
+vcs -v add foo*
+vcs -v commit -m 'files that need encoded names'
+cd ..
+
 cd copy
 #if bzr log three >/dev/null 2>&1; then
 #  echo 'three still known to bzr' >&2

@@ -16,9 +16,91 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
+#include <iomanip>
+#include <sstream>
 
 extern "C" {
   extern char **environ;
+}
+
+// Replace metacharacters with %xx
+static string p4_encode(const string &s) {
+  ostringstream r;
+  string::size_type n;
+
+  /* "To refer to files containing the Perforce revision specifier wildcards (@
+   * and #), file matching wildcard (*), or positional substitution wildcard
+   * (%%) in either the file name or any directory component, use the ASCII
+   * expression of the character's hexadecimal value. ASCII expansion applies
+   * only to the following four characters" - and it mentions @, #, *, %.  What
+   * you're supposed to do for spaces in filenames I do not know! 
+   */
+  r << hex;
+  for(n = 0; n < s.size(); ++n)
+    switch(s[n]) {
+    case '@':
+    case '#':
+    case '*':
+    case '%':
+      r << "%" << setw(2) << setfill('0') << (int)s[n];
+      break;
+    default:
+      r << s[n];
+      break;
+    }
+  return r.str();
+}
+
+// Replace metacharacters in multiple filesnames
+static char **p4_encode(int nfiles, char **files) {
+  char **newfiles = (char **)calloc(nfiles, sizeof *files);
+  int n;
+
+  for(n = 0; n < nfiles; ++n)
+    newfiles[n] = xstrdup(p4_encode(files[n]).c_str());
+  return newfiles;
+}
+
+static int fromhex(int c) {
+  switch(c) {
+  case '0': return 0;
+  case '1': return 1;
+  case '2': return 2;
+  case '3': return 3;
+  case '4': return 4;
+  case '5': return 5;
+  case '6': return 6;
+  case '7': return 7;
+  case '8': return 8;
+  case '9': return 9;
+  case 'a': return 10;
+  case 'b': return 11;
+  case 'c': return 12;
+  case 'd': return 13;
+  case 'e': return 14;
+  case 'f': return 15;
+  case 'A': return 10;
+  case 'B': return 11;
+  case 'C': return 12;
+  case 'D': return 13;
+  case 'E': return 14;
+  case 'F': return 15;
+  default: return 0;
+  }
+}
+
+static string p4_decode(const string &s) {
+  string r;
+  string::size_type n;
+  
+  for(n = 0; n < s.size(); ++n) {
+    if(s[n] == '%') {
+      r += 16 * fromhex(s[n + 1]) + fromhex(s[n + 2]);
+      n += 2;
+    } else
+      r += s[n];
+  }
+  return r;
 }
 
 // Parsed 'p4 opened' output
@@ -57,7 +139,7 @@ struct Opened {
     if(n == string::npos)
       fatal("no '#' found in 'p4 opened' output: %s",
             l.c_str());
-    path.assign(l, 0, n);
+    path.assign(p4_decode(l.substr(0, n)));
     // The revision
     string revs;
     ++n;
@@ -128,11 +210,12 @@ static void p4__where(vector<string> &where, const list<string> &files) {
     cmd.push_back("where");
     size_t total = 0;
     while(e != files.end()) {
-      size_t here = e->size() + 1;
+      const string encoded = p4_encode(*e);
+      size_t here = encoded.size() + 1;
 
       if(total + here > limit)
         break;
-      cmd.push_back(*e);
+      cmd.push_back(encoded);
       total += here;
       ++e;
     }
@@ -153,7 +236,7 @@ static void p4__where(vector<string> &where, const list<string> &files) {
 static int p4_edit(int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "edit",
-                 EXE_STRS, nfiles, files,
+                 EXE_STRS, nfiles, p4_encode(nfiles, files),
                  EXE_END);
 }
 
@@ -162,7 +245,7 @@ static int p4_diff(int nfiles, char **files) {
     return execute("p4",
                    EXE_STR, "diff",
                    EXE_STR, "-du",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, p4_encode(nfiles, files),
                    EXE_END);
   else
     return execute("p4",
@@ -174,8 +257,10 @@ static int p4_diff(int nfiles, char **files) {
 }
 
 static int p4_add(int /*binary*/, int nfiles, char **files) {
+  // 'p4 add' doesn't take encoded names - instead it encodes them for you.
   return execute("p4",
                  EXE_STR, "add",
+                 EXE_STR, "-f",
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
@@ -183,7 +268,7 @@ static int p4_add(int /*binary*/, int nfiles, char **files) {
 static int p4_remove(int /*force*/, int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "delete",
-                 EXE_STRS, nfiles, files,
+                 EXE_STRS, nfiles, p4_encode(nfiles, files),
                  EXE_END);
 }
 
@@ -232,10 +317,11 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
       for(m = 0; m < (size_t)nfiles; ++m) {
         if(!exists(files[m]))
           fatal("%s does not exist", files[m]);
-        cmd.push_back(files[m]);
+        cmd.push_back(p4_encode(files[m]));
       }
       if((rc = vcapture(where, cmd)))
         fatal("'p4 where PATHS' exited with status %d", rc);
+      // Output is %-encoded, we keep it that way
       for(m = 0; m < where.size(); ++m) {
         change.insert(change.begin() + n,
                       "\t" + where[m].substr(0, where[m].find(' ')));
@@ -253,6 +339,7 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
       if(!opened.size())
         fatal("no open files below current directory");
       // Construct the File: section
+      // Again the output is %-encoded and we keep it that way
       for(m = 0; m < opened.size(); ++m) {
         change.insert(change.begin() + n,
                       "\t" + opened[m].substr(0, opened[m].find('#')));
@@ -263,7 +350,7 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
   } else {
     return execute("p4",
                    EXE_STR, "submit",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, p4_encode(nfiles, files),
                    EXE_END);
   }
 }
@@ -272,7 +359,7 @@ static int p4_revert(int nfiles, char **files) {
   if(nfiles)
     return execute("p4",
                    EXE_STR, "revert",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, p4_encode(nfiles, files),
                    EXE_END);
   else
     return execute("p4",
@@ -304,12 +391,12 @@ static int p4_status() {
 
   // Generate a map from depot path names to what p4 knows about the files
   for(size_t n = 0; n < have.size(); ++n) {
-    const string depot_path(have[n], 0, have[n].find('#'));
+    const string depot_path = p4_decode(have[n].substr(0, have[n].find('#')));
     known[depot_path] = "";
   }
   for(size_t n = 0; n < opened.size(); ++n) {
     if(opened[n].size()) {
-      Opened o(opened[n]);
+      Opened o(opened[n]);              // does its own %-decoding
       known[o.path] = o.action;
     }
   }
@@ -319,7 +406,7 @@ static int p4_status() {
   
   // Use 'p4 where' to map relative filenames to absolute ones
   vector<string> where;
-  p4__where(where, files);
+  p4__where(where, files);              // output is %-encoded
 
   if(dryrun)
     return 0;
@@ -332,7 +419,7 @@ static int p4_status() {
   list<string>::const_iterator it = files.begin();
   size_t n = 0;
   while(it != files.end()) {
-    const string depot_path(where[n], 0, where[n].find(' '));
+    const string depot_path = p4_decode(where[n].substr(0, where[n].find(' ')));
     const string local_path(*it);
     const map<string,string>::const_iterator k = known.find(depot_path);
     string status;
@@ -390,7 +477,7 @@ static int p4_annotate(const char *path) {
   return execute("p4",
                  EXE_STR, "annotate",
                  EXE_STR, "-c",
-                 EXE_STR, path,
+                 EXE_STR, p4_encode(path).c_str(),
                  EXE_END);
 }
 
