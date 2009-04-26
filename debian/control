@@ -5,6 +5,7 @@ Priority: extra
 Standards-Version: 3.7.2.2
 Vcs-Bzr: http://www.greenend.org.uk/rjk/bzr/vcs.stable/
 Homepage: http://www.greenend.org.uk/rjk/2009/vcs.html
+Build-Depends: libcurl-dev
 
 Package: vcs
 Architecture: any

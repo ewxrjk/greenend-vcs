@@ -93,7 +93,7 @@ binary-arch: pkg-vcs
 binary-indep: 
 
 clean:
-	test -f Makefile && $(MAKE) distclean
+	if test -f Makefile; then $(MAKE) distclean; fi
 	rm -f config.cache
 	rm -f debian/files
 	rm -f debian/substvars.*
