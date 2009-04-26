@@ -16,6 +16,20 @@
 
 
 t_init() {
+    # Sanitize environment
+    unset EMAIL || true
+    unset VCS_PAGER || true
+    unset VCS_DIFF_PAGER || true
+    unset P4CLIENT || true
+    unset P4CONFIG || true
+    unset P4JOURNAL || true
+    unset P4PASSWD || true
+    unset P4PORT || true
+    unset P4ROOT || true
+    unset P4TICKETS || true
+    unset P4USER || true
+
+
     # Check all dependencies are present
     for dep; do
         if type $dep >/dev/null 2>&1; then
