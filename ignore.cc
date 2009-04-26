@@ -18,6 +18,7 @@
 #include "vcs.h"
 #include <fnmatch.h>
 #include <dirent.h>
+#include <algorithm>
 
 // Global ignore list
 list<string> global_ignores;
