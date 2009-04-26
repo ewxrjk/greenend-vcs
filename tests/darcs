@@ -18,6 +18,9 @@ set -e
 
 . $srcdir/tests/utils.sh
 
+EMAIL=vcs@rjk.greenend.org.uk.invalid
+export EMAIL
+
 t_init darcs
 
 mkdir project
