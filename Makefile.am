@@ -23,6 +23,7 @@ dist_man_MANS=vcs.1
 noinst_PROGRAMS=t-version
 t_version_SOURCES=utils.cc version.cc t-version.cc
 TESTS=t-version \
+	tests/help \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules tests/utils.sh scripts/setversion $(TESTS) \
