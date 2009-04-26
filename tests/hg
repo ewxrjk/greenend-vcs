@@ -36,6 +36,8 @@ x hg status three
 status=$(hg status three | awk '{print $1}')
 if test "x$status" != 'x?'; then
     fatal "Did not properly revert 'three'"
+    # TODO hg 0.7 (as found in Ubuntu dapper) leads us to fail this test.
+    # This probably won't be fixed without external demand.
 fi
 cd ..
 

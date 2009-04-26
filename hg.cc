@@ -59,9 +59,21 @@ static int hg_add(int /*binary*/, int nfiles, char **files) {
 }
 
 static int hg_remove(int force, int nfiles, char **files) {
+  // --force option was added in change:
+  //
+  // changeset:   1867:91ebf29c1595
+  // parent:      1865:1ed809a2104e
+  // user:        Vadim Gelfer <vadim.gelfer@gmail.com>
+  // date:        Wed Mar 08 15:14:24 2006 -0800
+  // summary:     add -f/--force to remove command.
+  //
+  // This lies between tags 0.8 (1665:3a56574f329a) and 0.8.1
+  // (2051:6a03cff2b0f5).
   return execute("hg",
                  EXE_STR, "remove",
-                 EXE_IFSTR(force, "--force"),
+                 EXE_IFSTR(force
+                           && version_compare(hg__version(), "0.8.1") >= 0,
+                           "--force"),
                  EXE_STRS, nfiles, files,
                  EXE_END);
 }
