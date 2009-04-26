@@ -38,4 +38,6 @@ if bzr log three >/dev/null 2>&1; then
 fi
 cd ..
 
+vcs clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
+
 t_done
