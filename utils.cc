@@ -21,7 +21,18 @@
 #include <sys/wait.h>
 #include <cerrno>
 #include <fcntl.h>
-#include <dirent.h>
+
+// Global debug flag
+int debug;
+
+// Global verbose operation flag
+int verbose;
+
+// Global dry-run flag
+int dryrun;
+
+// Preferred IP version
+int ipv;
 
 // Return nonzero if PATH is a directory.
 int isdir(const string &path,
@@ -425,93 +436,6 @@ int readline(const string &path, FILE *fp, string &l) {
     return 0;
   else
     return 1;
-}
-
-static string fullpath(const string &path, const string &file) {
-  if(path.size())
-    return path + PATHSEPSTR + file;
-  else
-    return file;
-}
-
-static void listfiles_recurse(string path,
-                              list<string> &files,
-                              set<string> &ignored) {
-  DIR *dp;
-  struct dirent *de;
-  vector<string> dirs_here, files_here;
-  list<string> ignores_here;
-
-  if(!(dp = opendir(path.size() ? path.c_str() : ".")))
-    fatal("opening directory %s: %s",
-          path.c_str(), strerror(errno));
-  read_ignores(ignores_here, fullpath(path, ".vcsignore"));
-  for(;;) {
-    errno = 0;
-    if(!(de = readdir(dp))) {
-      if(errno)
-        fatal("reading directory %s: %s",
-              path.c_str(), strerror(errno));
-      break;
-    }
-    const string name = de->d_name;
-    const string fullname = fullpath(path, name);
-
-    // Skip filesystem scaffolding
-    if(name == "."
-       || name == "..")
-      continue;
-    // Identify ignored files
-    const int ignoreme = (is_ignored(ignores_here, name)
-                          || is_ignored(global_ignores, name));
-    if(isdir(fullname, 0)) {
-      if(!ignoreme)
-        dirs_here.push_back(fullname);
-    } else if(isreg(fullname, 0)) {
-      files_here.push_back(fullname);
-      if(ignoreme)
-        ignored.insert(fullname);
-    }
-    // Symlinks, devices and whatnot are, for now at least, implicitly ignored.
-  }
-  closedir(dp);
-  // Put files into a consistent order (albeit not necessarily a very idiomatic
-  // one) and add them to the list
-  sort(files_here.begin(), files_here.end());
-  for(vector<string>::const_iterator it = files_here.begin();
-      it != files_here.end();
-      ++it)
-    files.push_back(*it);
-  // Put directories into a consistent order
-  sort(dirs_here.begin(), dirs_here.end());
-  // We scan subdirectories after completing the file list for two reasons:
-  // 1) It means all the regular files in a directory are grouped together
-  //    before any subdirectories
-  // 2) It limits the number of FDs we have open at any one time.
-  for(vector<string>::const_iterator it = dirs_here.begin();
-      it != dirs_here.end();
-      ++it)
-    listfiles_recurse(*it, files, ignored);
-}
-
-// Get a list of files below a directory plus a set of those that are ignored.
-// The ignored files WILL be in the list.
-void listfiles(string path,
-               list<string> &files,
-               set<string> &ignored) {
-  files.clear();
-  ignored.clear();
-  init_global_ignores();
-  listfiles_recurse(path, files, ignored);
-  if(debug) {
-    fprintf(stderr, "listfiles output:\n");
-    for(list<string>::const_iterator it = files.begin();
-        it != files.end();
-        ++it) {
-      fprintf(stderr, "| %s%s\n", it->c_str(),
-              ignored.find(*it) == ignored.end() ? "" : " - IGNORED");
-    }
-  }
 }
 
 /*

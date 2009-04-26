@@ -16,11 +16,14 @@
 bin_PROGRAMS=vcs
 vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc ignore.cc vcs.h \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc edit.cc annotate.cc clone.cc \
+	log.cc edit.cc annotate.cc clone.cc version.cc \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
 vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
-TESTS=tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
+noinst_PROGRAMS=t-version
+t_version_SOURCES=utils.cc version.cc t-version.cc
+TESTS=t-version \
+	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules tests/utils.sh scripts/setversion $(TESTS) \
 	README.developers scripts/coverage scripts/dist

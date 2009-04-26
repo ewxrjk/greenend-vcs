@@ -17,18 +17,6 @@
  */
 #include "vcs.h"
 
-// Global verbose operation flag
-int verbose;
-
-// Global debug flag
-int debug;
-
-// Global dry-run flag
-int dryrun;
-
-// Preferred IP version
-int ipv;
-
 // Table of global options
 static const struct option options[] = {
   { "help", no_argument, 0, 'h' },

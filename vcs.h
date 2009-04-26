@@ -130,6 +130,7 @@ int is_ignored(const list<string> &ignores,
 void listfiles(string path,
                list<string> &files,
                set<string> &ignored);
+int version_compare(const string &a, const string &b);
 
 extern list<string> global_ignores;
 
