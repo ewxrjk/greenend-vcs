@@ -39,6 +39,8 @@ if git log three >/dev/null 2>&1; then
   echo 'three still known to git' >&2
   exit 1
 fi
-cd ..
+
+touch -- -addme
+vcs -v add -- -addme
 
 t_done

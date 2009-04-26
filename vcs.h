@@ -102,6 +102,7 @@ char *xstrdup(const char *s);
 #define EXE_IFSTR(COND, STR) (COND) ? EXE_STR : EXE_SKIPSTR, (STR)
 #define EXE_NO_STDOUT 4
 #define EXE_NO_STDERR 5
+#define EXE_STRS_DOTSTUFF 6
 int execute(const char *prog, ...);
 
 int capture(vector<string> &lines,

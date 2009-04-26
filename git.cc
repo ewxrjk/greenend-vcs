@@ -34,12 +34,15 @@ static int git_add(int /*binary*/, int nfiles, char **files) {
    * uncontrolled files as version-controlled, so we go with it anyway. */
   return execute("git",
                  EXE_STR, "add",
-                 EXE_STR, "--",
-                 EXE_STRS, nfiles, files,
+                 EXE_STRS_DOTSTUFF, nfiles, files,
                  EXE_END);
 }
 
 static int git_remove(int force, int nfiles, char **files) {
+  // Very old git lacks the 'rm' command.  Without strong external demand I
+  // don't see any point in coping; if you have such a decrepit and ancient
+  // version you can either put up with vcs not working or upgrade git to
+  // something marginally more recent.
   return execute("git",
                  EXE_STR, "rm",
                  EXE_IFSTR(force, "-f"),

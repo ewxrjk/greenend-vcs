@@ -121,11 +121,23 @@ int execute(const char *prog, ...) {
     case EXE_SKIPSTR:
       va_arg(ap, char *);
       break;
-    case EXE_STRS: {
+    case EXE_STRS:
+    case EXE_STRS_DOTSTUFF: {
       int count = va_arg(ap, int);
       char **strs = va_arg(ap, char **);
-      while(count-- > 0)
-        cmd.push_back(*strs++);
+      int first = 1;
+      while(count-- > 0) {
+        const char *s = *strs++;
+        string t;
+        if(first) {
+          if(s[0] == '-' && op == EXE_STRS_DOTSTUFF) {
+            t = string("./") + s;
+            s = t.c_str();
+          }
+          first = 0;
+        }
+        cmd.push_back(s);
+      }
       break;
     }
     case EXE_NO_STDOUT:
