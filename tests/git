@@ -22,7 +22,7 @@ t_init git
 
 mkdir project
 cd project
-x git init
+x git init-db
 cd ..
 t_populate
 
