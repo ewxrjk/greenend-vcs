@@ -79,9 +79,13 @@ static int git_revert(int nfiles, char **files) {
 }
 
 static int git_status() {
-  return execute("git",
-                 EXE_STR, "status",
-                 EXE_END);
+  execute("git",
+          EXE_STR, "status",
+          EXE_END);
+  /* 'git status' is documented as exiting nonzero if there is nothing to
+   * commit.  In fact this is a lie, if stdout is a tty then it will always
+   * exit 0.  We ignore the essentially random exit status, regardless. */
+  return 0;
 }
 
 static int git_update() {
