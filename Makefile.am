@@ -27,7 +27,7 @@ TESTS=t-version \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules tests/utils.sh scripts/setversion $(TESTS) \
-	README.developers scripts/coverage scripts/dist
+	README.developers scripts/coverage scripts/dist scripts/htmlman
 
 clean-local:
 	rm -rf test-root
