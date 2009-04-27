@@ -33,7 +33,7 @@ clean-local:
 	rm -rf test-root
 	rm -f *.gcov *.gcda *.gcno
 
-coverage:
+coverage: all
 	rm -f *.gcov
 	rm -f *.gcda
 	$(MAKE) check
