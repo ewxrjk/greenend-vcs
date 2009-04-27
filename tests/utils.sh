@@ -16,19 +16,6 @@
 
 
 t_init() {
-    # Sanitize environment
-    unset EMAIL || true
-    unset VCS_PAGER || true
-    unset VCS_DIFF_PAGER || true
-    unset P4CLIENT || true
-    unset P4CONFIG || true
-    unset P4JOURNAL || true
-    unset P4PASSWD || true
-    unset P4PORT || true
-    unset P4ROOT || true
-    unset P4TICKETS || true
-    unset P4USER || true
-
 
     # Check all dependencies are present
     for dep; do
@@ -39,10 +26,6 @@ t_init() {
             exit 77
         fi
     done
-
-    # Make sure vcs is on the path
-    builddir=`pwd`
-    PATH=$builddir:$PATH
 
     testdir=$builddir/test-root/$1
 
@@ -125,3 +108,21 @@ fatal() {
     echo "$@" >&2
     exit 1
 }
+
+# Sanitize environment
+unset EMAIL || true
+unset VCS_PAGER || true
+unset VCS_DIFF_PAGER || true
+unset P4CLIENT || true
+unset P4CONFIG || true
+unset P4JOURNAL || true
+unset P4PASSWD || true
+unset P4PORT || true
+unset P4ROOT || true
+unset P4TICKETS || true
+unset P4USER || true
+
+
+# Make sure vcs is on the path
+builddir=`pwd`
+PATH=$builddir:$PATH
