@@ -49,6 +49,16 @@ t_populate() {
     x vcs -v add one two
     x vcs -v status
     x vcs -v commit -m 'one and two'
+    mkdir subdir
+    x vcs -v add subdir
+    cd subdir
+    echo subone > subone
+    x vcs add subone
+    x vcs commit -m 'added subone'
+    echo subtwo > subtwo
+    cd ../
+    x vcs add subdir/subtwo
+    x vcs commit -m 'added saubtwo'
     cd ..
 }
 
@@ -142,7 +152,8 @@ unset P4ROOT || true
 unset P4TICKETS || true
 unset P4USER || true
 
-
 # Make sure vcs is on the path
 builddir=`pwd`
 PATH=$builddir:$PATH
+
+exec > ${0##*/}.log 2>&1

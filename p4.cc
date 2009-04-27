@@ -258,6 +258,9 @@ static int p4_diff(int nfiles, char **files) {
 
 static int p4_add(int /*binary*/, int nfiles, char **files) {
   // 'p4 add' doesn't take encoded names - instead it encodes them for you.
+  remove_directories(nfiles, files);
+  if(!nfiles)
+    return 0;
   return execute("p4",
                  EXE_STR, "add",
                  EXE_STR, "-f",
