@@ -32,6 +32,8 @@ EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 clean-local:
 	rm -rf test-root
 	rm -f *.gcov *.gcda *.gcno
+	rm -f help.log errors.log bzr.log cvs.log svn.log git.log hg.log
+	rm -f darcs.log p4.log
 
 coverage: all
 	rm -f *.gcov
