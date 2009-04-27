@@ -1,0 +1,49 @@
+#! /bin/sh
+# This file is part of VCS
+# Copyright (C) 2009 Richard Kettlewell
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+# Tests that should provoke errors
+#
+# To some extent this is meaningless bumping of coverage numbers, but
+# it might catch out the odd bit of future stupidity.
+
+. $srcdir/tests/utils.sh
+
+xfail vcs
+xfail vcs --
+xfail vcs --no-such-option
+xfail vcs add
+xfail vcs add --no-such-option
+xfail vcs annotate --no-such-option
+xfail vcs annotate
+xfail vcs annotate one at a time please
+xfail vcs clone
+xfail vcs clone --no-such-option
+xfail vcs clone at most two
+xfail vcs commit --no-such-option
+xfail vcs diff --no-such-option
+xfail vcs edit --no-such-option
+xfail vcs edit
+xfail vcs log --no-such-option
+xfail vcs log one at a time please
+xfail vcs remove
+xfail vcs remove --no-such-option
+xfail vcs revert --no-such-option
+xfail vcs status no args allowed
+xfail vcs status --no-such-option
+xfail vcs update no args allowed
+xfail vcs update --no-such-option

@@ -104,6 +104,15 @@ x() {
     "$@"
 }
 
+xfail() {
+    echo "!!!" "$@" >&2
+    if "$@"; then
+      echo "*** UNEXPECTEDLY SUCCEEDED ***"
+      exit 1
+    fi
+}
+  
+
 fatal() {
     echo "$@" >&2
     exit 1
