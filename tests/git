@@ -26,7 +26,7 @@ x git init-db
 cd ..
 t_populate
 
-x git clone project copy
+x vcs clone `pwd`/project copy
 t_verify
 
 t_modify

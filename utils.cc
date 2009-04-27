@@ -449,6 +449,16 @@ int readline(const string &path, FILE *fp, string &l) {
     return 1;
 }
 
+void remove_directories(int &nfiles, char **files) {
+  vector<char *> nondirs;
+  int n, m = 0;
+
+  for(n = 0; n < nfiles; ++n)
+    if(!isdir(files[n]))
+      files[m++] = files[n];
+  nfiles = m;
+}
+
 /*
 Local Variables:
 mode:c++

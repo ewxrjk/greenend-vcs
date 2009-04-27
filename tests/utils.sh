@@ -16,19 +16,6 @@
 
 
 t_init() {
-    # Sanitize environment
-    unset EMAIL || true
-    unset VCS_PAGER || true
-    unset VCS_DIFF_PAGER || true
-    unset P4CLIENT || true
-    unset P4CONFIG || true
-    unset P4JOURNAL || true
-    unset P4PASSWD || true
-    unset P4PORT || true
-    unset P4ROOT || true
-    unset P4TICKETS || true
-    unset P4USER || true
-
 
     # Check all dependencies are present
     for dep; do
@@ -39,10 +26,6 @@ t_init() {
             exit 77
         fi
     done
-
-    # Make sure vcs is on the path
-    builddir=`pwd`
-    PATH=$builddir:$PATH
 
     testdir=$builddir/test-root/$1
 
@@ -66,6 +49,16 @@ t_populate() {
     x vcs -v add one two
     x vcs -v status
     x vcs -v commit -m 'one and two'
+    mkdir subdir
+    x vcs -v add subdir
+    cd subdir
+    echo subone > subone
+    x vcs add subone
+    x vcs commit -m 'added subone'
+    echo subtwo > subtwo
+    cd ../
+    x vcs add subdir/subtwo
+    x vcs commit -m 'added saubtwo'
     cd ..
 }
 
@@ -116,12 +109,51 @@ t_revert() {
     # have to be vc-specific.
 }
 
+check_match() {
+    set +e
+    x diff -u "$@"
+    rc=$?
+    set -e
+    if test $rc != 0; then
+        echo "*** UNEXPECTED DIFFERENCE FOUND ***"
+        exit 1
+    fi
+}
+
 x() {
     echo ">>>" "$@" >&2
     "$@"
 }
 
+xfail() {
+    echo "!!!" "$@" >&2
+    if "$@"; then
+      echo "*** UNEXPECTEDLY SUCCEEDED ***"
+      exit 1
+    fi
+}
+  
+
 fatal() {
     echo "$@" >&2
     exit 1
 }
+
+# Sanitize environment
+unset EMAIL || true
+unset VCS_PAGER || true
+unset VCS_DIFF_PAGER || true
+unset P4CLIENT || true
+unset P4CONFIG || true
+unset P4JOURNAL || true
+unset P4PASSWD || true
+unset P4PORT || true
+unset P4ROOT || true
+unset P4TICKETS || true
+unset P4USER || true
+
+# Make sure vcs is on the path
+builddir=`pwd`
+PATH=$builddir:$PATH
+
+exec > ${0##*/}.log 2>&1

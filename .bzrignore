@@ -8,7 +8,6 @@ autom4te.cache
 config.aux
 config.h
 config.h.in
-config.log
 config.status
 configure
 stamp-h1
@@ -23,3 +22,4 @@ test-root
 *.gcno
 *.gcov
 t-version
+*.log

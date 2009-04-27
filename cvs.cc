@@ -74,8 +74,7 @@ static int cvs_revert(int nfiles, char **files) {
   vector<string> status;
   set<string> modified, added, removed, conflicted;
   int rc;
-  if((rc = capture(status, "cvs", "-n", "up", (char *)0)))
-    fatal("cvs -n up exited with status %d", rc);
+  rc = capture(status, "cvs", "-n", "up", (char *)0);
   for(size_t n = 0; n < status.size(); ++n) {
     switch(status[n][0]) {
     case 'M':
@@ -93,6 +92,11 @@ static int cvs_revert(int nfiles, char **files) {
       break;
     }
   }
+  // 'cvs -n up' exits with status 1 if there are conflicts or if something is
+  // wrong.  So we wait to see if there are conflicts before deciding it was
+  // reporting an error.  About the best we can do.
+  if(rc && !conflicted.size())
+    fatal("cvs -n up exited with status %d", rc);
   // If files were specified limit to just those
   if(nfiles) {
     set<string> limit;

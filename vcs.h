@@ -132,6 +132,7 @@ void listfiles(string path,
                list<string> &files,
                set<string> &ignored);
 int version_compare(const string &a, const string &b);
+void remove_directories(int &nfiles, char **files);
 
 extern list<string> global_ignores;
 
