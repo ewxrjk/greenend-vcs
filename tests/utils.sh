@@ -99,6 +99,17 @@ t_revert() {
     # have to be vc-specific.
 }
 
+check_match() {
+    set +e
+    x diff -u "$@"
+    rc=$?
+    set -e
+    if test $rc != 0; then
+        echo "*** UNEXPECTED DIFFERENCE FOUND ***"
+        exit 1
+    fi
+}
+
 x() {
     echo ">>>" "$@" >&2
     "$@"

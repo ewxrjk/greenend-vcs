@@ -49,4 +49,24 @@ if test "x$status" != 'x'; then
 fi
 cd ..
 
+cd project
+echo a >> one
+x vcs commit -m "add a to one"
+
+cd ../copy
+echo b >> one
+x vcs up
+x vcs revert one
+cat >one.expected <<EOF
+one
+oneone
+a
+EOF
+check_match one.expected one
+x cvs -n up one
+status=$(cvs -n up one 2>/dev/null)
+if test "x$status" != 'x'; then
+    fatal "Did not properly revert 'one'"
+fi
+
 t_done
