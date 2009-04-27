@@ -56,7 +56,7 @@ static int svn_revert(int nfiles, char **files) {
     vector<string> status;
     int rc;
     if((rc = capture(status, "svn", "status", "-q", (char *)0)))
-      fatal("cvs status exited with status %d", rc);
+      fatal("svn status exited with status %d", rc);
     vector<char *> files;
     for(size_t n = 0; n < status.size(); ++n) {
       switch(status[n][0]) {
