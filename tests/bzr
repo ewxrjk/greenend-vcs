@@ -23,7 +23,7 @@ t_init bzr
 x bzr init project
 t_populate
 
-x bzr clone project copy
+x vcs clone project copy
 t_verify
 
 t_modify
