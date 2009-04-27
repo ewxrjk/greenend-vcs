@@ -47,3 +47,6 @@ xfail vcs status no args allowed
 xfail vcs status --no-such-option
 xfail vcs update no args allowed
 xfail vcs update --no-such-option
+
+xfail vcs nosuchcommand
+xfail vcs r             # not a unique prefix
