@@ -97,11 +97,52 @@ x vcs -v commit -m 'files that need encoded names'
 
 x ln -s target link
 x vcs -v status
-vcs -v status > status-output
-if grep link status-output; then
+x vcs -v status > status-output
+if grep link status-output >/dev/null; then
   echo "*** unexpectedly found 'link' in status output"
   exit 1
 fi
+echo > ignoreme
+echo ignoreme > .vcsignore
+x vcs -v status
+vcs -v status > status-output
+if grep ignoreme status-output >/dev/null; then
+  echo "*** unexpectedly found 'ignoreme' in status output"
+  exit 1
+fi
+if fgrep "? .vcsignore" status-output >/dev/null; then
+  :
+else
+  echo "*** expected '? .vcsignore' in status output"
+  exit 1
+fi
+x vcs -v add .vcsignore
+x vcs -v status
+x vcs -v status > status-output
+if fgrep "A .vcsignore" status-output >/dev/null; then
+  :
+else
+  echo "*** expected 'A .vcsignore' in status output"
+  exit 1
+fi
+x vcs -v commit -m 'Added ignore file'
+x vcs -v status
+x vcs -v status > status-output
+if fgrep ".vcsignore" status-output >/dev/null; then
+  echo "*** unexpectedly found '.vcsignore' in status output"
+  exit 1
+fi
+x vcs -v edit .vcsignore
+x vcs -v status
+x vcs -v status > status-output
+if fgrep "E .vcsignore" status-output >/dev/null; then
+  :
+else
+  echo "*** expected 'E .vcsignore' in status output"
+  exit 1
+fi
+x vcs -v revert .vcsignore
+
 cd ..
 
 cd copy
