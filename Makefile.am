@@ -27,11 +27,13 @@ TESTS=t-version \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules tests/utils.sh scripts/setversion $(TESTS) \
-	README.developers scripts/coverage scripts/dist
+	README.developers scripts/coverage scripts/dist scripts/htmlman
 
 clean-local:
 	rm -rf test-root
 	rm -f *.gcov *.gcda *.gcno
+	rm -f help.log errors.log bzr.log cvs.log svn.log git.log hg.log
+	rm -f darcs.log p4.log
 
 coverage: all
 	rm -f *.gcov
