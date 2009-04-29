@@ -174,6 +174,30 @@ struct Opened {
   }
 };
 
+// Parsed 'p4 where' output
+struct Where {
+  string depot_path;
+  string view_path;
+  string local_path;
+
+  Where() {
+  }
+
+  Where(const string &l) {
+    parse(l);
+  }
+
+  void parse(const string &l) {
+    string::size_type n = l.find(' ');
+    depot_path.assign(l, 0, n);
+    string::size_type m = n + 1;
+    n = l.find(' ', m);
+    view_path.assign(l, m, n - m);
+    m = n + 1;
+    local_path.assign(l, m, string::npos);
+  }
+};
+
 // Compute the number of bytes required for the environment
 static size_t env_size() {
   char **e = environ;
@@ -184,7 +208,7 @@ static size_t env_size() {
 }
 
 // Run 'p4 where' on all the listed files, breaking up into multiple
-// invocations to avoid command-line length limits
+// invocations to avoid command-line length limits.
 static void p4__where(vector<string> &where, const list<string> &files) {
   where.clear();
 
@@ -375,7 +399,7 @@ static int p4_status() {
   vector<string> have;
   vector<string> opened;
   map<string,string> known;
-  list<string> files;
+  list<string> files, deleted;
   set<string> ignored;
   int rc;
 
@@ -401,11 +425,33 @@ static int p4_status() {
     if(opened[n].size()) {
       Opened o(opened[n]);              // does its own %-decoding
       known[o.path] = o.action;
+      if(o.action == "delete")
+        deleted.push_back(o.path);
     }
   }
 
   // All files, with relative path names
   listfiles("", files, ignored);
+
+  // Map deleted depot paths to relative filenames and add to file list
+  if(deleted.size()) {
+    vector<string> wd;
+    deleted.push_front("...");
+    p4__where(wd, deleted);
+    const string base = Where(wd[0]).local_path;
+    const string::size_type baselen = base.size() - 3;
+    for(size_t n = 1; n < wd.size(); ++n) {
+      Where w(wd[n]);
+      if(debug)
+        fprintf(stderr, "depot path: %s\n"
+                "local path: %s\n"
+                "truncated:  %s\n",
+                w.depot_path.c_str(),
+                w.local_path.c_str(),
+                w.local_path.substr(baselen).c_str());
+      files.push_back(w.local_path.substr(baselen));
+    }
+  }
   
   // Use 'p4 where' to map relative filenames to absolute ones
   vector<string> where;

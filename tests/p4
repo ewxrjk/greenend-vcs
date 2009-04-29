@@ -142,6 +142,15 @@ else
   exit 1
 fi
 x vcs -v revert .vcsignore
+x vcs -v remove .vcsignore
+x vcs -v status
+x vcs -v status > status-output
+if fgrep "D .vcsignore" status-output >/dev/null; then
+  :
+else
+  echo "*** expected 'D .vcsignore' in status output"
+  exit 1
+fi
 
 cd ..
 
