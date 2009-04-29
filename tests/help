@@ -19,8 +19,11 @@ set -e
 . $srcdir/tests/utils.sh
 
 mkdir -p test-root
+x vcs --help
+x vcs --version
+x vcs -H
 vcs -H > test-root/commands
 awk '/^  / { print $1 }' < test-root/commands > test-root/command-names
 for cmd in `cat test-root/command-names`; do
-  vcs $cmd --help
+  x vcs $cmd --help
 done
