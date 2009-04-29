@@ -240,7 +240,28 @@ int vccapture(vector<string> &lines,
   if(debug) {
     for(size_t n = 0; cmd[n]; ++n) {
       fputs(n ? " " : "> ", stderr);
-      fputs(cmd[n], stderr);
+      if(cmd[n][0]) {
+        for(size_t m = 0; cmd[n][m]; ++m) {
+          switch(cmd[n][m]) {
+          case ' ':
+          case '"':
+          case '\'':
+          case '\\':
+          case '$':
+          case '\t':
+          case '*':
+          case '?':
+          case '[':
+          case '>':
+          case '<':
+          case '&':
+            fputc('\\', stderr);
+            break;
+          }
+          fputc(cmd[n][m], stderr);
+        }
+      } else
+        fputs("\"\"", stderr);
     }
     fputc('\n', stderr);
   }
