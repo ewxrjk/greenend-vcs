@@ -28,7 +28,6 @@ int main(void) {
   assert(version_compare("0.1", "1.1") == -1);
   assert(version_compare("0.9.2", "0.9.1") == 1);
   assert(version_compare("0.9.1", "0.9.2") == -1);
-  puts("OK");
   return 0;
 }
 
