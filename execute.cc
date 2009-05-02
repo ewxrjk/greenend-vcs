@@ -247,13 +247,18 @@ private:
 };
 
 // General purpose command execution
-static int exec(const char *prog,
-                const char **args,
+static int exec(const vector<string> &args,
                 const list<monitor *> &monitors,
                 unsigned killfds = 0) {
   pid_t pid;
   list<monitor *>::const_iterator it;
+  vector<const char *> cargs;
 
+  // Convert args to C format
+  cargs.reserve(args.size());
+  for(size_t n = 0; n < args.size(); ++n)
+    cargs.push_back(args[n].c_str());
+  cargs.push_back(NULL);
   // Start subprocess
   if((pid = fork()) < 0)
     fatal("error calling fork: %s", strerror(errno));
@@ -278,8 +283,8 @@ static int exec(const char *prog,
         _exit(-1);
       }
     }
-    execvp(prog, (char **)args);
-    fprintf(stderr, "executing %s: %s\n", prog, strerror(errno));
+    execvp(cargs[0], (char **)&cargs[0]);
+    fprintf(stderr, "executing %s: %s\n", cargs[0], strerror(errno));
     _exit(1);
   }
   for(it = monitors.begin();
@@ -323,42 +328,28 @@ static int exec(const char *prog,
     fatal("error calling waitpid: %s", strerror(errno));
   // Signals are always fatal
   if(WIFSIGNALED(w))
-    fatal("%s received fatal signal %d (%s)", prog, 
+    fatal("%s received fatal signal %d (%s)", cargs[0], 
 	  WTERMSIG(w), strsignal(WTERMSIG(w)));
   if(WIFEXITED(w))
     return WEXITSTATUS(w);
-  fatal("%s exited with unknown wait status %#x", prog, w);
-}
-
-// As above but with a vector<string> arg list
-static int exec(const vector<string> &args,
-                const list<monitor *> &monitors) {
-  vector<const char *> cargs;
-  size_t n;
-
-  cargs.reserve(args.size());
-  for(n = 0; n < args.size(); ++n)
-    cargs.push_back(args[n].c_str());
-  cargs.push_back(NULL);
-  return exec(cargs[0], &cargs[0], monitors);
+  fatal("%s exited with unknown wait status %#x", cargs[0], w);
 }
 
 // As above but for stdarg arg lists
 static int exec(const char *prog,
                 va_list ap,
                 const list<monitor *> &monitors) {
-  vector<const char *> cmd;
+  vector<string> cmd;
   const char *s;
 
   cmd.push_back(prog);
-  do {
-    cmd.push_back((s = va_arg(ap, const char *)));
-  } while(s);
-  return exec(prog, &cmd[0], monitors);
+  while((s = va_arg(ap, const char *)))
+    cmd.push_back(s);
+  return exec(cmd, monitors);
 }
 
 // Assemble a command from an argument list
-static void assemble(vector<const char *> &cmd,
+static void assemble(vector<string> &cmd,
                      const char *prog,
                      va_list ap,
                      unsigned &killfds) {
@@ -401,7 +392,6 @@ static void assemble(vector<const char *> &cmd,
       assert(!"unknown execute() op");
     }
   }
-  cmd.push_back(NULL);
 }
 
 // Split a string on newline
@@ -431,13 +421,13 @@ static void join(string &s, const vector<string> &lines) {
 // exit code.
 int execute(const char *prog, ...) {
   va_list ap;
-  vector<const char *> cmd;
+  vector<string> cmd;
   unsigned killfds = 0;
 
   va_start(ap, prog);
   assemble(cmd, prog, ap, killfds);
   va_end(ap);
-  return exec(prog, &cmd[0], list<monitor *>(), killfds);
+  return exec(cmd, list<monitor *>(), killfds);
 }
 
 // Execute a command (specified like execl()) and capture its output.
