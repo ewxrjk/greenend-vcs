@@ -469,12 +469,7 @@ int inject(const vector<string> &input,
   va_start(ap, prog);
   vmakevs(command, prog, ap);
   va_end(ap);
-  string buffer;
-  join(buffer, input);
-  writefromstring w;
-  w.init(buffer);
-  const int rc = exec(command, list<monitor *>(1, &w));
-  return rc;
+  return execute(command, &input, NULL, NULL);
 }
 
 // General-purpose command execution, injection and capture
