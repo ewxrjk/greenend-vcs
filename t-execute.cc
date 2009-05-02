@@ -17,11 +17,25 @@
  */
 #include "vcs.h"
 
+static vector<string> makevs(const char *first, ...) {
+  vector<string> vs;
+  const char *s;
+  va_list ap;
+  
+  vs.push_back(first);
+  va_start(ap, first);
+  while((s = va_arg(ap, const char *)))
+    vs.push_back(s);
+  va_end(ap);
+  return vs;
+}
+
 int main(void) {
   assert(execute("true", EXE_END) == 0);
   assert(execute("false", EXE_END) != 0);
   assert(execute("test", EXE_STR, "-d", EXE_STR, "/", EXE_END) == 0);
   assert(execute("test", EXE_STR, "-f", EXE_STR, "/", EXE_END) != 0);
+
   vector<string> vs;
   assert(capture(vs, "true", (char *)0) == 0);
   assert(vs.size() == 0);
@@ -33,6 +47,18 @@ int main(void) {
   assert(vs[0] == "foo");
   assert(vs[1] == "");
   assert(vs[2] == "bar");
+
+  assert(vcapture(vs, makevs("true", (char *)0)) == 0);
+  assert(vs.size() == 0);
+  assert(vcapture(vs, makevs("echo", "wibble", (char *)0)) == 0);
+  assert(vs.size() == 1);
+  assert(vs[0] == "wibble");
+  assert(vcapture(vs, makevs("sh", "-c", "echo foo;echo;echo bar", (char *)0)) == 0);
+  assert(vs.size() == 3);
+  assert(vs[0] == "foo");
+  assert(vs[1] == "");
+  assert(vs[2] == "bar");
+
   return 0;
 }
 

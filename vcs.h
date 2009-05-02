@@ -114,8 +114,6 @@ int fcapture(unsigned flags,
              ...);
 int vcapture(vector<string> &lines,
              const vector<string> &command);
-int vccapture(vector<string> &lines,
-              char **cmd);
 int inject(const vector<string> &input,
            const char *prog,
            ...);

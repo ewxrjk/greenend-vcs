@@ -322,7 +322,6 @@ static int exec(const char *prog,
   fatal("%s exited with unknown wait status %#x", prog, w);
 }
 
-#if 0
 // As above but with a vector<string> arg list
 static int exec(const vector<string> &args,
                 const list<monitor *> &monitors) {
@@ -335,7 +334,6 @@ static int exec(const vector<string> &args,
   cargs.push_back(NULL);
   return exec(cargs[0], &cargs[0], monitors);
 }
-#endif
 
 // As above but for stdarg arg lists
 static int exec(const char *prog,
@@ -441,7 +439,6 @@ int capture(vector<string> &lines,
   return rc;
 }
 
-#if 0
 // Execute a command (specified in a string) and capture it output.
 // Returns exit code.
 int vcapture(vector<string> &lines,
@@ -452,7 +449,6 @@ int vcapture(vector<string> &lines,
   split(lines, buffer);
   return rc;
 }
-#endif
 
 /*
 Local Variables:
