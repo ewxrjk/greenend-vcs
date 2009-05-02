@@ -335,19 +335,6 @@ static int exec(const vector<string> &args,
   fatal("%s exited with unknown wait status %#x", cargs[0], w);
 }
 
-// As above but for stdarg arg lists
-static int exec(const char *prog,
-                va_list ap,
-                const list<monitor *> &monitors) {
-  vector<string> cmd;
-  const char *s;
-
-  cmd.push_back(prog);
-  while((s = va_arg(ap, const char *)))
-    cmd.push_back(s);
-  return exec(cmd, monitors);
-}
-
 // Assemble a command from an argument list
 static void assemble(vector<string> &cmd,
                      const char *prog,
@@ -417,6 +404,27 @@ static void join(string &s, const vector<string> &lines) {
   }
 }
 
+static vector<string> &vmakevs(vector<string> &command,
+                               const char *prog,
+                               va_list ap) {
+  command.clear();
+  command.push_back(prog);
+  while(const char *s = va_arg(ap, const char *))
+    command.push_back(s);
+  return command;
+}
+
+vector<string> &makevs(vector<string> &command,
+                       const char *prog,
+                       ...) {
+  va_list ap;
+  
+  va_start(ap, prog);
+  vmakevs(command, prog, ap);
+  va_end(ap);
+  return command;
+}
+
 // Execute a command assembled using EXE_... macros and return its
 // exit code.
 int execute(const char *prog, ...) {
@@ -436,14 +444,12 @@ int capture(vector<string> &lines,
             const char *prog,
             ...) {
   va_list ap;
+  vector<string> command;
 
   va_start(ap, prog);
-  readtostring r;
-  r.init();
-  const int rc = exec(prog, ap, list<monitor *>(1, &r));
+  vmakevs(command, prog, ap);
   va_end(ap);
-  split(lines, r.str());
-  return rc;
+  return vcapture(lines, command);
 }
 
 // Execute a command (specified in a string) and capture it output.
@@ -458,14 +464,16 @@ int inject(const vector<string> &input,
            const char *prog,
            ...) {
   va_list ap;
+  vector<string> command;
 
   va_start(ap, prog);
+  vmakevs(command, prog, ap);
+  va_end(ap);
   string buffer;
   join(buffer, input);
   writefromstring w;
   w.init(buffer);
-  const int rc = exec(prog, ap, list<monitor *>(1, &w));
-  va_end(ap);
+  const int rc = exec(command, list<monitor *>(1, &w));
   return rc;
 }
 

@@ -129,6 +129,9 @@ int execute(const vector<string> &command,
             const vector<string> *input = NULL,
             vector<string> *output = NULL,
             vector<string> *errors = NULL);
+vector<string> &makevs(vector<string> &command,
+                       const char *prog,
+                       ...);
 
 extern list<string> global_ignores;
 
