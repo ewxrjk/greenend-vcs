@@ -102,25 +102,6 @@ void fatal(const char *msg, ...) {
   exit(1);
 }
 
-// Execute a command (specified like execl()) and capture its output.
-// Returns exit code.
-int capture(vector<string> &lines,
-            const char *prog,
-            ...) {
-  const char *arg;
-  va_list ap;
-
-  // Construct the command
-  vector<const char *> cmd;
-  cmd.push_back(prog);
-  va_start(ap, prog);
-  while((arg = va_arg(ap, const char *)))
-    cmd.push_back(arg);
-  va_end(ap);
-  cmd.push_back(NULL);
-  return vccapture(lines, (char **)&cmd[0]);
-}
-
 // Execute a command (specified in a string) and capture it output.
 // Returns exit code.
 int vcapture(vector<string> &lines,

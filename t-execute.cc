@@ -22,6 +22,17 @@ int main(void) {
   assert(execute("false", EXE_END) != 0);
   assert(execute("test", EXE_STR, "-d", EXE_STR, "/", EXE_END) == 0);
   assert(execute("test", EXE_STR, "-f", EXE_STR, "/", EXE_END) != 0);
+  vector<string> vs;
+  assert(capture(vs, "true", (char *)0) == 0);
+  assert(vs.size() == 0);
+  assert(capture(vs, "echo", "wibble", (char *)0) == 0);
+  assert(vs.size() == 1);
+  assert(vs[0] == "wibble");
+  assert(capture(vs, "sh", "-c", "echo foo;echo;echo bar", (char *)0) == 0);
+  assert(vs.size() == 3);
+  assert(vs[0] == "foo");
+  assert(vs[1] == "");
+  assert(vs[2] == "bar");
   return 0;
 }
 

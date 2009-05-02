@@ -115,7 +115,7 @@ private:
   }
   
   void afterfork() {
-    if(::close(childfd) < 0)
+    if(::close(parentfd) < 0)
       fatal("error calling close: %s", strerror(errno));
   }
   
@@ -156,7 +156,7 @@ public:
   }
 
   // Find out what to write next
-  virtual const  void *available(size_t &nbytes) = 0;
+  virtual const void *available(size_t &nbytes) = 0;
 
   // Called when NBYTES have been written
   virtual void wrote(size_t nbytes) = 0;
@@ -165,7 +165,7 @@ public:
 // Write a string to child's redirected FD
 class writefromstring: public writetofd {
 public:
-  writefromstring(const string &s_, int childid = 1):
+  writefromstring(const string &s_, int childid = 0):
     writetofd(childid),
     s(s_),
     written(0) {
@@ -225,7 +225,7 @@ public:
 // Read from a child's redirected FD into a sintrg
 class readtostring: public readfromfd {
 public:
-  readtostring(string &s_, int childid = 0):
+  readtostring(string &s_, int childid = 1):
     readfromfd(childid),
     s(s_) {
   }
@@ -296,7 +296,7 @@ static int exec(const char *prog,
     if(!nactive)
       // Stop waiting for IO if no monitors left, the wait will never finish
       break;
-    const int rc = select(max, rfds, wfds, NULL, NULL);
+    const int rc = select(max + 1, rfds, wfds, NULL, NULL);
     if(rc < 0)
       fatal("error calling select: %s", strerror(errno));
     for(it = monitors.begin();
@@ -335,6 +335,7 @@ static int exec(const vector<string> &args,
   cargs.push_back(NULL);
   return exec(cargs[0], &cargs[0], monitors);
 }
+#endif
 
 // As above but for stdarg arg lists
 static int exec(const char *prog,
@@ -349,7 +350,6 @@ static int exec(const char *prog,
   } while(s);
   return exec(prog, &cmd[0], monitors);
 }
-#endif
 
 // Assemble a command from an argument list
 static void assemble(vector<const char *> &cmd,
@@ -398,12 +398,12 @@ static void assemble(vector<const char *> &cmd,
   cmd.push_back(NULL);
 }
 
-#if 0
 // Split a string on newline
 static void split(vector<string> &lines, const string &s) {
   string::size_type pos = 0, n;
   const string::size_type limit = s.size();
   
+  lines.clear();
   while(pos < limit && (n = s.find('\n', pos)) != string::npos) {
     lines.push_back(s.substr(pos, n - pos));
     pos = n + 1;
@@ -411,7 +411,6 @@ static void split(vector<string> &lines, const string &s) {
   if(pos < limit)
     lines.push_back(s.substr(pos, limit - pos));
 }
-#endif
 
 // Execute a command assembled using EXE_... macros and return its
 // exit code.
@@ -426,7 +425,6 @@ int execute(const char *prog, ...) {
   return exec(prog, &cmd[0], list<monitor *>(), killfds);
 }
 
-#if 0
 // Execute a command (specified like execl()) and capture its output.
 // Returns exit code.
 int capture(vector<string> &lines,
@@ -443,6 +441,7 @@ int capture(vector<string> &lines,
   return rc;
 }
 
+#if 0
 // Execute a command (specified in a string) and capture it output.
 // Returns exit code.
 int vcapture(vector<string> &lines,
