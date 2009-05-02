@@ -133,7 +133,7 @@ private:
 // Write to a child's redirected FD
 class writetofd: public fdredirect {
 public:
-  writetofd(int childid) {
+  void init(int childid) {
     writer(childid);
   }
 
@@ -166,14 +166,17 @@ public:
 // Write a string to child's redirected FD
 class writefromstring: public writetofd {
 public:
-  writefromstring(const string &s_, int childid = 0):
-    writetofd(childid),
-    s(s_),
+  writefromstring():
     written(0) {
+  }
+
+  void init(const string &s_, int childid = 0) {
+    s = s_;
+    writetofd::init(childid);
   }
 private:
   // string to write
-  const string &s;
+  string s;
   
   // bytes written so far
   size_t written;
@@ -191,7 +194,7 @@ private:
 // Read from an FD
 class readfromfd: public fdredirect {
 public:
-  readfromfd(int childid) {
+  void init(int childid = 0) {
     reader(childid);
   }
 
@@ -226,12 +229,16 @@ public:
 // Read from a child's redirected FD into a sintrg
 class readtostring: public readfromfd {
 public:
-  readtostring(string &s_, int childid = 1):
-    readfromfd(childid),
-    s(s_) {
+
+  void init(int childid = 1) {
+    readfromfd::init(childid);
+  }
+
+  inline const string &str() {
+    return s;
   }
 private:
-  string &s;
+  string s;
 
   void read(void *ptr, size_t nbytes) {
     s.append((char *)ptr, nbytes);
@@ -441,11 +448,11 @@ int capture(vector<string> &lines,
   va_list ap;
 
   va_start(ap, prog);
-  string buffer;
-  readtostring r(buffer);
+  readtostring r;
+  r.init();
   const int rc = exec(prog, ap, list<monitor *>(1, &r));
   va_end(ap);
-  split(lines, buffer);
+  split(lines, r.str());
   return rc;
 }
 
@@ -453,10 +460,10 @@ int capture(vector<string> &lines,
 // Returns exit code.
 int vcapture(vector<string> &lines,
              const vector<string> &command) {
-  string buffer;
-  readtostring r(buffer);
+  readtostring r;
+  r.init();
   const int rc = exec(command, list<monitor *>(1, &r));
-  split(lines, buffer);
+  split(lines, r.str());
   return rc;
 }
 
@@ -469,7 +476,8 @@ int inject(const vector<string> &input,
   va_start(ap, prog);
   string buffer;
   join(buffer, input);
-  writefromstring w(buffer);
+  writefromstring w;
+  w.init(buffer);
   const int rc = exec(prog, ap, list<monitor *>(1, &w));
   va_end(ap);
   return rc;
