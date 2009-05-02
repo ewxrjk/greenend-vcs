@@ -59,6 +59,9 @@ int main(void) {
   assert(vs[1] == "");
   assert(vs[2] == "bar");
 
+  assert(inject(makevs("spong", (char *)0), "grep", "wibble", (char *)0) == 1);
+  assert(inject(makevs("spong", (char *)0), "grep", "spong", (char *)0) == 0);
+
   return 0;
 }
 

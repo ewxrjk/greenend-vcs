@@ -108,7 +108,8 @@ private:
       perror("dup2");
       _exit(1);
     }
-    if(::close(parentfd) < 0) {
+    // Close both original pipe FDs
+    if(::close(parentfd) < 0 || ::close(fd) < 0) {
       perror("close");
       _exit(1);
     }
@@ -182,7 +183,7 @@ private:
     return s.data() + written;
   }
 
-  void write(size_t nbytes) {
+  void wrote(size_t nbytes) {
     written += nbytes;
   }
 };
@@ -410,6 +411,15 @@ static void split(vector<string> &lines, const string &s) {
     lines.push_back(s.substr(pos, limit - pos));
 }
 
+// Join a string with newlines
+static void join(string &s, const vector<string> &lines) {
+  s.clear();
+  for(size_t n = 0; n < lines.size(); ++n) {
+    s.append(lines[n]);
+    s.append("\n");
+  }
+}
+
 // Execute a command assembled using EXE_... macros and return its
 // exit code.
 int execute(const char *prog, ...) {
@@ -447,6 +457,21 @@ int vcapture(vector<string> &lines,
   readtostring r(buffer);
   const int rc = exec(command, list<monitor *>(1, &r));
   split(lines, buffer);
+  return rc;
+}
+
+// Execute a command and feed it input.  Returns the exit code.
+int inject(const vector<string> &input,
+           const char *prog,
+           ...) {
+  va_list ap;
+
+  va_start(ap, prog);
+  string buffer;
+  join(buffer, input);
+  writefromstring w(buffer);
+  const int rc = exec(prog, ap, list<monitor *>(1, &w));
+  va_end(ap);
   return rc;
 }
 

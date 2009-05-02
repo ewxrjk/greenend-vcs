@@ -108,17 +108,11 @@ int execute(const char *prog, ...);
 int capture(vector<string> &lines,
             const char *prog,
             ...);
-int fcapture(unsigned flags,
-             vector<string> &lines,
-             const char *prog,
-             ...);
 int vcapture(vector<string> &lines,
              const vector<string> &command);
 int inject(const vector<string> &input,
            const char *prog,
            ...);
-int vcinject(const vector<string> &input,
-             char **cmd);
 void redirect(const char *pager);
 void await_redirect();
 int readline(const string &path, FILE *fp, string &l);
