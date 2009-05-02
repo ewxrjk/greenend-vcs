@@ -205,7 +205,7 @@ public:
   void afterselect(const fd_set *rfds, const fd_set *) {
     if(fd >= 0 && FD_ISSET(fd, rfds)) {
       char buffer[4096];
-      int n = ::read(fd, buffer, sizeof fd);
+      int n = ::read(fd, buffer, sizeof buffer);
       
       if(n < 0)
         fatal("read error: %s", strerror(errno));
@@ -460,11 +460,7 @@ int capture(vector<string> &lines,
 // Returns exit code.
 int vcapture(vector<string> &lines,
              const vector<string> &command) {
-  readtostring r;
-  r.init();
-  const int rc = exec(command, list<monitor *>(1, &r));
-  split(lines, r.str());
-  return rc;
+  return execute(command, NULL, &lines, NULL);
 }
 
 // Execute a command and feed it input.  Returns the exit code.
@@ -480,6 +476,37 @@ int inject(const vector<string> &input,
   w.init(buffer);
   const int rc = exec(prog, ap, list<monitor *>(1, &w));
   va_end(ap);
+  return rc;
+}
+
+// General-purpose command execution, injection and capture
+int execute(const vector<string> &command,
+            const vector<string> *input,
+            vector<string> *output,
+            vector<string> *errors) {
+  list<monitor *> monitors;
+  writefromstring w;
+  readtostring ro, re;
+
+  if(input) {
+    string s;
+    join(s, *input);
+    w.init(s, 0);
+    monitors.push_back(&w);
+  }
+  if(output) {
+    ro.init(1);
+    monitors.push_back(&ro);
+  }
+  if(errors) {
+    re.init(2);
+    monitors.push_back(&re);
+  }
+  const int rc = exec(command, monitors);
+  if(output)
+    split(*output, ro.str());
+  if(errors)
+    split(*errors, re.str());
   return rc;
 }
 

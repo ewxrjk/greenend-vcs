@@ -62,6 +62,13 @@ int main(void) {
   assert(inject(makevs("spong", (char *)0), "grep", "wibble", (char *)0) == 1);
   assert(inject(makevs("spong", (char *)0), "grep", "spong", (char *)0) == 0);
 
+  vector<string> i = makevs("wibble", "spong", (char *)0);
+  vector<string> o;
+  assert(execute(makevs("grep", "wibble", (char *)0),
+                 &i, &o, NULL) == 0);
+  assert(o.size() == 1);
+  assert(o[0] == "wibble");
+  
   return 0;
 }
 
