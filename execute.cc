@@ -246,6 +246,25 @@ private:
 
 };
 
+static string shellquote(const string &s) {
+  bool quote;
+
+  if(s.size())
+    quote = (s.find_first_of("\"\\\' \r\t\n") != string::npos);
+  else
+    quote = true;
+  if(!quote)
+    return s;
+  string r = "\"";
+  for(string::size_type n = 0; n < s.size(); ++n) {
+    if(s[n] == '"' || s[n] == '\\')
+      r += '\\';
+    r += s[n];
+  }
+  r += '"';
+  return r;
+}
+
 // General purpose command execution
 static int exec(const vector<string> &args,
                 const list<monitor *> &monitors,
@@ -259,6 +278,13 @@ static int exec(const vector<string> &args,
   for(size_t n = 0; n < args.size(); ++n)
     cargs.push_back(args[n].c_str());
   cargs.push_back(NULL);
+  // Report what we're going to do
+  if(debug) {
+    fputc('>', stderr);
+    for(size_t n = 0; n < args.size(); ++n)
+      fprintf(stderr, " %s", shellquote(args[n]).c_str());
+    fputc('\n',  stderr);
+  }
   // Start subprocess
   if((pid = fork()) < 0)
     fatal("error calling fork: %s", strerror(errno));
@@ -472,6 +498,12 @@ int inject(const vector<string> &input,
   return execute(command, &input, NULL, NULL);
 }
 
+static void report(const char *what, const vector<string> &l) {
+  fprintf(stderr, "%s:\n", what);
+  for(size_t n = 0; n < l.size(); ++n)
+    fprintf(stderr, "| %s\n", l[n].c_str());
+}
+
 // General-purpose command execution, injection and capture
 int execute(const vector<string> &command,
             const vector<string> *input,
@@ -486,6 +518,8 @@ int execute(const vector<string> &command,
     join(s, *input);
     w.init(s, 0);
     monitors.push_back(&w);
+    if(debug)
+      report("input", *input);
   }
   if(output) {
     ro.init(1);
@@ -496,10 +530,16 @@ int execute(const vector<string> &command,
     monitors.push_back(&re);
   }
   const int rc = exec(command, monitors);
-  if(output)
+  if(output) {
     split(*output, ro.str());
-  if(errors)
+    if(debug)
+      report("output", *output);
+  }
+  if(errors) {
     split(*errors, re.str());
+    if(debug)
+      report("errors", *errors);
+  }
   return rc;
 }
 

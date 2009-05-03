@@ -30,7 +30,10 @@ static vector<string> makevs(const char *first, ...) {
   return vs;
 }
 
-int main(void) {
+int main(int argc, char **) {
+
+  if(argc > 1)
+    debug = true;
   assert(execute("true", EXE_END) == 0);
   assert(execute("false", EXE_END) != 0);
   assert(execute("test", EXE_STR, "-d", EXE_STR, "/", EXE_END) == 0);
