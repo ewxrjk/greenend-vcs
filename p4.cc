@@ -397,7 +397,7 @@ static int p4_revert(int nfiles, char **files) {
 
 static int p4_status() {
   vector<string> have;
-  vector<string> opened;
+  vector<string> opened, errors, command;
   map<string,string> known;
   list<string> files, deleted;
   set<string> ignored;
@@ -413,8 +413,19 @@ static int p4_status() {
   //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
   // ACTION is add, edit, delete, branch, integrate
   // CHNUM is the change number or 'default'.
-  if((rc = capture(opened, "p4", "opened", "...", (char *)0)))
+  if((rc = execute(makevs(command, "p4", "opened", "...", (char *)0),
+                   NULL/*input*/,
+                   &opened,
+                   &errors))) {
+    report_lines(errors);
     fatal("'p4 opened ...' exited with status %d", rc);
+  }
+  if(!(errors.size() == 0
+       || (errors.size() == 1
+           && errors[0] == "... - file(s) not opened on this client."))) {
+    report_lines(errors);
+    fatal("Unexpected error output from 'p4 opened ...'");
+  }
 
   // Generate a map from depot path names to what p4 knows about the files
   for(size_t n = 0; n < have.size(); ++n) {

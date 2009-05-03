@@ -132,6 +132,10 @@ int execute(const vector<string> &command,
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...);
+void report_lines(const vector<string> &l, 
+                  const char *what = NULL, 
+                  const char *prefix = NULL, 
+                  FILE *fp = stderr);
 
 extern list<string> global_ignores;
 
