@@ -21,13 +21,15 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
 vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
 noinst_PROGRAMS=t-version t-execute
+dist_noinst_SCRIPTS=tests/help tests/errors \
+	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 t_version_SOURCES=utils.cc version.cc t-version.cc
 t_execute_SOURCES=utils.cc execute.cc t-execute.cc
 TESTS=t-version t-execute \
 	tests/help tests/errors \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules tests/utils.sh scripts/setversion $(TESTS) \
+	debian/rules tests/utils.sh scripts/setversion \
 	README.developers scripts/coverage scripts/dist scripts/htmlman
 
 clean-local:
