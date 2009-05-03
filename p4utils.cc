@@ -209,10 +209,21 @@ void p4__where(vector<string> &where, const list<string> &files) {
     }
     if(e == it)
       fatal("filename too long: %s", it->c_str());
-    vector<string> someresults;
+    vector<string> someresults, errors;
     int rc;
-    if((rc = vcapture(someresults, cmd)))
+    if((rc = execute(cmd, NULL/*input*/, &someresults, &errors))) {
+      report_lines(errors);
       fatal("'p4 where PATHS' exited with status %d", rc);
+    }
+    size_t n;
+    for(n = 0; n < errors.size(); ++n) {
+      if(errors[n].find(" - file(s) not in client view.") == string::npos)
+        break;
+    }
+    if(n < errors.size()) {
+      report_lines(errors);
+      fatal("Unexpected error output from 'p4 where PATHS'");
+    }
     while(someresults.size()
           && someresults.back().size() == 0)
       someresults.pop_back();
