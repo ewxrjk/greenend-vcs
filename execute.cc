@@ -133,7 +133,7 @@ private:
 // Write to a child's redirected FD
 class writetofd: public fdredirect {
 public:
-  writetofd(int childid) {
+  void init(int childid) {
     writer(childid);
   }
 
@@ -166,14 +166,17 @@ public:
 // Write a string to child's redirected FD
 class writefromstring: public writetofd {
 public:
-  writefromstring(const string &s_, int childid = 0):
-    writetofd(childid),
-    s(s_),
+  writefromstring():
     written(0) {
+  }
+
+  void init(const string &s_, int childid = 0) {
+    s = s_;
+    writetofd::init(childid);
   }
 private:
   // string to write
-  const string &s;
+  string s;
   
   // bytes written so far
   size_t written;
@@ -191,7 +194,7 @@ private:
 // Read from an FD
 class readfromfd: public fdredirect {
 public:
-  readfromfd(int childid) {
+  void init(int childid = 0) {
     reader(childid);
   }
 
@@ -202,7 +205,7 @@ public:
   void afterselect(const fd_set *rfds, const fd_set *) {
     if(fd >= 0 && FD_ISSET(fd, rfds)) {
       char buffer[4096];
-      int n = ::read(fd, buffer, sizeof fd);
+      int n = ::read(fd, buffer, sizeof buffer);
       
       if(n < 0)
         fatal("read error: %s", strerror(errno));
@@ -226,12 +229,16 @@ public:
 // Read from a child's redirected FD into a sintrg
 class readtostring: public readfromfd {
 public:
-  readtostring(string &s_, int childid = 1):
-    readfromfd(childid),
-    s(s_) {
+
+  void init(int childid = 1) {
+    readfromfd::init(childid);
+  }
+
+  inline const string &str() {
+    return s;
   }
 private:
-  string &s;
+  string s;
 
   void read(void *ptr, size_t nbytes) {
     s.append((char *)ptr, nbytes);
@@ -239,14 +246,51 @@ private:
 
 };
 
+static string shellquote(const string &s) {
+  bool quote;
+
+  if(s.size())
+    quote = (s.find_first_of("\"\\\' \r\t\n") != string::npos);
+  else
+    quote = true;
+  if(!quote)
+    return s;
+  string r = "\"";
+  for(string::size_type n = 0; n < s.size(); ++n) {
+    if(s[n] == '"' || s[n] == '\\')
+      r += '\\';
+    r += s[n];
+  }
+  r += '"';
+  return r;
+}
+
+static void display_command(const vector<string> &vs) {
+  for(size_t n = 0; n < vs.size(); ++n)
+    fprintf(stderr, "%s%s", 
+            n ? " " : "",
+            shellquote(vs[n]).c_str());
+  fputc('\n',  stderr);
+}
+
 // General purpose command execution
-static int exec(const char *prog,
-                const char **args,
+static int exec(const vector<string> &args,
                 const list<monitor *> &monitors,
                 unsigned killfds = 0) {
   pid_t pid;
   list<monitor *>::const_iterator it;
+  vector<const char *> cargs;
 
+  // Convert args to C format
+  cargs.reserve(args.size());
+  for(size_t n = 0; n < args.size(); ++n)
+    cargs.push_back(args[n].c_str());
+  cargs.push_back(NULL);
+  // Report what we're going to do
+  if(debug) {
+    fputs("> ", stderr);
+    display_command(args);
+  }
   // Start subprocess
   if((pid = fork()) < 0)
     fatal("error calling fork: %s", strerror(errno));
@@ -271,8 +315,8 @@ static int exec(const char *prog,
         _exit(-1);
       }
     }
-    execvp(prog, (char **)args);
-    fprintf(stderr, "executing %s: %s\n", prog, strerror(errno));
+    execvp(cargs[0], (char **)&cargs[0]);
+    fprintf(stderr, "executing %s: %s\n", cargs[0], strerror(errno));
     _exit(1);
   }
   for(it = monitors.begin();
@@ -316,42 +360,15 @@ static int exec(const char *prog,
     fatal("error calling waitpid: %s", strerror(errno));
   // Signals are always fatal
   if(WIFSIGNALED(w))
-    fatal("%s received fatal signal %d (%s)", prog, 
+    fatal("%s received fatal signal %d (%s)", cargs[0], 
 	  WTERMSIG(w), strsignal(WTERMSIG(w)));
   if(WIFEXITED(w))
     return WEXITSTATUS(w);
-  fatal("%s exited with unknown wait status %#x", prog, w);
-}
-
-// As above but with a vector<string> arg list
-static int exec(const vector<string> &args,
-                const list<monitor *> &monitors) {
-  vector<const char *> cargs;
-  size_t n;
-
-  cargs.reserve(args.size());
-  for(n = 0; n < args.size(); ++n)
-    cargs.push_back(args[n].c_str());
-  cargs.push_back(NULL);
-  return exec(cargs[0], &cargs[0], monitors);
-}
-
-// As above but for stdarg arg lists
-static int exec(const char *prog,
-                va_list ap,
-                const list<monitor *> &monitors) {
-  vector<const char *> cmd;
-  const char *s;
-
-  cmd.push_back(prog);
-  do {
-    cmd.push_back((s = va_arg(ap, const char *)));
-  } while(s);
-  return exec(prog, &cmd[0], monitors);
+  fatal("%s exited with unknown wait status %#x", cargs[0], w);
 }
 
 // Assemble a command from an argument list
-static void assemble(vector<const char *> &cmd,
+static void assemble(vector<string> &cmd,
                      const char *prog,
                      va_list ap,
                      unsigned &killfds) {
@@ -394,7 +411,6 @@ static void assemble(vector<const char *> &cmd,
       assert(!"unknown execute() op");
     }
   }
-  cmd.push_back(NULL);
 }
 
 // Split a string on newline
@@ -420,17 +436,40 @@ static void join(string &s, const vector<string> &lines) {
   }
 }
 
+static vector<string> &vmakevs(vector<string> &command,
+                               const char *prog,
+                               va_list ap) {
+  command.clear();
+  command.push_back(prog);
+  while(const char *s = va_arg(ap, const char *))
+    command.push_back(s);
+  return command;
+}
+
+vector<string> &makevs(vector<string> &command,
+                       const char *prog,
+                       ...) {
+  va_list ap;
+  
+  va_start(ap, prog);
+  vmakevs(command, prog, ap);
+  va_end(ap);
+  return command;
+}
+
 // Execute a command assembled using EXE_... macros and return its
 // exit code.
 int execute(const char *prog, ...) {
   va_list ap;
-  vector<const char *> cmd;
+  vector<string> cmd;
   unsigned killfds = 0;
 
   va_start(ap, prog);
   assemble(cmd, prog, ap, killfds);
   va_end(ap);
-  return exec(prog, &cmd[0], list<monitor *>(), killfds);
+  if(dryrun)
+    display_command(cmd);
+  return exec(cmd, list<monitor *>(), killfds);
 }
 
 // Execute a command (specified like execl()) and capture its output.
@@ -439,25 +478,19 @@ int capture(vector<string> &lines,
             const char *prog,
             ...) {
   va_list ap;
+  vector<string> command;
 
   va_start(ap, prog);
-  string buffer;
-  readtostring r(buffer);
-  const int rc = exec(prog, ap, list<monitor *>(1, &r));
+  vmakevs(command, prog, ap);
   va_end(ap);
-  split(lines, buffer);
-  return rc;
+  return vcapture(lines, command);
 }
 
 // Execute a command (specified in a string) and capture it output.
 // Returns exit code.
 int vcapture(vector<string> &lines,
              const vector<string> &command) {
-  string buffer;
-  readtostring r(buffer);
-  const int rc = exec(command, list<monitor *>(1, &r));
-  split(lines, buffer);
-  return rc;
+  return execute(command, NULL, &lines, NULL);
 }
 
 // Execute a command and feed it input.  Returns the exit code.
@@ -465,13 +498,56 @@ int inject(const vector<string> &input,
            const char *prog,
            ...) {
   va_list ap;
+  vector<string> command;
 
   va_start(ap, prog);
-  string buffer;
-  join(buffer, input);
-  writefromstring w(buffer);
-  const int rc = exec(prog, ap, list<monitor *>(1, &w));
+  vmakevs(command, prog, ap);
   va_end(ap);
+  return execute(command, &input, NULL, NULL);
+}
+
+static void report(const char *what, const vector<string> &l) {
+  fprintf(stderr, "%s:\n", what);
+  for(size_t n = 0; n < l.size(); ++n)
+    fprintf(stderr, "| %s\n", l[n].c_str());
+}
+
+// General-purpose command execution, injection and capture
+int execute(const vector<string> &command,
+            const vector<string> *input,
+            vector<string> *output,
+            vector<string> *errors) {
+  list<monitor *> monitors;
+  writefromstring w;
+  readtostring ro, re;
+
+  if(input) {
+    string s;
+    join(s, *input);
+    w.init(s, 0);
+    monitors.push_back(&w);
+    if(debug)
+      report("input", *input);
+  }
+  if(output) {
+    ro.init(1);
+    monitors.push_back(&ro);
+  }
+  if(errors) {
+    re.init(2);
+    monitors.push_back(&re);
+  }
+  const int rc = exec(command, monitors);
+  if(output) {
+    split(*output, ro.str());
+    if(debug)
+      report("output", *output);
+  }
+  if(errors) {
+    split(*errors, re.str());
+    if(debug)
+      report("errors", *errors);
+  }
   return rc;
 }
 

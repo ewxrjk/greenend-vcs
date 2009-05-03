@@ -30,7 +30,10 @@ static vector<string> makevs(const char *first, ...) {
   return vs;
 }
 
-int main(void) {
+int main(int argc, char **) {
+
+  if(argc > 1)
+    debug = true;
   assert(execute("true", EXE_END) == 0);
   assert(execute("false", EXE_END) != 0);
   assert(execute("test", EXE_STR, "-d", EXE_STR, "/", EXE_END) == 0);
@@ -62,6 +65,13 @@ int main(void) {
   assert(inject(makevs("spong", (char *)0), "grep", "wibble", (char *)0) == 1);
   assert(inject(makevs("spong", (char *)0), "grep", "spong", (char *)0) == 0);
 
+  vector<string> i = makevs("wibble", "spong", (char *)0);
+  vector<string> o;
+  assert(execute(makevs("grep", "wibble", (char *)0),
+                 &i, &o, NULL) == 0);
+  assert(o.size() == 1);
+  assert(o[0] == "wibble");
+  
   return 0;
 }
 
