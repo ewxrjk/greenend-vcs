@@ -506,10 +506,16 @@ int inject(const vector<string> &input,
   return execute(command, &input, NULL, NULL);
 }
 
-static void report(const char *what, const vector<string> &l) {
-  fprintf(stderr, "%s:\n", what);
+void report_lines(const vector<string> &l, 
+                  const char *what, 
+                  const char *prefix, 
+                  FILE *fp) {
+  if(what)
+    fprintf(fp, "%s:\n", what);
+  if(!prefix)
+    prefix = "";
   for(size_t n = 0; n < l.size(); ++n)
-    fprintf(stderr, "| %s\n", l[n].c_str());
+    fprintf(fp, "%s%s\n", prefix, l[n].c_str());
 }
 
 // General-purpose command execution, injection and capture
@@ -527,7 +533,7 @@ int execute(const vector<string> &command,
     w.init(s, 0);
     monitors.push_back(&w);
     if(debug)
-      report("input", *input);
+      report_lines(*input, "Input", "| ");
   }
   if(output) {
     ro.init(1);
@@ -541,12 +547,12 @@ int execute(const vector<string> &command,
   if(output) {
     split(*output, ro.str());
     if(debug)
-      report("output", *output);
+      report_lines(*output, "Output", "| ");
   }
   if(errors) {
     split(*errors, re.str());
     if(debug)
-      report("errors", *errors);
+      report_lines(*errors, "Errors", "| ");
   }
   return rc;
 }
