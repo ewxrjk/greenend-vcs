@@ -265,6 +265,14 @@ static string shellquote(const string &s) {
   return r;
 }
 
+static void display_command(const vector<string> &vs) {
+  for(size_t n = 0; n < vs.size(); ++n)
+    fprintf(stderr, "%s%s", 
+            n ? " " : "",
+            shellquote(vs[n]).c_str());
+  fputc('\n',  stderr);
+}
+
 // General purpose command execution
 static int exec(const vector<string> &args,
                 const list<monitor *> &monitors,
@@ -280,10 +288,8 @@ static int exec(const vector<string> &args,
   cargs.push_back(NULL);
   // Report what we're going to do
   if(debug) {
-    fputc('>', stderr);
-    for(size_t n = 0; n < args.size(); ++n)
-      fprintf(stderr, " %s", shellquote(args[n]).c_str());
-    fputc('\n',  stderr);
+    fputs("> ", stderr);
+    display_command(args);
   }
   // Start subprocess
   if((pid = fork()) < 0)
@@ -461,6 +467,8 @@ int execute(const char *prog, ...) {
   va_start(ap, prog);
   assemble(cmd, prog, ap, killfds);
   va_end(ap);
+  if(dryrun)
+    display_command(cmd);
   return exec(cmd, list<monitor *>(), killfds);
 }
 
