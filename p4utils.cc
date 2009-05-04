@@ -154,12 +154,12 @@ void P4Opened::parse(const string &l) {
 
 void P4Where::parse(const string &l) {
   string::size_type n = l.find(' ');
-  depot_path.assign(l, 0, n);
+  depot_path = p4_decode(l.substr( 0, n));
   string::size_type m = n + 1;
   n = l.find(' ', m);
-  view_path.assign(l, m, n - m);
+  view_path = p4_decode(l.substr(m, n - m));
   m = n + 1;
-  local_path.assign(l, m, string::npos);
+  local_path.assign(l, m, string::npos); // not encoded!
 }
 
 // Compute the number of bytes required for the environment
@@ -403,7 +403,7 @@ void P4Info::gather() {
   for(size_t n = 0; n < have.size(); ++n) {
     const string &l = have[n];
     string::size_type i = l.find('#');
-    const string depot_path = l.substr(0, i);
+    const string depot_path = p4_decode(l.substr(0, i));
     ++i;
     string revs;
     while(isdigit(l.at(i)))
