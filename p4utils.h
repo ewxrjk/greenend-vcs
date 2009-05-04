@@ -60,6 +60,53 @@ struct P4Where {
   void parse(const string &l);
 };
 
+// Information about one file
+struct P4FileInfo {
+  P4FileInfo();
+  P4FileInfo(const string &l);
+  ~P4FileInfo();
+  string depot_path;                    // depot path
+  string view_path;                     // view path (NB sometimes missing)
+  string local_path;                    // absolute local path
+  string relative_path;                 // relative local path
+  int rev;                              // revision number
+  string action;                        // action or "" if not open
+  int chnum;                            // change number, -1 for default
+  string type;                          // file type or "" if not known
+  bool locked;                          // true for *locked*
+};
+
+struct ltfilename {
+  bool operator()(const string &a, const string &b) const;
+};
+
+// Collate information about files indexed in various ways
+class P4Info {
+public:
+  P4Info();
+  ~P4Info();
+  
+  // Look up one file by various kinds of filename
+  bool depot_find(const string &depot_path, P4FileInfo &fi) const;
+  bool local_find(const string &local_path, P4FileInfo &fi) const;
+  bool relative_find(const string &relative_path, P4FileInfo &fi) const;
+  
+  // Look up a list of known filenames of whichever kind
+  void depot_list(list<string> &depot_paths) const;
+  void local_list(list<string> &local_paths) const;
+  void relative_list(list<string> &relative_paths) const;
+
+  // (Re-)gather information matching a given pattern
+  void gather();
+
+private:
+  typedef map<string,P4FileInfo> info_type;
+  typedef map<string,string> filemap_type;
+  info_type info;                       // depot path -> information
+  filemap_type by_local;                // local path -> depot path
+  filemap_type by_relative;             // relative path -> depot path
+};
+
 string p4_encode(const string &s);
 char **p4_encode(int nfiles, char **files);
 string p4_decode(const string &s);

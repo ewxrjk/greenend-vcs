@@ -161,141 +161,63 @@ static int p4_revert(int nfiles, char **files) {
 }
 
 static int p4_status() {
-  vector<string> have;
-  vector<string> opened, errors, command;
-  map<string,string> known;
-  list<string> files, deleted;
+  // Find out what P4 knows
+  P4Info p4info;
+  p4info.gather();
+
+  // Get a list of all files, with relative path names
+  list<string> files;
   set<string> ignored;
-  int rc;
-
-  // All files, in the form:
-  //   DEPOT-PATH#REV - LOCAL-PATH
-  // NB paths are absolute!
-  if((rc = capture(have, "p4", "have", "...", (char *)NULL)))
-    fatal("'p4 have ...' exited with status %d", rc);
-
-  // Opened files, in the form:
-  //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
-  // ACTION is add, edit, delete, branch, integrate
-  // CHNUM is the change number or 'default'.
-  if((rc = execute(makevs(command, "p4", "opened", "...", (char *)0),
-                   NULL/*input*/,
-                   &opened,
-                   &errors))) {
-    report_lines(errors);
-    fatal("'p4 opened ...' exited with status %d", rc);
-  }
-  if(!(errors.size() == 0
-       || (errors.size() == 1
-           && errors[0] == "... - file(s) not opened on this client."))) {
-    report_lines(errors);
-    fatal("Unexpected error output from 'p4 opened ...'");
-  }
-
-  // Generate a map from depot path names to what p4 knows about the files
-  for(size_t n = 0; n < have.size(); ++n) {
-    const string depot_path = p4_decode(have[n].substr(0, have[n].find('#')));
-    known[depot_path] = "";
-  }
-  for(size_t n = 0; n < opened.size(); ++n) {
-    if(opened[n].size()) {
-      P4Opened o(opened[n]);            // does its own %-decoding
-      known[o.path] = o.action;
-      if(o.action == "delete")
-        deleted.push_back(o.path);
-    }
-  }
-
-  // All files, with relative path names
   listfiles("", files, ignored);
-
-  // Find the base local path name
-  // In theory this is the current working directory, but we want to be
-  // sure we have p4's idea of it.
-  vector<string> wd;
-  list<string> ls;
-  ls.push_back("...");
-  p4__where(wd, ls);
-  const string base(P4Where(wd[0]).local_path,
-                    0, P4Where(wd[0]).local_path.size() - 3);
-
-  // Map deleted depot paths to relative filenames and add to file list
-  if(deleted.size()) {
-    p4__where(wd, deleted);
-    for(size_t n = 0; n < wd.size(); ++n) {
-      P4Where w(wd[n]);
-      if(debug)
-        fprintf(stderr, "depot path: %s\n"
-                "local path: %s\n"
-                "truncated:  %s\n",
-                w.depot_path.c_str(),
-                w.local_path.c_str(),
-                w.local_path.substr(base.size()).c_str());
-      files.push_back(w.local_path.substr(base.size()));
-    }
-  }
   
-  // Use 'p4 where' to map relative filenames to absolute ones
-  map<string,P4Where> depot, view, local;
-  p4__where(files, depot, view, local);
-
-  if(dryrun)
-    return 0;
+  // We'll accumulate the status info here
+  typedef map<string,char,ltfilename> status_type;
+  status_type status;
 
   // We'll accumulate a list of files that are in p4 but also ignored.
   list<string> known_ignored;
 
-  // Now we can go through the file list in order and say what we know about
-  // each one
-  list<string>::const_iterator it = files.begin();
-  size_t n = 0;
-  while(it != files.end()) {
-    // Compute (p4's idea of) the absolute local path
-    const string local_path = base + *it;
-    // Find the 'p4 where' info, if there is any
-    const P4Where *w = local.find(local_path) != local.end()
-      ? &local[local_path] : NULL;
-    // Find what p4 knows about the file
-    const map<string,string>::const_iterator k
-      = w ? known.find(w->depot_path) : known.end();
-    // This will be the file status.
-    string status;
-    
-    fprintf(stderr,
-            "file %s\n"
-            "  local_path %s\n", it->c_str(), local_path.c_str());
-    if(w)
-      fprintf(stderr, "  w %s | %s | %s\n",
-              w->depot_path.c_str(), w->view_path.c_str(), w->local_path.c_str());
-    else
-      fprintf(stderr, "  w NULL\n");
-    if(k != known.end())
-      fprintf(stderr, "  k %s -> %s\n",
-              k->first.c_str(), k->second.c_str());
-    else
-      fprintf(stderr, "  k end()\n");
+  // First from p4
+  list<string> p4relpaths;
+  p4info.relative_list(p4relpaths);
+  for(list<string>::const_iterator it = p4relpaths.begin();
+      it != p4relpaths.end();
+      ++it) {
+    P4FileInfo fi;
+    p4info.relative_find(*it, fi);
+    status[*it] = fi.action.size() ? toupper(fi.action[0]) : 0;
+    if(ignored.find(*it) != ignored.end())
+      // Stash ignored files known to P4 for a moan later on
+      known_ignored.push_back(*it);
+  }
+  
+  // Now from the file list
+  for(list<string>::const_iterator it = files.begin();
+      it != files.end();
+      ++it) {
+    // Completely skip ignored files
+    if(ignored.find(*it) != ignored.end())
+      continue;
+    // Skip files that p4 knows about
+    if(status.find(*it) != status.end())
+      continue;
+    // The rest are unknown
+    status[*it] = '?';
+  }
 
-    if(k != known.end()) {
-      // Perforce knows something about this file
-      status = k->second;
-      if(ignored.find(*it) != ignored.end())
-        // ...but it's ignored!
-        known_ignored.push_back(*it);
-    } else {
-      // Perforce knows nothing about this file
-      if(ignored.find(*it) == ignored.end())
-        // ...and it's not ignored either
-        status = "?";
-    }
-    if(status.size()) {
-      if(printf("%c %s\n",
-                toupper(status[0]), it->c_str()) < 0)
+  // So what should dry-run mode do here?  At the moment we carry on
+  // regardless; since we don't modify anything this harmless.
+
+  // Now print out the results
+  for(status_type::const_iterator it = status.begin();
+      it != status.end();
+      ++it) {
+    if(it->second) {
+      if(printf("%c %s\n", it->second, it->first.c_str()) < 0)
         fatal("error writing to stdout: %s", strerror(errno));
     }
-
-    ++n;
-    ++it;
   }
+
   // Ensure warnings come right after the output so they are not swamped
   if(fflush(stdout) < 0)
     fatal("error writing to stdout: %s", strerror(errno));

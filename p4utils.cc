@@ -248,11 +248,238 @@ void p4__where(const list<string> &files,
   for(size_t n = 0; n < where.size(); ++n) {
     P4Where w(where[n]);
 
-    fprintf(stderr, "local %s\n", w.local_path.c_str());
+    //fprintf(stderr, "local %s\n", w.local_path.c_str());
     depot[w.depot_path] = w;
     view[w.view_path] = w;
     local[w.local_path] = w;
   }
+}
+
+// P4FileInfo ------------------------------------------------------------------
+
+P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false) {
+}
+
+P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false) {
+  // Get the depot path
+  string::size_type n = l.find('#');
+  if(n == string::npos)
+    fatal("no '#' found in 'p4 opened' output: %s",
+          l.c_str());
+  depot_path.assign(p4_decode(l.substr(0, n)));
+  // The revision
+  string revs;
+  ++n;
+  while(isdigit(l.at(n)))
+    revs += l[n++];
+  rev = atoi(revs.c_str());
+  // The action
+  while(l.at(n) == ' ' || l.at(n) == '-')
+    ++n;
+  while(l.at(n) != ' ')
+    action += l[n++];
+  // The change
+  string chstr;
+  while(l.at(n) == ' ')
+    ++n;
+  while(l.at(n) != ' ')
+    chstr += l[n++];
+  if(chstr == "default")
+    chnum = -1;
+  else
+    chnum = atoi(chstr.c_str());
+  // The type
+  while(l.at(n) == ' ' || l.at(n) == '(')
+    ++n;
+  while(l.at(n) != ')')
+    type += l[n++];
+  // Lock status
+  while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
+    ++n;
+  if(n < l.size() && l[n] == '*')
+    locked = true;
+}
+
+P4FileInfo::~P4FileInfo() {
+}
+
+// P4Info ----------------------------------------------------------------------
+
+P4Info::P4Info() {
+}
+
+P4Info::~P4Info() {
+}
+
+bool P4Info::depot_find(const string &depot_path, P4FileInfo &fi) const {
+  info_type::const_iterator it = info.find(depot_path);
+
+  if(it != info.end()) {
+    fi = it->second;
+    return true;
+  } else
+    return false;
+}
+
+bool P4Info::local_find(const string &local_path, P4FileInfo &fi) const {
+  const filemap_type::const_iterator it = by_local.find(local_path);
+  
+  if(it == by_local.end())
+    return false;
+  return depot_find(it->second, fi);
+}
+
+bool P4Info::relative_find(const string &relative_path, P4FileInfo &fi) const {
+  const filemap_type::const_iterator it = by_relative.find(relative_path);
+  
+  if(it == by_relative.end())
+    return false;
+  return depot_find(it->second, fi);
+}
+
+void P4Info::depot_list(list<string> &depot_paths) const {
+  depot_paths.clear();
+  for(info_type::const_iterator it = info.begin();
+      it != info.end();
+      ++it)
+    depot_paths.push_back(it->second.depot_path);
+}
+
+void P4Info::local_list(list<string> &local_paths) const {
+  local_paths.clear();
+  for(info_type::const_iterator it = info.begin();
+      it != info.end();
+      ++it)
+    local_paths.push_back(it->second.local_path);
+}
+
+void P4Info::relative_list(list<string> &relative_paths) const {
+  relative_paths.clear();
+  for(info_type::const_iterator it = info.begin();
+      it != info.end();
+      ++it)
+    relative_paths.push_back(it->second.relative_path);
+}
+
+void P4Info::gather() {
+  vector<string> command, opened, errors, have;
+  int rc;
+
+  info.clear();
+  by_local.clear();
+  by_relative.clear();
+  
+  // 'p4 opened' gives all opened files, in the form:
+  //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
+  // ACTION is add, edit, delete, branch, integrate
+  // CHNUM is the change number or 'default'.
+  if((rc = execute(makevs(command, "p4", "opened", "...", (char *)0),
+                   NULL/*input*/,
+                   &opened,
+                   &errors))) {
+    report_lines(errors);
+    fatal("'p4 opened ...' exited with status %d", rc);
+  }
+  if(!(errors.size() == 0
+       || (errors.size() == 1
+           && errors[0] == "... - file(s) not opened on this client."))) {
+    report_lines(errors);
+    fatal("Unexpected error output from 'p4 opened ...'");
+  }
+  // Build the info array
+  for(size_t n = 0; n < opened.size(); ++n) {
+    P4FileInfo fi(opened[n]);
+
+    //fprintf(stderr, "opened: %s -> %s\n", fi.depot_path.c_str(), fi.action.c_str());
+    info[fi.depot_path] = fi;
+  }
+
+  // 'p4 have' gives all files, in the form:
+  //   DEPOT-PATH#REV - LOCAL-PATH
+  if((rc = execute(makevs(command, "p4", "have", "...", (char *)0),
+                   NULL/*input*/,
+                   &have)))
+    fatal("'p4 have ...' exited with status %d", rc);
+  for(size_t n = 0; n < have.size(); ++n) {
+    const string &l = have[n];
+    string::size_type i = l.find('#');
+    const string depot_path = l.substr(0, i);
+    ++i;
+    string revs;
+    while(isdigit(l.at(i)))
+      revs += l[i++];
+    const int rev = atoi(revs.c_str());
+    while(l.at(i) == ' ' || l.at(i) == '-')
+      ++i;
+    const string local_path = l.substr(i);
+    info_type::iterator it = info.find(depot_path);
+    if(it == info.end()) {
+      // Not an open file
+      P4FileInfo fi;
+      fi.depot_path = depot_path;
+      fi.rev = rev;
+      fi.local_path = local_path;
+      info[fi.depot_path] = fi;
+      //fprintf(stderr, "have(1): %s -> %s\n", fi.depot_path.c_str(), fi.local_path.c_str());
+    } else {
+      // Must be an open file.  Usefuly we can pick up the local path here.
+      it->second.local_path = local_path;
+      //fprintf(stderr, "have(2): %s -> %s\n", it->second.depot_path.c_str(), it->second.local_path.c_str());
+    }
+    by_local[local_path] = depot_path;
+  }
+
+  // That _should_ give us the local path for everything that p4 knows about,
+  // hence no need to mess with 'p4 where'.
+
+  // Fill in relative paths
+  for(info_type::iterator it = info.begin();
+      it != info.end();
+      ++it) {
+    it->second.relative_path = get_relative_path(it->second.local_path);
+    by_relative[it->second.relative_path] = it->first;
+  }
+}
+
+// ltfilename ------------------------------------------------------------------
+
+// Split into path components.
+static void split_path(const string &path, vector<string> &bits) {
+  bits.clear();
+  string::size_type n = 0;
+  while(n < path.size()) {
+    if(path[n] == '/') {
+      ++n;
+    } else {
+      string::size_type slash = path.find('/', n);
+      bits.push_back(path.substr(n, slash - n));
+      n = slash;
+    }
+  }
+}
+
+// Filename comparison should group files in the same directory together.  We
+// do this by finding the common prefix of A and B, then comparing the
+// immediately subsequent path component.
+bool ltfilename::operator()(const string &a, const string &b) const {
+  // Decompose into path components
+  vector<string> abits, bbits;
+  split_path(a, abits);
+  split_path(b, bbits);
+  // Find the common prefix length
+  size_t n;
+  for(n = 0; n < abits.size() && n < bbits.size() && abits[n] == bbits[n]; ++n)
+    ;
+  // If we've "run out" of both sides then they're equal
+  if(n == abits.size() && n == bbits.size())
+    return false;
+  // If we've only run out of one side then that side is smaller
+  if(n == abits.size())
+    return true;
+  if(n == bbits.size())
+    return false;
+  // Otherwise we compare the subsequent component
+  return abits[n] < bbits[n];
 }
 
 /*

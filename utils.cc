@@ -190,6 +190,91 @@ void remove_directories(int &nfiles, char **files) {
   nfiles = m;
 }
 
+// Return true if d is a prefix of s; D must have a trailing slash.
+static bool is_prefix(const string &d, const string &s) {
+  if(s.size() <= d.size())
+    return false;
+  return s.compare(0, d.size(), d, 0, d.size()) == 0;
+}
+
+// If possible make S into a relative path
+string get_relative_path(const string &s) {
+  // Cache of all filenames equal to the current directory, so we don't spend
+  // ouur life doing stat() calls.  In fact in the most common case there'll
+  // only be one.  All entries in here INCLUDE the trailing slash.
+  //
+  // (Including the trailing slash means that the root can be handled without
+  // any special-casing.  It turns out to make is_prefix() above and the
+  // stripping of the absolute part below simpler, too.)
+  static list<string> pwds;
+
+  // Already relative?
+  if(s.at(0) != '/')
+    return s;
+  // See if any past matches
+  for(list<string>::const_iterator it = pwds.begin();
+      it != pwds.end();
+      ++it) {
+    const string &dir = *it;
+    
+    if(s == dir)
+      return ".";
+    if(is_prefix(dir, s)) {
+      //fprintf(stderr, "%s -> %s via cache\n",
+      //        s.c_str(), s.substr(dir.size()).c_str());
+      return s.substr(dir.size());
+    }
+  }
+  // Find out what device/inode the current directory is
+  struct stat pwd_stat[1], dir_stat[1];
+  if(stat(".", pwd_stat) < 0)
+    fatal("stat .: %s", strerror(errno));
+  for(string::size_type pos = 0; pos < s.size();) {
+    const string::size_type sl = s.find('/', pos);
+    
+    if(sl == string::npos)
+      break;
+    // We INCLUDE the trailing slash in d
+    const string d = s.substr(0, sl + 1);
+    if(stat(d.c_str(), dir_stat) < 0)
+      fatal("stat %s: %s", d.c_str(), strerror(errno));
+    if(pwd_stat->st_dev == dir_stat->st_dev
+       && pwd_stat->st_ino == dir_stat->st_ino) {
+      // Stash hit for next time
+      //fprintf(stderr, "stash %s\n", d.c_str());
+      pwds.push_back(d);
+      return s.substr(d.size());
+    }
+    pos = sl + 1;
+  }
+  return s;
+}
+
+string dirname(const string &f) {
+  string::size_type ls = f.rfind('/');
+  
+  // No slashes -> dirname is current directory
+  if(ls == string::npos)
+    return ".";
+  // Last slash might be part of a sequence of more than one slash
+  while(ls > 0 && f.at(ls - 1) == '/')
+    --ls;
+  // If last slash sequence is at start, dirname is root
+  if(ls == 0)
+    return "/";
+  else
+    return f.substr(0, ls);
+}
+
+string basename(const string &f) {
+  string::size_type ls = f.rfind('/');
+  
+  if(ls == string::npos)
+    return f;
+  else
+    return f.substr(ls + 1);
+}
+
 /*
 Local Variables:
 mode:c++
