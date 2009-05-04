@@ -62,13 +62,15 @@ span.command {
    
    <div>
     
-    <p>Perforce: Filenames containing <tt>@</tt>, <tt>%</tt>, <tt>#</tt> and
+    <p>Filenames containing <tt>@</tt>, <tt>%</tt>, <tt>#</tt> and
     <tt>*</tt> should now be properly encoded and decoded.</p>
 
     <p>If you try to <tt>vcs add</tt> a directory to Perforce, it will be
     silently ignored.</p>
 
-    <p><tt>vcs status</tt> now shows files opened for delete.</p>
+    <p><tt>vcs status</tt> now shows files opened for delete and supports
+    &ldquo;incomplete&rdquo; client views (i.e. which don't cover every
+    possible filename below the client root) properly.</p>
 
    </div>   
 
