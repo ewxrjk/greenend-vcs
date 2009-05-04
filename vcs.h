@@ -132,6 +132,13 @@ int execute(const vector<string> &command,
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...);
+void report_lines(const vector<string> &l, 
+                  const char *what = NULL, 
+                  const char *prefix = NULL, 
+                  FILE *fp = stderr);
+string get_relative_path(const string &s);
+string dirname(const string &s);
+string basename(const string &s);
 
 extern list<string> global_ignores;
 
