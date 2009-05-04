@@ -36,6 +36,7 @@ static void help(FILE *fp = stdout) {
 	  "Options:\n"
           "  -v, --verbose     Verbose operation\n"
           "  -n, --dry-run     Report what would be done but do nothing\n"
+          "  -d, --debug       Display debug messages (-dd for more)\n"
 	  "  -h, --help        Display usage message\n"
 	  "  -H, --commands    Display command list\n"
 	  "  -V, --version     Display version number\n"
@@ -184,7 +185,7 @@ int main(int argc, char **argv) {
       ipv = n - '0';
       break;
     case 'd':
-      debug = 1;
+      ++debug;
       break;
     default:
       exit(1);

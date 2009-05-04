@@ -532,7 +532,7 @@ int execute(const vector<string> &command,
     join(s, *input);
     w.init(s, 0);
     monitors.push_back(&w);
-    if(debug)
+    if(debug > 1)
       report_lines(*input, "Input", "| ");
   }
   if(output) {
@@ -546,12 +546,12 @@ int execute(const vector<string> &command,
   const int rc = exec(command, monitors);
   if(output) {
     split(*output, ro.str());
-    if(debug)
+    if(debug > 1)
       report_lines(*output, "Output", "| ");
   }
   if(errors) {
     split(*errors, re.str());
-    if(debug)
+    if(debug > 1)
       report_lines(*errors, "Errors", "| ");
   }
   return rc;

@@ -135,7 +135,7 @@ void listfiles(string path,
   ignored.clear();
   init_global_ignores();
   listfiles_recurse(path, files, ignored);
-  if(debug) {
+  if(debug > 1) {
     fprintf(stderr, "listfiles output:\n");
     for(list<string>::const_iterator it = files.begin();
         it != files.end();

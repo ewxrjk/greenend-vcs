@@ -21,7 +21,10 @@
 #include <cerrno>
 #include <fcntl.h>
 
-// Global debug flag
+// Global debug level
+// 0 = no debugging output
+// 1 = basic debugging output (e.g. commands but not output)
+// 2 = copious debugging output (e.g. command input and output)
 int debug;
 
 // Global verbose operation flag

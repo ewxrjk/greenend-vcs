@@ -33,7 +33,7 @@ static vector<string> makevs(const char *first, ...) {
 int main(int argc, char **) {
 
   if(argc > 1)
-    debug = true;
+    debug = 99;
   assert(execute("true", EXE_END) == 0);
   assert(execute("false", EXE_END) != 0);
   assert(execute("test", EXE_STR, "-d", EXE_STR, "/", EXE_END) == 0);

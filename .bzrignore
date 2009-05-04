@@ -25,3 +25,4 @@ t-version
 *.log
 t-execute
 t-ltfilename
+TAGS
