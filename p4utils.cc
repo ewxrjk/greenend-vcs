@@ -429,8 +429,26 @@ void P4Info::gather() {
     by_local[local_path] = depot_path;
   }
 
-  // That _should_ give us the local path for everything that p4 knows about,
-  // hence no need to mess with 'p4 where'.
+  // We'll still be missing local paths for files known to 'opened' but not
+  // 'have', e.g. those newly added.
+
+  // Accumulate a list of files we don't know the local path for
+  list<string> files;
+  for(info_type::iterator it = info.begin();
+      it != info.end();
+      ++it)
+    if(it->second.local_path.size() == 0)
+      files.push_back(it->first);
+  
+  if(files.size()) {
+    // Use 'p4 where' to map depot paths to local paths
+    vector<string> where;
+    p4__where(where, files);
+    for(size_t n = 0; n < where.size(); ++n) {
+      const P4Where w(where[n]);
+      info[w.depot_path].local_path = w.local_path;
+    }
+  }
 
   // Fill in relative paths
   for(info_type::iterator it = info.begin();
