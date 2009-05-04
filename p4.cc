@@ -209,14 +209,20 @@ static int p4_status() {
   // All files, with relative path names
   listfiles("", files, ignored);
 
+  // Find the base local path name
+  // In theory this is the current working directory, but we want to be
+  // sure we have p4's idea of it.
+  vector<string> wd;
+  list<string> ls;
+  ls.push_back("...");
+  p4__where(wd, ls);
+  const string base(P4Where(wd[0]).local_path,
+                    0, P4Where(wd[0]).local_path.size() - 3);
+
   // Map deleted depot paths to relative filenames and add to file list
   if(deleted.size()) {
-    vector<string> wd;
-    deleted.push_front("...");
     p4__where(wd, deleted);
-    const string base = P4Where(wd[0]).local_path;
-    const string::size_type baselen = base.size() - 3;
-    for(size_t n = 1; n < wd.size(); ++n) {
+    for(size_t n = 0; n < wd.size(); ++n) {
       P4Where w(wd[n]);
       if(debug)
         fprintf(stderr, "depot path: %s\n"
@@ -224,14 +230,14 @@ static int p4_status() {
                 "truncated:  %s\n",
                 w.depot_path.c_str(),
                 w.local_path.c_str(),
-                w.local_path.substr(baselen).c_str());
-      files.push_back(w.local_path.substr(baselen));
+                w.local_path.substr(base.size()).c_str());
+      files.push_back(w.local_path.substr(base.size()));
     }
   }
   
   // Use 'p4 where' to map relative filenames to absolute ones
-  vector<string> where;
-  p4__where(where, files);              // output is %-encoded
+  map<string,P4Where> depot, view, local;
+  p4__where(files, depot, view, local);
 
   if(dryrun)
     return 0;
@@ -244,26 +250,46 @@ static int p4_status() {
   list<string>::const_iterator it = files.begin();
   size_t n = 0;
   while(it != files.end()) {
-    const string depot_path = p4_decode(where[n].substr(0, where[n].find(' ')));
-    const string local_path(*it);
-    const map<string,string>::const_iterator k = known.find(depot_path);
+    // Compute (p4's idea of) the absolute local path
+    const string local_path = base + *it;
+    // Find the 'p4 where' info, if there is any
+    const P4Where *w = local.find(local_path) != local.end()
+      ? &local[local_path] : NULL;
+    // Find what p4 knows about the file
+    const map<string,string>::const_iterator k
+      = w ? known.find(w->depot_path) : known.end();
+    // This will be the file status.
     string status;
     
+    fprintf(stderr,
+            "file %s\n"
+            "  local_path %s\n", it->c_str(), local_path.c_str());
+    if(w)
+      fprintf(stderr, "  w %s | %s | %s\n",
+              w->depot_path.c_str(), w->view_path.c_str(), w->local_path.c_str());
+    else
+      fprintf(stderr, "  w NULL\n");
+    if(k != known.end())
+      fprintf(stderr, "  k %s -> %s\n",
+              k->first.c_str(), k->second.c_str());
+    else
+      fprintf(stderr, "  k end()\n");
+
     if(k != known.end()) {
       // Perforce knows something about this file
       status = k->second;
-      if(ignored.find(local_path) != ignored.end())
+      if(ignored.find(*it) != ignored.end())
         // ...but it's ignored!
-        known_ignored.push_back(local_path);
+        known_ignored.push_back(*it);
     } else {
       // Perforce knows nothing about this file
-      if(ignored.find(local_path) == ignored.end())
+      if(ignored.find(*it) == ignored.end())
         // ...and it's not ignored either
         status = "?";
     }
     if(status.size()) {
       if(printf("%c %s\n",
-                toupper(status[0]), local_path.c_str()) < 0)
+                toupper(status[0]), it->c_str()) < 0)
         fatal("error writing to stdout: %s", strerror(errno));
     }
 

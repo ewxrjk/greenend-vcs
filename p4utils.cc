@@ -232,6 +232,29 @@ void p4__where(vector<string> &where, const list<string> &files) {
   }
 }
 
+// Run 'p4 where' on all the listed files,  breaking up into multiple
+// invocations to avoid command-line length limits and returning the
+// results index by depot path, view path and local path.
+void p4__where(const list<string> &files,
+               map<string,P4Where> &depot,
+               map<string,P4Where> &view,
+               map<string,P4Where> &local) {
+  vector<string> where;
+  
+  p4__where(where, files);
+  depot.clear();
+  view.clear();
+  local.clear();
+  for(size_t n = 0; n < where.size(); ++n) {
+    P4Where w(where[n]);
+
+    fprintf(stderr, "local %s\n", w.local_path.c_str());
+    depot[w.depot_path] = w;
+    view[w.view_path] = w;
+    local[w.local_path] = w;
+  }
+}
+
 /*
 Local Variables:
 c-basic-offset:2
