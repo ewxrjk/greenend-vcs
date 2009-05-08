@@ -18,10 +18,6 @@
 #include "vcs.h"
 #include "p4utils.h"
 
-extern "C" {
-  extern char **environ;
-}
-
 static int p4_edit(int nfiles, char **files) {
   return execute("p4",
                  EXE_STR, "edit",

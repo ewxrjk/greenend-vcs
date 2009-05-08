@@ -20,6 +20,10 @@
 #include <sstream>
 #include <iomanip>
 
+extern "C" {
+  extern char **environ;
+}
+
 // Replace metacharacters with %xx
 string p4_encode(const string &s) {
   ostringstream r;

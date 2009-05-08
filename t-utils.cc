@@ -17,6 +17,7 @@
  */
 #include "vcs.h"
 #include <fcntl.h>
+#include <sys/stat.h>
 
 int main(void) {
   FILE *fp;

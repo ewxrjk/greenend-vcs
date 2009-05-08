@@ -36,7 +36,7 @@ public:
   virtual void beforeselect(fd_set *rfds, fd_set *wfds, int &max) = 0;
 
   // Called after select()
-  virtual void afterselect(const fd_set *rfds, const fd_set *wfds) = 0; 
+  virtual void afterselect(fd_set *rfds, fd_set *wfds) = 0; 
 
   // Test whether this monitor is still active
   virtual bool active() = 0;
@@ -141,7 +141,7 @@ public:
     update_fd_set(wfds, max);
   }
 
-  void afterselect(const fd_set *, const fd_set *wfds) {
+  void afterselect(fd_set *, fd_set *wfds) {
     if(fd >= 0 && FD_ISSET(fd, wfds)) {
       size_t nbytes = 0;
       const void *ptr = available(nbytes);
@@ -202,7 +202,7 @@ public:
     update_fd_set(rfds, max);
   }
   
-  void afterselect(const fd_set *rfds, const fd_set *) {
+  void afterselect(fd_set *rfds, fd_set *) {
     if(fd >= 0 && FD_ISSET(fd, rfds)) {
       char buffer[4096];
       int n = ::read(fd, buffer, sizeof buffer);
