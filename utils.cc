@@ -253,31 +253,6 @@ string get_relative_path(const string &s) {
   return s;
 }
 
-string dirname(const string &f) {
-  string::size_type ls = f.rfind('/');
-  
-  // No slashes -> dirname is current directory
-  if(ls == string::npos)
-    return ".";
-  // Last slash might be part of a sequence of more than one slash
-  while(ls > 0 && f.at(ls - 1) == '/')
-    --ls;
-  // If last slash sequence is at start, dirname is root
-  if(ls == 0)
-    return "/";
-  else
-    return f.substr(0, ls);
-}
-
-string basename(const string &f) {
-  string::size_type ls = f.rfind('/');
-  
-  if(ls == string::npos)
-    return f;
-  else
-    return f.substr(ls + 1);
-}
-
 /*
 Local Variables:
 mode:c++
