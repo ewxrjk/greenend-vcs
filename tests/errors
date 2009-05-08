@@ -21,7 +21,7 @@ set -e
 # To some extent this is meaningless bumping of coverage numbers, but
 # it might catch out the odd bit of future stupidity.
 
-. $srcdir/tests/utils.sh
+. ${srcdir:-.}/tests/utils.sh
 
 xfail vcs
 xfail vcs --

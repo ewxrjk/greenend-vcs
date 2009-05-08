@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. $srcdir/tests/utils.sh
+. ${srcdir:-.}/tests/utils.sh
 
 mkdir -p test-root
 x vcs --help
