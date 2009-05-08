@@ -18,32 +18,6 @@
 #ifndef P4UTILS_H
 #define P4UTILS_H
 
-struct P4Opened {
-  string path;                          // depot path
-  int rev;                              // revision number
-  string action;                        // action
-  int chnum;                            // change number, -1 for default
-  string type;                          // file type
-  bool locked;                          // true for *locked*
-
-  P4Opened(): rev(0),
-              chnum(-1),
-              locked(false) {
-  }
-
-  P4Opened(const string &l): rev(0),
-                             chnum(-1),
-                             locked(false) { 
-    parse(l);
-  }
-
-  // Zap everything
-  void clear();
-
-  // Parse one line
-  void parse(const string &l);
-};
-
 // Parsed 'p4 where' output
 struct P4Where {
   string depot_path;

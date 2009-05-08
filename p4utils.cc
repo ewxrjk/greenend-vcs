@@ -100,58 +100,6 @@ string p4_decode(const string &s) {
   return r;
 }
 
-// Zap everything
-void P4Opened::clear() {
-  path.clear();
-  rev = 0;
-  action.clear();
-  chnum = -1;
-  type.clear();
-  locked = false;
-}
-
-  // Cheesy parser
-void P4Opened::parse(const string &l) {
-  clear();
-  // Get the depot path
-  string::size_type n = l.find('#');
-  if(n == string::npos)
-    fatal("no '#' found in 'p4 opened' output: %s",
-          l.c_str());
-  path.assign(p4_decode(l.substr(0, n)));
-  // The revision
-  string revs;
-  ++n;
-  while(isdigit(l.at(n)))
-    revs += l[n++];
-  rev = atoi(revs.c_str());
-  // The action
-  while(l.at(n) == ' ' || l.at(n) == '-')
-    ++n;
-  while(l.at(n) != ' ')
-    action += l[n++];
-  // The change
-  string chstr;
-  while(l.at(n) == ' ')
-    ++n;
-  while(l.at(n) != ' ')
-    chstr += l[n++];
-  if(chstr == "default")
-    chnum = -1;
-  else
-    chnum = atoi(chstr.c_str());
-  // The type
-  while(l.at(n) == ' ' || l.at(n) == '(')
-    ++n;
-  while(l.at(n) != ')')
-    type += l[n++];
-  // Lock status
-  while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
-    ++n;
-  if(n < l.size() && l[n] == '*')
-    locked = true;
-}
-
 void P4Where::parse(const string &l) {
   string::size_type n = l.find(' ');
   depot_path = p4_decode(l.substr( 0, n));
