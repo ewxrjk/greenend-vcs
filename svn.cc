@@ -55,6 +55,8 @@ static int svn_revert(int nfiles, char **files) {
     // Establish the current state
     vector<string> status;
     int rc;
+    // svn interactive output changes between versions, sadly, so we must fall
+    // back on the XML output.
     if((rc = capture(status, "svn", "status", "-q", (char *)0)))
       fatal("svn status exited with status %d", rc);
     vector<char *> files;

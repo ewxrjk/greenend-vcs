@@ -26,6 +26,8 @@ AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
 AC_CHECK_LIB([curl],[curl_easy_init])
+AC_CHECK_LIB([expat],[XML_ParserCreate])
+AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_HEADERS([curl/curl.h])
 
 RJK_GCOV
