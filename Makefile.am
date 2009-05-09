@@ -28,6 +28,7 @@ t_version_SOURCES=utils.cc version.cc t-version.cc
 t_execute_SOURCES=utils.cc execute.cc t-execute.cc
 t_ltfilename_SOURCES=utils.cc execute.cc p4utils.cc t-ltfilename.cc
 t_utils_SOURCES=utils.cc t-utils.cc
+TESTS_ENVIRONMENT=TESTLOG=true
 TESTS=t-version t-execute t-ltfilename t-utils \
 	tests/help tests/errors \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4

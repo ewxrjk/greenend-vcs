@@ -156,4 +156,6 @@ unset P4USER || true
 builddir=`pwd`
 PATH=$builddir:$PATH
 
-exec > ${0##*/}.log 2>&1
+if ${TESTLOG:-false}; then
+  exec > ${0##*/}.log 2>&1
+fi
