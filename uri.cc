@@ -63,7 +63,7 @@ const string uri_scheme(const string &uri) {
   return "";
 }
 
-#if HAVE_LIBCURL
+#if HAVE_CURL_CURL_H
 
 static CURL *curl;
 

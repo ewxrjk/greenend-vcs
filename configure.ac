@@ -25,7 +25,8 @@ AC_SET_MAKE
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
-LIBCURL_CHECK_CONFIG
+AC_CHECK_LIB([curl],[curl_easy_init])
+AC_CHECK_HEADERS([curl/curl.h])
 
 RJK_GCOV
 

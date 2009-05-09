@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
     help(stderr);
     exit(1);
   }
-#if HAVE_LIBCURL
+#if HAVE_CURL_CURL_H
   CURLcode rc = curl_global_init(CURL_GLOBAL_ALL);
   if(rc)
     fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));

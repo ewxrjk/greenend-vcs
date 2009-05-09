@@ -32,7 +32,7 @@
 #include <getopt.h>
 #include <errno.h>
 
-#if HAVE_LIBCURL
+#if HAVE_CURL_CURL_H
 # include <curl/curl.h>
 #endif
 
