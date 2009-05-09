@@ -145,6 +145,13 @@ static void XMLCALL character_data(void *userData,
 
 XMLNode *xmlparse(const string &s,
                   bool want_character_data) {
+  vector<string> vs;
+  vs.push_back(s);
+  return xmlparse(vs, want_character_data);
+}
+
+XMLNode *xmlparse(const vector<string> &vs,
+                  bool want_character_data) {
   Parser p(want_character_data);
   XML_Parser expat;
 
@@ -152,7 +159,11 @@ XMLNode *xmlparse(const string &s,
   XML_SetElementHandler(expat, start_element, end_element);
   XML_SetCharacterDataHandler(expat, character_data);
   XML_SetUserData(expat, &p);
-  if(XML_Parse(expat, s.data(), s.size(), 1) != XML_STATUS_OK)
+  for(size_t n = 0; n < vs.size(); ++n) {
+    if(XML_Parse(expat, vs[n].data(), vs[n].size(), 0) != XML_STATUS_OK)
+      fatal("XML_Parse failed");
+  }
+  if(XML_Parse(expat, "", 0, 1) != XML_STATUS_OK)
     fatal("XML_Parse failed");
   XML_ParserFree(expat);
   return p.root;
