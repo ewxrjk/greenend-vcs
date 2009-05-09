@@ -120,10 +120,8 @@ int uri_exists(const string &uri) {
   if(verbose)
     fprintf(stderr, "Checking for existence of %s:\n", uri.c_str());
   rc = curl_easy_perform(curl);
-  if(!rc) {
-    fprintf(stderr, "  OK\n");
+  if(!rc)
     return 1;
-  }
   if(verbose)
     fprintf(stderr, "  CURL status: %d (%s)\n  Error: %s\n",
             rc, curl_easy_strerror(rc), error);

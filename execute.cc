@@ -467,9 +467,11 @@ int execute(const char *prog, ...) {
   va_start(ap, prog);
   assemble(cmd, prog, ap, killfds);
   va_end(ap);
-  if(dryrun)
+  if(dryrun) {
     display_command(cmd);
-  return exec(cmd, list<monitor *>(), killfds);
+    return 0;
+  } else
+    return exec(cmd, list<monitor *>(), killfds);
 }
 
 // Execute a command (specified like execl()) and capture its output.
