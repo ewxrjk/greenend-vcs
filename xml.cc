@@ -19,6 +19,7 @@
 #include "xml.h"
 #include <expat.h>
 #include <iconv.h>
+#include <langinfo.h>
 
 #ifdef XML_UNICODE
 # define EXPAT_ENCODING "UTF-16"
@@ -66,7 +67,7 @@ static string expat_to_native(const XML_Char *data,
   static iconv_t converter;
 
   if(!converter) {
-    converter = iconv_open("char", EXPAT_ENCODING);
+    converter = iconv_open(nl_langinfo(CODESET), EXPAT_ENCODING);
     if(converter == (iconv_t)-1)
       fatal("iconv_open %s->char: %s", EXPAT_ENCODING, strerror(errno));
   } else

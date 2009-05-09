@@ -157,6 +157,8 @@ static const struct command *find_command(const char *cmd) {
 int main(int argc, char **argv) {
   int n;
 
+  if(!setlocale(LC_CTYPE, ""))
+    fatal("error calling setlocale: %s", strerror(errno));
   // Parse global options
   while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
     switch(n) {
