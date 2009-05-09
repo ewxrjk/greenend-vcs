@@ -60,7 +60,8 @@ public:
   string value;
 };
 
-XMLNode *xmlparse(const string &s);
+XMLNode *xmlparse(const string &s,
+                  bool want_character_data = true);
 
 #endif /* XML_H */
 

@@ -50,10 +50,12 @@ XMLNodeType XMLString::type() const {
 
 // XML Parser state
 struct Parser {
-  Parser():
+  Parser(bool wcd):
+    want_character_data(wcd),
     root(0),
     current(0) {
   }
+  bool want_character_data;
   XMLNode *root;
   XMLElement *current;
 };
@@ -131,16 +133,19 @@ static void XMLCALL character_data(void *userData,
 				   const XML_Char *s,
 				   int len) {
   Parser *p = (Parser *)userData;
-  XMLString *n = new XMLString(p->current);
-  n->value = expat_to_native(s, len);
-  if(p->current) 
-    p->current->contents.push_back(n);
-  else
-    p->root = n;
+  if(p->want_character_data) {
+    XMLString *n = new XMLString(p->current);
+    n->value = expat_to_native(s, len);
+    if(p->current) 
+      p->current->contents.push_back(n);
+    else
+      p->root = n;
+  }
 }
 
-XMLNode *xmlparse(const string &s) {
-  Parser p;
+XMLNode *xmlparse(const string &s,
+                  bool want_character_data) {
+  Parser p(want_character_data);
   XML_Parser expat;
 
   expat = XML_ParserCreate(0);
