@@ -81,8 +81,8 @@ t_update() {
 }
 
 t_verify() {
-    if diff project/one copy/one; then :; else exit 1; fi
-    if diff project/two copy/two; then :; else exit 1; fi
+    if diff -u project/one copy/one; then :; else exit 1; fi
+    if diff -u project/two copy/two; then :; else exit 1; fi
 }
 
 t_revert() {
@@ -121,11 +121,13 @@ check_match() {
 }
 
 x() {
+    echo ">>> PWD=`pwd`"
     echo ">>>" "$@" >&2
     "$@"
 }
 
 xfail() {
+    echo "!!! PWD=`pwd`"
     echo "!!!" "$@" >&2
     if "$@"; then
       echo "*** UNEXPECTEDLY SUCCEEDED ***"
