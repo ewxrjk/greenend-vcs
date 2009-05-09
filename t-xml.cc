@@ -20,7 +20,7 @@
 
 static void report(const XMLNode *n, int depth = 0) {
   switch(n->type()) {
-  case XMLN_Element:
+  case XMLN_Element: {
     const XMLElement *e = dynamic_cast<const XMLElement *>(n);
     printf("%*selement: %s {\n", depth, "", e->name.c_str());
     for(map<string,string>::const_iterator it = e->attributes.begin();
@@ -32,7 +32,8 @@ static void report(const XMLNode *n, int depth = 0) {
       report(e->contents[i], depth + 1);
     printf("%*s}\n", depth, "");
     break;
-  case XMLN_String:
+  }
+  case XMLN_String: {
     const XMLString *s = dynamic_cast<const XMLString *>(n);
     printf("%*sstring: ", depth, "");
     for(size_t i = 0; i < s->value.size(); ++i)
@@ -42,6 +43,7 @@ static void report(const XMLNode *n, int depth = 0) {
         printf("\\x%02x", s->value[i]);
     putchar('\n');
     break;
+  }
   }
 }
 
