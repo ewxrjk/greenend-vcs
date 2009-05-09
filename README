@@ -16,6 +16,7 @@ Installation
 To build VCS, you will need:
   GNU C++      http://gcc.gnu.org/
   cURL         http://curl.haxx.se/
+  Expat        http://expat.sourceforge.net/
 
 Use the following commands:
   ./configure
