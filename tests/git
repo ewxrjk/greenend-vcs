@@ -44,6 +44,6 @@ touch -- -addme
 vcs -v add -- -addme
 cd ..
 
-vcs clone http://www.greenend.org.uk/rjk/git/astrosim
+vcs clone http://www.greenend.org.uk/rjk/git/example
 
 t_done
