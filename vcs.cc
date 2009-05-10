@@ -207,7 +207,6 @@ int main(int argc, char **argv) {
   const int status = c->action(argc - optind, argv + optind);
   if(fclose(stdout) < 0)
     fatal("closing stdout: %s", strerror(errno));
-  await_redirect();
   return status;
 }
 

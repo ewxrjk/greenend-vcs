@@ -114,7 +114,6 @@ int inject(const vector<string> &input,
            const char *prog,
            ...);
 void redirect(const char *pager);
-void await_redirect();
 int readline(const string &path, FILE *fp, string &l);
 void init_global_ignores();
 void read_ignores(list<string> &ignores, const string &path);

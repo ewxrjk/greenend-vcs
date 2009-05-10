@@ -126,18 +126,31 @@ int erase(const char *s) {
     return 0;
 }
 
-static pid_t pager_pid = -1;
-
 // Redirect output if not a terminal
+//
+// We run both the pager and vcs in subprocesses linked by a pipe.
+//
+// If the pager was foreground and vcs background, we wouldn't be able to do
+// anything with vcs's exit status.
+//
+// If the pager was background and vcs foreground then it'd be inconvenient to
+// terminate when the user quits the pager (at which point we must return
+// control to the user in a timely fashion even if there's more work going on).
 void redirect(const char *pager) {
   int p[2];
+  pid_t pager_pid, vcs_pid, pid;
 
+  // Do nothing if no pager configured
   if(!pager)
     return;
+  // Don't invoke pager if not sending to a terminal
   if(!isatty(1))
     return;
+  // Create a pipe
   if(pipe(p) < 0)
     fatal("pipe failed: %s", strerror(errno));
+  // Invoke pager in a subprocess.  Return to the user's control must be
+  // delayed at least until the pager completes.
   switch((pager_pid = fork())) {
   case 0:
     if(dup2(p[0], 0) < 0) {
@@ -154,18 +167,59 @@ void redirect(const char *pager) {
   case -1:
     fatal("fork failed: %s", strerror(errno));
   }
-  if(dup2(p[1], 1) < 0)
-    fatal("dup2");
-  if(close(p[0]) < 0 || close(p[1]) < 0)
-    fatal("close");
-}
-
-void await_redirect() {
-  int w;
-
-  if(pager_pid != -1)
-    while(waitpid(pager_pid, &w, 0) < 0 && errno == EINTR)
-      ;
+  // Run the rest of vcs in a subprocess.
+  switch((vcs_pid = fork())) {
+  case 0:
+    if(dup2(p[1], 1) < 0)
+      fatal("dup2: %s", strerror(errno));
+    if(close(p[0]) < 0 || close(p[1]) < 0)
+      fatal("close: %s", strerror(errno));
+    return;
+  case -1:
+    fatal("fork failed: %s", strerror(errno));
+  }
+  if(close(p[0]) < 0
+     || close(p[1]) < 0) {
+    perror("close");
+    _exit(-1);
+  }
+  int vcs_status = 0, w;
+  for(;;) {
+    pid = wait(&w);
+    if(pid < 0) {
+      if(errno == EINTR)
+        continue;
+      perror("wait");
+      _exit(-1);
+    }
+    if(pid == pager_pid) {
+      // User has quit the pager.
+      //
+      // We don't (yet) document the exit status behavior; it may be that other
+      // choices are more sensible.  The current version prefers the
+      // operation's exit status to the pager's even if the pager crashed, but
+      // will use the pager's if you quit (or it crashes) before the underlying
+      // operation is complete.
+      if(vcs_pid != -1)
+        // Try to stop VCS if it's still running
+        kill(vcs_pid, SIGTERM);
+      else
+        // If VCS finished already send back its exit status
+        _exit(vcs_status);
+      // Send back the pager's exit status
+      _exit(WIFSIGNALED(w) ? 128 + WTERMSIG(w) : WEXITSTATUS(w));
+    }
+    if(pid == vcs_pid) {
+      if(WIFSIGNALED(w) && WTERMSIG(w) == SIGPIPE)
+        // SIGPIPE is definitely to be ignored.  Sadly svn (for one) feels the
+        // need to report it got 'broken pipe'...
+        vcs_status = 0;
+      else
+        // Anything else is - potentially - of interest
+        vcs_status = WIFSIGNALED(w) ? 128 + WTERMSIG(w) : WEXITSTATUS(w);
+      vcs_pid = -1;
+    }
+  }
 }
 
 // Read one line from a file.  Returns 1 on success, 0 on eof
