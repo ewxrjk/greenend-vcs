@@ -20,6 +20,7 @@
 #include <sys/wait.h>
 #include <cerrno>
 #include <fcntl.h>
+#include <signal.h>
 
 // Global debug level
 // 0 = no debugging output
