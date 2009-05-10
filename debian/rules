@@ -72,7 +72,7 @@ pkg-vcs: build
 	 $(INSTALL_DATA) debian/copyright CHANGES.html \
 		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
-		debian/vcs/usr/share/doc/vcs/changelog.Debian
+		debian/vcs/usr/share/doc/vcs/changelog
 	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
 	strip --remove-section=.comment debian/vcs/usr/bin/vcs
