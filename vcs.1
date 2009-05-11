@@ -247,6 +247,15 @@ CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
 .SS Bazaar
 Web page: http://bazaar\-vcs.org/
+.PP
+.B "vcs up"
+will invoke
+.B "bzr up"
+in a bound branch (created with
+.BR "bzr checkout" )
+and
+.B "bzr pull"
+in any other branch.
 .SS Subversion
 Web page: http://subversion.tigris.org/
 .SS Git

@@ -62,9 +62,19 @@ static int bzr_status() {
 }
 
 static int bzr_update() {
-  return execute("bzr",
-                 EXE_STR, "pull",
+  vector<string> info;
+  int rc;
+  if((rc = capture(info, "bzr", "info", (char *)NULL)))
+    fatal("'bzr info' exited with status %d", rc);
+  if(info.size() > 0
+     && info[0].compare(0, 8, "Checkout") == 0)
+    return execute("bzr",
+                 EXE_STR, "up",
                  EXE_END);
+  else
+    return execute("bzr",
+                   EXE_STR, "pull",
+                   EXE_END);
 }
 
 static int bzr_log(const char *path) {
