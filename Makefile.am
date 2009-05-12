@@ -19,7 +19,6 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
 	log.cc edit.cc annotate.cc clone.cc version.cc \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
-vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
 noinst_PROGRAMS=t-version t-execute t-ltfilename t-utils t-xml
 dist_noinst_SCRIPTS=tests/help tests/errors \
