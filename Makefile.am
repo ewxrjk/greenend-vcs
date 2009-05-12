@@ -21,7 +21,7 @@ vcs_SOURCES=vcs.cc guess.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
 vcs_LDADD=$(LIBCURL)
 dist_man_MANS=vcs.1
-noinst_PROGRAMS=t-version t-execute t-ltfilename t-utils t-xml
+noinst_PROGRAMS=t-version t-execute t-ltfilename t-utils t-xml t-pager
 dist_noinst_SCRIPTS=tests/help tests/errors \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 t_version_SOURCES=utils.cc version.cc t-version.cc
@@ -29,8 +29,9 @@ t_execute_SOURCES=utils.cc execute.cc t-execute.cc
 t_ltfilename_SOURCES=utils.cc execute.cc p4utils.cc t-ltfilename.cc
 t_utils_SOURCES=utils.cc t-utils.cc
 t_xml_SOURCES=xml.cc utils.cc t-xml.cc
+t_pager_SOURCES=utils.cc t-pager.cc
 TESTS_ENVIRONMENT=TESTLOG=true
-TESTS=t-version t-execute t-ltfilename t-utils t-xml \
+TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager \
 	tests/help tests/errors \
 	tests/bzr tests/cvs tests/svn tests/git tests/hg tests/darcs tests/p4
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
