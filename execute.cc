@@ -505,6 +505,12 @@ int inject(const vector<string> &input,
   va_start(ap, prog);
   vmakevs(command, prog, ap);
   va_end(ap);
+  if(dryrun) {
+    display_command(command);
+    for(size_t n = 0; n < input.size(); ++n)
+      printf("| %s\n", input[n].c_str());
+    return 0;
+  }
   return execute(command, &input, NULL, NULL);
 }
 
