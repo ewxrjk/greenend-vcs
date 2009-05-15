@@ -50,6 +50,10 @@ static void test_pager(const char *pager,
 }
 
 int main(void) {
+  if(!isatty(1)) {
+    fprintf(stderr, "Can't test pager without a tty\n");
+    return 77;
+  }
   test_pager("touch ,pager-ran;cat");
   assert(exists(",pager-ran"));
   assert(exists(",child-ran"));
