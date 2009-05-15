@@ -24,9 +24,6 @@ struct P4Where {
   string view_path;
   string local_path;
 
-  P4Where() {
-  }
-
   P4Where(const string &l) {
     parse(l);
   }

@@ -201,9 +201,9 @@ void p4__where(const list<string> &files,
     P4Where w(where[n]);
 
     //fprintf(stderr, "local %s\n", w.local_path.c_str());
-    depot[w.depot_path] = w;
-    view[w.view_path] = w;
-    local[w.local_path] = w;
+    depot.insert(pair<string,P4Where>(w.depot_path, w));
+    view.insert(pair<string,P4Where>(w.view_path, w));
+    local.insert(pair<string,P4Where>(w.local_path, w));
   }
 }
 

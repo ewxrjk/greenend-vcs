@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
+#include <cctype>
 
 static int alpha(int c) {
   switch(c) {
@@ -27,16 +28,6 @@ static int alpha(int c) {
   case 'J': case 'K': case 'L': case 'M': case 'N': case 'O': case 'P':
   case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W':
   case 'X': case 'Y': case 'Z':
-    return 1;
-  default:
-    return 0;
-  }
-}
-  
-static int digit(int c) {
-  switch(c) {
-  case '0': case '1': case '2': case '3': case '4': case '5': case '6':
-  case '7': case '8': case '9':
     return 1;
   default:
     return 0;
@@ -55,7 +46,7 @@ const string uri_scheme(const string &uri) {
   for(n = 0;
       (n < uri.size()
        && (c = uri.at(n)) != ':'
-       && (alpha(c) || digit(c) || c == '+' || c =='-' || c == '.'));
+       && (alpha(c) || isdigit(c) || c == '+' || c =='-' || c == '.'));
       ++n)
     ;
   if(n < uri.size() && c == ':')
