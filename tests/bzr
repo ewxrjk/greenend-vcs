@@ -38,6 +38,19 @@ if bzr log three >/dev/null 2>&1; then
 fi
 cd ..
 
-vcs clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
+x vcs -n clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
+if [ -d vcs.rel ]; then
+  echo "dry-run clone created target directory" >&2
+  ls -ld vcs.rel
+  exit 1
+fi
+
+x vcs -v clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
+if [ -d vcs.rel ]; then
+  :
+else
+  echo "clone didn't create target directory" >&2
+  exit 1
+fi
 
 t_done

@@ -44,6 +44,19 @@ touch -- -addme
 vcs -v add -- -addme
 cd ..
 
-vcs clone http://www.greenend.org.uk/rjk/git/example
+x vcs -n clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  echo "dry-run clone created target directory" >&2
+  ls -ld example
+  exit 1
+fi
+
+x vcs -v clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  :
+else
+  echo "clone didn't create target directory" >&2
+  exit 1
+fi
 
 t_done
