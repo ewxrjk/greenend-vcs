@@ -23,7 +23,7 @@ t_utils_SOURCES=t-utils.cc
 t_xml_SOURCES=t-xml.cc
 t_pager_SOURCES=t-pager.cc
 LDADD=../src/libvcs.a
-AM_CXXFLAGS=-I../src
+AM_CXXFLAGS=-I${top_srcdir}/src
 TESTS_ENVIRONMENT=TESTLOG=true \
 	PATH=$(shell cd ../src && pwd):$$PATH \
 	top_srcdir=$(shell cd ${top_srcdir} && pwd)
