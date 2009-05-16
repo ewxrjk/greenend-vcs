@@ -33,14 +33,12 @@ static int darcs_add(int /*binary*/, int nfiles, char **files) {
 }
 
 static int darcs_remove(int force, int nfiles, char **files) {
-  if(force) {
-    int rc = 0;
-
-    for(int n = 0; n < nfiles; ++n)
-      if(erase(files[n]))
-        rc = 1;
-    return rc;
-  } else
+  if(force)
+    return execute("rm",
+                   EXE_STR, "-f",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  else
     return execute("darcs",
                    EXE_STR, "remove",
                    EXE_STRS, nfiles, files,

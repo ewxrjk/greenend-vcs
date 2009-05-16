@@ -144,6 +144,11 @@ t_revert() {
     cd copy
     x vcs -v edit one
     echo extra >> one
+    x vcs -n rm -f two
+    if [ ! -e two ]; then
+        echo "dry-run remove removed 'two'" >&2
+        exit 1
+    fi
     x vcs -v rm -f two
     if [ -e two ]; then
 	echo "removed 'two' but it's still there" >&2
@@ -162,6 +167,11 @@ t_revert() {
     else
         echo "Dry-run revert modified 'one'" >&2
         sed 's/^/| ' < one
+        exit 1
+    fi
+    if [ -e two ]; then
+        echo "Dry-run revert restored 'two'" >&2
+        sed 's/^/| ' < two
         exit 1
     fi
     x vcs -v revert
