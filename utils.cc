@@ -84,7 +84,7 @@ string parentdir(const string &d) {
   size_t n = d.rfind(PATHSEP);
   if(n == string::npos)
     fatal("invalid directory name: %s", d.c_str());
-  if(n == 0)			// it's the root or a subdirectory thereof
+  if(n == 0)                         // it's the root or a subdirectory thereof
     return "/";
   return d.substr(0, n);
 }

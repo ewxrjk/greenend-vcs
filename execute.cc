@@ -361,7 +361,7 @@ static int exec(const vector<string> &args,
   // Signals are always fatal
   if(WIFSIGNALED(w))
     fatal("%s received fatal signal %d (%s)", cargs[0], 
-	  WTERMSIG(w), strsignal(WTERMSIG(w)));
+          WTERMSIG(w), strsignal(WTERMSIG(w)));
   if(WIFEXITED(w))
     return WEXITSTATUS(w);
   fatal("%s exited with unknown wait status %#x", cargs[0], w);

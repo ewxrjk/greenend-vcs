@@ -32,18 +32,18 @@ static const struct option options[] = {
 // Display help message
 static void help(FILE *fp = stdout) {
   fprintf(fp, "Usage:\n"
-	  "  vcs [OPTIONS] COMMAND ...\n"
-	  "Options:\n"
+          "  vcs [OPTIONS] COMMAND ...\n"
+          "Options:\n"
           "  -v, --verbose     Verbose operation\n"
           "  -n, --dry-run     Report what would be done but do nothing\n"
           "  -d, --debug       Display debug messages (-dd for more)\n"
-	  "  -h, --help        Display usage message\n"
-	  "  -H, --commands    Display command list\n"
-	  "  -V, --version     Display version number\n"
+          "  -h, --help        Display usage message\n"
+          "  -H, --commands    Display command list\n"
+          "  -V, --version     Display version number\n"
           "  -g, --guess       Guess which version control system is in use\n"
           "  -4, -6            Force IP version for network access\n"
-	  "\n"
-	  "Use 'vcs COMMAND --help' for per-command help.\n");
+          "\n"
+          "Use 'vcs COMMAND --help' for per-command help.\n");
 }
 
 // Table of commands
@@ -124,8 +124,8 @@ static void commandlist(FILE *fp = stdout) {
   fprintf(fp, "vcs commmands:\n\n");
   for(n = 0; commands[n].name; ++n) {
     fprintf(fp, "  %-*s    %s\n", 
-	    maxlen, commands[n].name, 
-	    commands[n].description);
+            maxlen, commands[n].name, 
+            commands[n].description);
   }
   fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
 }
