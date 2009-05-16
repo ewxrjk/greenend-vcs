@@ -64,7 +64,29 @@ t_populate() {
 
 t_modify() {
     cd project
+    if [ -w one ]; then
+        writable=true
+    else
+        writable=false
+    fi
+    x vcs -n edit one
+    if $writable; then
+        :
+    else
+        if [ -w one ]; then
+            echo "vcs -n edit made file writable" >&2
+            ls -l one
+            exit 1
+        fi
+    fi
     x vcs -v edit one
+    if [ -w one ]; then
+        :
+    else
+        echo "vcs -n edit did not make file writable" >&2
+        ls -l one
+        exit 1
+    fi
     echo oneone >> one
     x vcs -v status
     x vcs -v diff > diff-output-1 || true
