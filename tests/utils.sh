@@ -121,13 +121,13 @@ check_match() {
 }
 
 x() {
-    echo ">>> PWD=`pwd`"
+    echo ">>> PWD=`pwd`" >&2
     echo ">>>" "$@" >&2
     "$@"
 }
 
 xfail() {
-    echo "!!! PWD=`pwd`"
+    echo "!!! PWD=`pwd`" >&2
     echo "!!!" "$@" >&2
     if "$@"; then
       echo "*** UNEXPECTEDLY SUCCEEDED ***"
