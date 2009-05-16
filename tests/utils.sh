@@ -152,6 +152,18 @@ t_revert() {
     echo three > three
     x vcs -v add three
     x vcs -v status
+    x vcs -n revert
+    if [ ! -e three ]; then
+        echo "Dry-run revert removed 'three'" >&2
+        exit 1
+    fi
+    if grep -q extra one; then
+        :
+    else
+        echo "Dry-run revert modified 'one'" >&2
+        sed 's/^/| ' < one
+        exit 1
+    fi
     x vcs -v revert
     x vcs -v status
     cd ..
