@@ -16,14 +16,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. ${srcdir:-.}/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init hg
+t_init git
 
-x hg init project
+mkdir project
+cd project
+x git init-db
+cd ..
 t_populate
 
-x hg clone project copy
+x vcs clone `pwd`/project copy
 t_verify
 
 t_modify
@@ -32,13 +35,28 @@ t_verify
 
 t_revert
 cd copy
-x hg status three
-status=$(hg status three | awk '{print $1}')
-if test "x$status" != 'x?'; then
-    fatal "Did not properly revert 'three'"
-    # TODO hg 0.7 (as found in Ubuntu dapper) leads us to fail this test.
-    # This probably won't be fixed without external demand.
+if git log three >/dev/null 2>&1; then
+  echo 'three still known to git' >&2
+  exit 1
 fi
+
+touch -- -addme
+vcs -v add -- -addme
 cd ..
+
+x vcs -n clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  echo "dry-run clone created target directory" >&2
+  ls -ld example
+  exit 1
+fi
+
+x vcs -v clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  :
+else
+  echo "clone didn't create target directory" >&2
+  exit 1
+fi
 
 t_done

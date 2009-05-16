@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. ${srcdir:-.}/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
 # This test can only run if you have p4 and p4d installed.
 t_init p4 p4d

@@ -16,17 +16,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. ${srcdir:-.}/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init git
+t_init cvs
 
-mkdir project
-cd project
-x git init-db
-cd ..
+CVSROOT=$testdir/repo
+export CVSROOT
+
+# Create repository
+x mkdir $CVSROOT
+x cvs -d $CVSROOT init
+
+# Create an empty project and check it out
+x mkdir $CVSROOT/project
+
+x cvs co project
 t_populate
 
-x vcs clone `pwd`/project copy
+x cvs co -d copy project
 t_verify
 
 t_modify
@@ -35,28 +42,31 @@ t_verify
 
 t_revert
 cd copy
-if git log three >/dev/null 2>&1; then
-  echo 'three still known to git' >&2
-  exit 1
+x cvs -n up three
+status=$(cvs -n up three 2>/dev/null)
+if test "x$status" != 'x'; then
+    fatal "Did not properly revert 'three'"
 fi
-
-touch -- -addme
-vcs -v add -- -addme
 cd ..
 
-x vcs -n clone http://www.greenend.org.uk/rjk/git/example
-if [ -d example ]; then
-  echo "dry-run clone created target directory" >&2
-  ls -ld example
-  exit 1
-fi
+cd project
+echo a >> one
+x vcs commit -m "add a to one"
 
-x vcs -v clone http://www.greenend.org.uk/rjk/git/example
-if [ -d example ]; then
-  :
-else
-  echo "clone didn't create target directory" >&2
-  exit 1
+cd ../copy
+echo b >> one
+x vcs up
+x vcs revert one
+cat >one.expected <<EOF
+one
+oneone
+a
+EOF
+check_match one.expected one
+x cvs -n up one
+status=$(cvs -n up one 2>/dev/null)
+if test "x$status" != 'x'; then
+    fatal "Did not properly revert 'one'"
 fi
 
 t_done

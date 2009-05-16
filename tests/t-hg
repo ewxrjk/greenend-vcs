@@ -16,24 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. ${srcdir:-.}/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init cvs
+t_init hg
 
-CVSROOT=$testdir/repo
-export CVSROOT
-
-# Create repository
-x mkdir $CVSROOT
-x cvs -d $CVSROOT init
-
-# Create an empty project and check it out
-x mkdir $CVSROOT/project
-
-x cvs co project
+x hg init project
 t_populate
 
-x cvs co -d copy project
+x hg clone project copy
 t_verify
 
 t_modify
@@ -42,31 +32,13 @@ t_verify
 
 t_revert
 cd copy
-x cvs -n up three
-status=$(cvs -n up three 2>/dev/null)
-if test "x$status" != 'x'; then
+x hg status three
+status=$(hg status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
     fatal "Did not properly revert 'three'"
+    # TODO hg 0.7 (as found in Ubuntu dapper) leads us to fail this test.
+    # This probably won't be fixed without external demand.
 fi
 cd ..
-
-cd project
-echo a >> one
-x vcs commit -m "add a to one"
-
-cd ../copy
-echo b >> one
-x vcs up
-x vcs revert one
-cat >one.expected <<EOF
-one
-oneone
-a
-EOF
-check_match one.expected one
-x cvs -n up one
-status=$(cvs -n up one 2>/dev/null)
-if test "x$status" != 'x'; then
-    fatal "Did not properly revert 'one'"
-fi
 
 t_done

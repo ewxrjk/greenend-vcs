@@ -16,14 +16,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. ${srcdir:-.}/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init bzr
+t_init svn
 
-x bzr init project
+repo=$testdir/repo
+
+# Create repository
+x svnadmin create $repo
+
+# Create an empty project and check it out
+x mkdir project
+x svn import -m 'Import empty directory' project file://$repo/trunk/project
+x rmdir project
+x svn co file:///$repo/trunk/project
+
 t_populate
 
-x vcs clone project copy
+x svn co file:///$repo/trunk/project copy
 t_verify
 
 t_modify
@@ -32,25 +42,11 @@ t_verify
 
 t_revert
 cd copy
-if bzr log three >/dev/null 2>&1; then
-  echo 'three still known to bzr' >&2
-  exit 1
+x svn status three
+status=$(svn status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
+    fatal "Did not properly revert 'three'"
 fi
 cd ..
-
-x vcs -n clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
-if [ -d vcs.rel ]; then
-  echo "dry-run clone created target directory" >&2
-  ls -ld vcs.rel
-  exit 1
-fi
-
-x vcs -v clone http://www.greenend.org.uk/rjk/bzr/vcs.rel
-if [ -d vcs.rel ]; then
-  :
-else
-  echo "clone didn't create target directory" >&2
-  exit 1
-fi
 
 t_done
