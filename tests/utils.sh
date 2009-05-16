@@ -66,11 +66,33 @@ t_modify() {
     cd project
     x vcs -v edit one
     echo oneone >> one
-    x vcs -v edit two
-    echo twotwo >> two
     x vcs -v status
-    x vcs -v commit -m 'oneone' one
-    x vcs -v revert
+    x vcs -v diff > diff-output-1 || true
+    if [ -s diff-output-1 ]; then
+        :
+    else
+        echo Modified one but no diff output >&2
+        exit 1
+    fi
+    x vcs -n commit -m 'oneone'
+    x vcs -v diff > diff-output-2 || true
+    if [ -s diff-output-2 ]; then
+        :
+    else
+        echo Diff output went away after supposedly dry-run commit >&2
+        exit 1
+    fi
+    x vcs -v commit -m 'oneone'
+    x vcs -v diff > diff-output-3 || true
+    # Stupid darcs appends a blank line to diff output even if it
+    # would otherwise be empty.  As a hack we only consider nonblank
+    # lines when determine if the output is empty.
+    sed '/^$/d' < diff-output-3 > diff-output-3a
+    if [ -s diff-output-3a ]; then
+        echo Diff output remains after commit >&2
+        sed 's/^/| /' < diff-output-3
+        exit 1
+    fi
     cd ..
 }
 
