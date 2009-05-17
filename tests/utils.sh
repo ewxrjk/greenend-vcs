@@ -46,6 +46,16 @@ t_populate() {
     cd project
     echo one > one
     echo two > two
+    x vcs -v status > ../before
+    x vcs -n add one two
+    x vcs -v status > ../after
+    if cmp -s ../before ../after; then
+        :
+    else
+        echo "vcs -n add unexpectedly changed status output" >&2
+        cd ../
+        diff -u before after
+    fi
     x vcs -v add one two
     x vcs -v status
     x vcs -v commit -m 'one and two'
