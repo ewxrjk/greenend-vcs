@@ -402,10 +402,10 @@ static void assemble(vector<string> &cmd,
       break;
     }
     case EXE_NO_STDOUT:
-      killfds |= 1;
+      killfds |= 1 << 1;
       break;
     case EXE_NO_STDERR:
-      killfds |= 2;
+      killfds |= 1 << 2;
       break;
     default:
       assert(!"unknown execute() op");
