@@ -19,12 +19,25 @@ t_init() {
 
     # Check all dependencies are present
     for dep; do
-        if type $dep >/dev/null 2>&1; then
-            :
-        else
-            echo "Cannot test $1 - $dep is not installed" >&2
-            exit 77
-        fi
+        case $dep in
+        http:* )
+            if curl -m ${CONNECTMAX:-5} -s -f --head "$dep" \
+                 >/dev/null 2>&1; then
+                :
+            else
+                echo "Cannot run test $1 - can't reach $dep" >&2
+                exit 77
+            fi
+            ;;
+        * )
+            if type $dep >/dev/null 2>&1; then
+                :
+            else
+                echo "Cannot run test $1 - $dep is not installed" >&2
+                exit 77
+            fi
+            ;;
+        esac
     done
 
     testdir=$builddir/test-root/$1
