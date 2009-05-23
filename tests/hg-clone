@@ -20,14 +20,14 @@ set -e
 
 t_init hg http://www.greenend.org.uk/rjk/2009/mercurial
 
-x vcs -n clone http://www.greenend.org.uk/rjk/2009/mercurial
+x vcs -n clone static-http://www.greenend.org.uk/rjk/2009/mercurial
 if [ -d mercurial ]; then
   echo "dry-run clone created target directory" >&2
   ls -ld mercurial
   exit 1
 fi
 
-x vcs -v clone http://www.greenend.org.uk/rjk/2009/mercurial
+x vcs -v clone static-http://www.greenend.org.uk/rjk/2009/mercurial
 if [ -d mercurial ]; then
   :
 else
