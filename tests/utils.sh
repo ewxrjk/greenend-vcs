@@ -256,7 +256,7 @@ unset P4USER || true
 
 # Make sure vcs is on the path
 builddir=`pwd`
-PATH=$builddir:$PATH
+PATH=$builddir/src:$PATH
 
 if ${TESTLOG:-false}; then
   exec > ${0##*/}.log 2>&1
