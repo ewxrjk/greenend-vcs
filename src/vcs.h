@@ -138,6 +138,7 @@ void report_lines(const vector<string> &l,
 string get_relative_path(const string &s);
 string dirname(const string &s);
 string basename(const string &s);
+int editor(vector<string> &file);
 
 extern list<string> global_ignores;
 

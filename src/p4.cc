@@ -61,20 +61,53 @@ static int p4_remove(int /*force*/, int nfiles, char **files) {
 }
 
 static int p4_commit(const char *msg, int nfiles, char **files) {
-  if(msg) {
-    // If there's a message to include we must cobble together a suitable
-    // change.  We do this by getting the default change and then editing it to
-    // our taste.
-    int rc;
-    vector<string> change;
-    vector<string>::size_type n, m;
+  // We have an optional message and an optional list of files, giving
+  // four possibilities.  If the message isn't present then we need to
+  // bring up a change form for the user to fill in.
+  //
+  // 1) No message, no files.
+  //    We can just "p4 submit ..." and Perforce will get the user to edit
+  //    the change form.
+  // 2) Message and no files.
+  //    We can "p4 submit -d MESSAGE ..." and avoid any further interaction.
+  // 3) No message, list of files.
+  //    We synthesize a change form and let the user edit it.  We then
+  //    invoke "p4 submit -i".
+  // 4) Message, list of files.
+  //    We synthesize a change form and immediately submit it to
+  //    "p4 submit -i".
 
-    if((rc = capture(change, "p4", "change", "-o", (char *)NULL)))
-      fatal("'p4 change -o' exited with status %d", rc);
-    n = 0;
-    // Find the default description 
-    while(n < change.size() && change[n] != "Description:")
-      ++n;
+  // The easy case is when there are no files listed.
+  if(!nfiles) {
+    if(msg)
+      return execute("p4",
+                     EXE_STR, "submit",
+                     EXE_STR, "-d",
+                     EXE_STR, msg,
+                     EXE_STR, "...",
+                     EXE_END);
+    else
+      return execute("p4",
+                     EXE_STR, "submit",
+                     EXE_STR, "...",
+                     EXE_END);
+  }
+
+  // Some files were listed.  There might or might not be a message.  Either
+  // way we need to construct a change form.
+
+  int rc;
+  vector<string> change;
+  vector<string>::size_type n, m;
+
+  // Get the default change form
+  if((rc = capture(change, "p4", "change", "-o", (char *)NULL)))
+    fatal("'p4 change -o' exited with status %d", rc);
+  n = 0;
+  // Find the default description 
+  while(n < change.size() && change[n] != "Description:")
+    ++n;
+  if(msg) {
     // Erase it
     ++n;
     while(n < change.size()
@@ -85,62 +118,60 @@ static int p4_commit(const char *msg, int nfiles, char **files) {
     // Insert the user's message instead
     change.insert(change.begin() + n, string("\t") + msg);
     ++n;
-    // Find the Files: section
-    while(n < change.size() && change[n] != "Files:")
-      ++n;
-    // Erase it
+    // ..pointing just after the message text
+  } else {
+    // Step over it
     ++n;
     while(n < change.size()
           && change[n].size()
           && (change[n].at(0) == '\t'
               || change[n].at(0) == ' '))
-      change.erase(change.begin() + n);
-
-    if(nfiles) {
-      // Translate the list of files to submit
-      vector<string> cmd;
-      vector<string> where;
-      cmd.push_back("p4");
-      cmd.push_back("where");
-      for(m = 0; m < (size_t)nfiles; ++m) {
-        if(!exists(files[m]))
-          fatal("%s does not exist", files[m]);
-        cmd.push_back(p4_encode(files[m]));
-      }
-      if((rc = vcapture(where, cmd)))
-        fatal("'p4 where PATHS' exited with status %d", rc);
-      // Output is %-encoded, we keep it that way
-      for(m = 0; m < where.size(); ++m) {
-        change.insert(change.begin() + n,
-                      "\t" + where[m].substr(0, where[m].find(' ')));
-        ++n;
-      }
-    } else {
-      vector<string> opened;
-      if((rc = capture(opened, "p4", "opened", "...", (char *)NULL)))
-        fatal("'p4 opened ...' exited with status %d", rc);
-      // Drop blanks
-      while(opened.size()
-            and opened.back().size() == 0)
-        opened.pop_back();
-      // Anything to commit?
-      if(!opened.size())
-        fatal("no open files below current directory");
-      // Construct the File: section
-      // Again the output is %-encoded and we keep it that way
-      for(m = 0; m < opened.size(); ++m) {
-        change.insert(change.begin() + n,
-                      "\t" + opened[m].substr(0, opened[m].find('#')));
-        ++n;
-      }
-    }
-    return inject(change, "p4", "submit", "-i", (char *)NULL);
-  } else {
-    return execute("p4",
-                   EXE_STR, "submit",
-                   EXE_STRS, nfiles, p4_encode(nfiles, files),
-                   EXE_END);
+      ++n;
+    // ..pointing just after the default message text
   }
+  // Find the Files: section
+  while(n < change.size() && change[n] != "Files:")
+    ++n;
+  // Erase it
+  ++n;
+  while(n < change.size()
+        && change[n].size()
+        && (change[n].at(0) == '\t'
+            || change[n].at(0) == ' '))
+    change.erase(change.begin() + n);
+  // Translate the list of files to submit
+  vector<string> cmd;
+  vector<string> where;
+  cmd.push_back("p4");
+  cmd.push_back("where");
+  for(m = 0; m < (size_t)nfiles; ++m) {
+    if(!exists(files[m]))
+      fatal("%s does not exist", files[m]);
+    cmd.push_back(p4_encode(files[m]));
+  }
+  if((rc = vcapture(where, cmd)))
+    fatal("'p4 where PATHS' exited with status %d", rc);
+  // Output is %-encoded, we keep it that way
+  for(m = 0; m < where.size(); ++m) {
+    change.insert(change.begin() + n,
+                  "\t" + where[m].substr(0, where[m].find(' ')));
+    ++n;
+  }
+  // Now we have a change.  If a message was specified we submit straight away
+  // and that's all we need.
+  if(msg)
+    return inject(change, "p4", "submit", "-i", (char *)NULL);
+  if(dryrun) {
+    // Popping up a form to fill in in dry-run mode makes no sense, so we just
+    // show them what the un-edited form would look like.
+    return inject(change, "p4", "submit", "-i", (char *)NULL);
+  }
+  // Give the user a chance to edit the change form
+  rc = editor(change);
+  if(rc)
+    return rc;
+  // Submit the edited change
+  return inject(change, "p4", "submit", "-i", (char *)NULL);
 }
 
 static int p4_revert(int nfiles, char **files) {
