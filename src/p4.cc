@@ -238,7 +238,7 @@ static int p4_log(const char *path) {
   return execute("p4",
                  EXE_STR, "changes",
                  EXE_STR, "-lt",
-                 EXE_IFSTR(path, path),
+                 EXE_STR, path ? path : "...",
                  EXE_END);
 }
 
