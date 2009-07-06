@@ -143,13 +143,13 @@ t_modify() {
 
 t_update() {
     cd copy
-    if [ `wc -l one` != 1 ]; then
+    if [ `wc -l < one` != 1 ]; then
         echo "'one' has unexpected length"
         sed 's/^/| /' < one
         exit 1
     fi
     x vcs -n up
-    if [ `wc -l one` != 1 ]; then
+    if [ `wc -l < one` != 1 ]; then
         echo "'one' has wrong length after dry-run update"
         sed 's/^/| /' < one
         exit 1
