@@ -20,6 +20,16 @@ set -e
 
 t_init hg http://www.greenend.org.uk/rjk/2009/mercurial
 
+# This test is currently broken on old versions of Mercurial
+v=`hg --version |
+     grep '^Mercurial.*version' |
+     sed 's/^.*(version //;s/).*//'`
+case $v in
+0.[789]* )
+  exit 77
+  ;;
+esac
+
 x vcs -n clone static-http://www.greenend.org.uk/rjk/2009/mercurial
 if [ -d mercurial ]; then
   echo "dry-run clone created target directory" >&2
