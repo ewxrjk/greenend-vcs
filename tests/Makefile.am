@@ -37,4 +37,4 @@ EXTRA_DIST=utils.sh
 clean-local:
 	rm -rf test-root
 	rm -f *.gcov *.gcda *.gcno
-	rm -f t-*.log
+	rm -f *.log
