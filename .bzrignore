@@ -8,11 +8,11 @@ autom4te.cache
 config.aux
 config.h
 config.h.in
-config.log
 config.status
 configure
+config.log
 stamp-h1
-vcs
+src/vcs
 *.tar.gz
 debian/files
 debian/substvars.*
@@ -22,3 +22,13 @@ test-root
 *.gcda
 *.gcno
 *.gcov
+tests/t-version
+tests/*.log
+tests/t-execute
+tests/t-ltfilename
+tests/t-utils
+TAGS
+tests/t-xml
+tests/t-pager
+debian/vcs
+

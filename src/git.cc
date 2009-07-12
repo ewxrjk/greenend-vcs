@@ -34,12 +34,15 @@ static int git_add(int /*binary*/, int nfiles, char **files) {
    * uncontrolled files as version-controlled, so we go with it anyway. */
   return execute("git",
                  EXE_STR, "add",
-                 EXE_STR, "--",
-                 EXE_STRS, nfiles, files,
+                 EXE_STRS_DOTSTUFF, nfiles, files,
                  EXE_END);
 }
 
 static int git_remove(int force, int nfiles, char **files) {
+  // Very old git lacks the 'rm' command.  Without strong external demand I
+  // don't see any point in coping; if you have such a decrepit and ancient
+  // version you can either put up with vcs not working or upgrade git to
+  // something marginally more recent.
   return execute("git",
                  EXE_STR, "rm",
                  EXE_IFSTR(force, "-f"),
@@ -69,19 +72,36 @@ static int git_commit(const char *msg, int nfiles, char **files) {
 }
 
 static int git_revert(int nfiles, char **files) {
-  return execute("git",
-                 EXE_STR, "reset",
-                 EXE_STR, "--hard",
-                 EXE_STR, "HEAD",
-                 EXE_STR, "--",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
+  /* Modern git-reset can take -- and a list of files.  However older
+   * versions don't like -- and don't accept a list of files.
+   *
+   * Currently we just fail if we are asked to selectively revert files on a
+   * too-old version of git, but we try to succeed in other possible cases.
+   */
+  if(nfiles)
+    return execute("git",
+                   EXE_STR, "reset",
+                   EXE_STR, "--hard",
+                   EXE_STR, "HEAD",
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  else
+    return execute("git",
+                   EXE_STR, "reset",
+                   EXE_STR, "--hard",
+                   EXE_STR, "HEAD",
+                   EXE_END);
 }
 
 static int git_status() {
-  return execute("git",
-                 EXE_STR, "status",
-                 EXE_END);
+  execute("git",
+          EXE_STR, "status",
+          EXE_END);
+  /* 'git status' is documented as exiting nonzero if there is nothing to
+   * commit.  In fact this is a lie, if stdout is a tty then it will always
+   * exit 0.  We ignore the essentially random exit status, regardless. */
+  return 0;
 }
 
 static int git_update() {

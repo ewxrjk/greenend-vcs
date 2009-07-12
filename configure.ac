@@ -15,17 +15,21 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_INIT([vcs], [0.5], [richard+vcs@sfere.greenend.org.uk])
+AC_INIT([vcs], [0.6], [richard+vcs@sfere.greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
-AM_INIT_AUTOMAKE(vcs, [0.5])
-AC_CONFIG_SRCDIR([vcs.cc])
+AM_INIT_AUTOMAKE(vcs, [0.6])
+AC_CONFIG_SRCDIR([src/vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
 AC_SET_MAKE
+AC_PROG_RANLIB
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
-LIBCURL_CHECK_CONFIG
+AC_CHECK_LIB([curl],[curl_easy_init])
+AC_CHECK_LIB([expat],[XML_ParserCreate])
+AC_CHECK_LIB([iconv],[iconv_open])
+AC_CHECK_HEADERS([curl/curl.h])
 
 RJK_GCOV
 
@@ -39,7 +43,9 @@ AH_BOTTOM([#ifdef __GNUC__
 # define attribute(x)
 #endif])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 tests/Makefile])
 AC_OUTPUT
 
 # Local Variables:

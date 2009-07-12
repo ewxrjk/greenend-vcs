@@ -16,29 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. $srcdir/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init git
-
-mkdir project
-cd project
-x git init
-cd ..
-t_populate
-
-x git clone project copy
-t_verify
-
-t_modify
-t_update
-t_verify
-
-t_revert
-cd copy
-if git log three >/dev/null 2>&1; then
-  echo 'three still known to git' >&2
-  exit 1
-fi
-cd ..
-
-t_done
+mkdir -p test-root
+x vcs --help
+x vcs --version
+x vcs -H
+vcs -H > test-root/commands
+awk '/^  / { print $1 }' < test-root/commands > test-root/command-names
+for cmd in `cat test-root/command-names`; do
+  x vcs $cmd --help
+done

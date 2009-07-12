@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. $srcdir/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
 t_init cvs
 
@@ -48,5 +48,25 @@ if test "x$status" != 'x'; then
     fatal "Did not properly revert 'three'"
 fi
 cd ..
+
+cd project
+echo a >> one
+x vcs commit -m "add a to one"
+
+cd ../copy
+echo b >> one
+x vcs up
+x vcs revert one
+cat >one.expected <<EOF
+one
+oneone
+a
+EOF
+check_match one.expected one
+x cvs -n up one
+status=$(cvs -n up one 2>/dev/null)
+if test "x$status" != 'x'; then
+    fatal "Did not properly revert 'one'"
+fi
 
 t_done

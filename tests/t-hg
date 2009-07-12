@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,20 +14,31 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-dist_man_MANS=vcs.1
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules scripts/setversion \
-	README.developers scripts/coverage scripts/dist scripts/htmlman
-SUBDIRS=src tests
+set -e
 
-clean-local:
-	rm -rf test-root
-	rm -f *.gcov *.gcda *.gcno
-	rm -f help.log errors.log bzr.log cvs.log svn.log git.log hg.log
-	rm -f darcs.log p4.log
+. ${top_srcdir:-.}/tests/utils.sh
 
-coverage: all
-	rm -f *.gcov */*.gcov
-	rm -f *.gcda */*.gcda
-	$(MAKE) check
-	(cd src && ${GCOV} *.cc) | ${srcdir}/scripts/coverage
+t_init hg
+
+x hg init project
+t_populate
+
+x hg clone project copy
+t_verify
+
+t_modify
+t_update
+t_verify
+
+t_revert
+cd copy
+x hg status three
+status=$(hg status three | awk '{print $1}')
+if test "x$status" != 'x?'; then
+    fatal "Did not properly revert 'three'"
+    # TODO hg 0.7 (as found in Ubuntu dapper) leads us to fail this test.
+    # This probably won't be fixed without external demand.
+fi
+cd ..
+
+t_done

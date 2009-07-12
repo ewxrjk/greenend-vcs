@@ -17,18 +17,6 @@
  */
 #include "vcs.h"
 
-// Global verbose operation flag
-int verbose;
-
-// Global debug flag
-int debug;
-
-// Global dry-run flag
-int dryrun;
-
-// Preferred IP version
-int ipv;
-
 // Table of global options
 static const struct option options[] = {
   { "help", no_argument, 0, 'h' },
@@ -44,17 +32,18 @@ static const struct option options[] = {
 // Display help message
 static void help(FILE *fp = stdout) {
   fprintf(fp, "Usage:\n"
-	  "  vcs [OPTIONS] COMMAND ...\n"
-	  "Options:\n"
+          "  vcs [OPTIONS] COMMAND ...\n"
+          "Options:\n"
           "  -v, --verbose     Verbose operation\n"
           "  -n, --dry-run     Report what would be done but do nothing\n"
-	  "  -h, --help        Display usage message\n"
-	  "  -H, --commands    Display command list\n"
-	  "  -V, --version     Display version number\n"
+          "  -d, --debug       Display debug messages (-dd for more)\n"
+          "  -h, --help        Display usage message\n"
+          "  -H, --commands    Display command list\n"
+          "  -V, --version     Display version number\n"
           "  -g, --guess       Guess which version control system is in use\n"
           "  -4, -6            Force IP version for network access\n"
-	  "\n"
-	  "Use 'vcs COMMAND --help' for per-command help.\n");
+          "\n"
+          "Use 'vcs COMMAND --help' for per-command help.\n");
 }
 
 // Table of commands
@@ -135,8 +124,8 @@ static void commandlist(FILE *fp = stdout) {
   fprintf(fp, "vcs commmands:\n\n");
   for(n = 0; commands[n].name; ++n) {
     fprintf(fp, "  %-*s    %s\n", 
-	    maxlen, commands[n].name, 
-	    commands[n].description);
+            maxlen, commands[n].name, 
+            commands[n].description);
   }
   fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
 }
@@ -168,6 +157,8 @@ static const struct command *find_command(const char *cmd) {
 int main(int argc, char **argv) {
   int n;
 
+  if(!setlocale(LC_CTYPE, ""))
+    fatal("error calling setlocale: %s", strerror(errno));
   // Parse global options
   while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
     switch(n) {
@@ -196,7 +187,7 @@ int main(int argc, char **argv) {
       ipv = n - '0';
       break;
     case 'd':
-      debug = 1;
+      ++debug;
       break;
     default:
       exit(1);
@@ -207,7 +198,7 @@ int main(int argc, char **argv) {
     help(stderr);
     exit(1);
   }
-#if HAVE_LIBCURL
+#if HAVE_CURL_CURL_H
   CURLcode rc = curl_global_init(CURL_GLOBAL_ALL);
   if(rc)
     fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
@@ -216,7 +207,6 @@ int main(int argc, char **argv) {
   const int status = c->action(argc - optind, argv + optind);
   if(fclose(stdout) < 0)
     fatal("closing stdout: %s", strerror(errno));
-  await_redirect();
   return status;
 }
 

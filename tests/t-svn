@@ -16,14 +16,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. $srcdir/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init hg
+t_init svn
 
-x hg init project
+repo=$testdir/repo
+
+# Create repository
+x svnadmin create $repo
+
+# Create an empty project and check it out
+x mkdir project
+x svn import -m 'Import empty directory' project file://$repo/trunk/project
+x rmdir project
+x svn co file:///$repo/trunk/project
+
 t_populate
 
-x hg clone project copy
+x svn co file:///$repo/trunk/project copy
 t_verify
 
 t_modify
@@ -32,8 +42,8 @@ t_verify
 
 t_revert
 cd copy
-x hg status three
-status=$(hg status three | awk '{print $1}')
+x svn status three
+status=$(svn status three | awk '{print $1}')
 if test "x$status" != 'x?'; then
     fatal "Did not properly revert 'three'"
 fi

@@ -32,7 +32,7 @@
 #include <getopt.h>
 #include <errno.h>
 
-#if HAVE_LIBCURL
+#if HAVE_CURL_CURL_H
 # include <curl/curl.h>
 #endif
 
@@ -102,26 +102,18 @@ char *xstrdup(const char *s);
 #define EXE_IFSTR(COND, STR) (COND) ? EXE_STR : EXE_SKIPSTR, (STR)
 #define EXE_NO_STDOUT 4
 #define EXE_NO_STDERR 5
+#define EXE_STRS_DOTSTUFF 6
 int execute(const char *prog, ...);
 
 int capture(vector<string> &lines,
             const char *prog,
             ...);
-int fcapture(unsigned flags,
-             vector<string> &lines,
-             const char *prog,
-             ...);
 int vcapture(vector<string> &lines,
              const vector<string> &command);
-int vccapture(vector<string> &lines,
-              char **cmd);
 int inject(const vector<string> &input,
            const char *prog,
            ...);
-int vcinject(const vector<string> &input,
-             char **cmd);
 void redirect(const char *pager);
-void await_redirect();
 int readline(const string &path, FILE *fp, string &l);
 void init_global_ignores();
 void read_ignores(list<string> &ignores, const string &path);
@@ -130,6 +122,23 @@ int is_ignored(const list<string> &ignores,
 void listfiles(string path,
                list<string> &files,
                set<string> &ignored);
+int version_compare(const string &a, const string &b);
+void remove_directories(int &nfiles, char **files);
+int execute(const vector<string> &command,
+            const vector<string> *input = NULL,
+            vector<string> *output = NULL,
+            vector<string> *errors = NULL);
+vector<string> &makevs(vector<string> &command,
+                       const char *prog,
+                       ...);
+void report_lines(const vector<string> &l, 
+                  const char *what = NULL, 
+                  const char *prefix = NULL, 
+                  FILE *fp = stderr);
+string get_relative_path(const string &s);
+string dirname(const string &s);
+string basename(const string &s);
+int editor(vector<string> &file);
 
 extern list<string> global_ignores;
 

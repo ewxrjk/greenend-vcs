@@ -76,6 +76,7 @@ static const struct vcs_scheme {
   { "git", &vcs_git },
   { "svn", &vcs_svn },
   { "svn+ssh", &vcs_svn },
+  { "static-http", &vcs_hg },
   { 0, 0 }
 };
 

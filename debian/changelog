@@ -1,3 +1,32 @@
+vcs (0.6) unstable; urgency=low
+
+  * If you quit a pager (configured with VCS_PAGER for instance) before
+    some slow underyling command has finished executing, vcs should now
+    exit immediately rather than waiting for the subprocess to complete.
+  * For Perforce support:
+    - Filenames containing @, %, # and * should now be properly encoded
+      and decoded.
+    - If you try to vcs add a directory to Perforce, it will be silently
+      ignored.
+    - vcs status now shows files opened for delete and supports
+      "incomplete" client views (i.e. which don't cover every possible
+      filename below the client root) properly.
+    - vcs commit should now work for all four combinations of a message
+      being present or not and a list of files being present or not (issue
+      #2).
+  * vcs up will invoke bzr up in a bound branch (created with bzr
+    checkout) and bzr pull in any other branch.
+  * vcs revert now supports Subversion back to 1.3 (previously it would
+    misparse output from 1.3 and 1.4). A possible hang was also removed.
+  * Improved support for older versions of Git and fixed vcs status with
+    Git.
+  * vcs clone now recognizes Mercurial's static-http: scheme.
+  * Improved support for older Mercurial versions.
+  * Improved support for CVS conflicts.
+  * Needs Expat.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 12 Jul 2009 18:41:14 +0100
+
 vcs (0.5) unstable; urgency=low
 
   * New VCS_PAGER and VCS_DIFF_PAGER environment variables to feed

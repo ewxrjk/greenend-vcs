@@ -69,10 +69,10 @@ pkg-vcs: build
 	 rm -rf debian/vcs
 	 $(MKDIR) debian/vcs/DEBIAN
 	 $(MKDIR) debian/vcs/usr/share/doc/vcs
-	 $(INSTALL_DATA) debian/copyright CHANGES.html changelog \
+	 $(INSTALL_DATA) debian/copyright CHANGES.html \
 		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
-		debian/vcs/usr/share/doc/vcs/changelog.Debian
+		debian/vcs/usr/share/doc/vcs/changelog
 	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
 	strip --remove-section=.comment debian/vcs/usr/bin/vcs
@@ -93,7 +93,7 @@ binary-arch: pkg-vcs
 binary-indep: 
 
 clean:
-	test -f Makefile && $(MAKE) distclean
+	if test -f Makefile; then $(MAKE) distclean; fi
 	rm -f config.cache
 	rm -f debian/files
 	rm -f debian/substvars.*

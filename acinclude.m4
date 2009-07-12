@@ -22,6 +22,7 @@ AC_DEFUN([RJK_GCOV],[
                               [Enable coverage testing])],
               [if test $withval = yes; then
                  CXXFLAGS="${CXXFLAGS} -O0 -fprofile-arcs -ftest-coverage"
+                 LIBS="${LIBS} -lgcov"
                  GCOV=`echo $CXX | sed s'/g++/gcov/;s/ .*$//'`;
                fi])
   AC_SUBST([GCOV],[$GCOV])

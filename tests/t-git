@@ -16,14 +16,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-. $srcdir/tests/utils.sh
+. ${top_srcdir:-.}/tests/utils.sh
 
-t_init bzr
+t_init git
 
-x bzr init project
+mkdir project
+cd project
+x git init-db
+cd ..
 t_populate
 
-x bzr clone project copy
+x vcs clone `pwd`/project copy
 t_verify
 
 t_modify
@@ -32,10 +35,13 @@ t_verify
 
 t_revert
 cd copy
-if bzr log three >/dev/null 2>&1; then
-  echo 'three still known to bzr' >&2
+if git log three >/dev/null 2>&1; then
+  echo 'three still known to git' >&2
   exit 1
 fi
+
+touch -- -addme
+vcs -v add -- -addme
 cd ..
 
 t_done

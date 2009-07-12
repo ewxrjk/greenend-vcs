@@ -1,4 +1,3 @@
-#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -14,27 +13,15 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-set -e
+bin_PROGRAMS=vcs
+noinst_LIBRARIES=libvcs.a
+libvcs_a_SOURCES=guess.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
+	p4utils.h p4utils.cc xml.cc version.cc xml.h editor.cc
+vcs_SOURCES=vcs.cc \
+	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
+	log.cc edit.cc annotate.cc clone.cc \
+	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
+LDADD=libvcs.a
 
-. $srcdir/tests/utils.sh
-
-t_init darcs
-
-mkdir project
-cd project
-x darcs init
-cd ..
-t_populate
-
-x darcs get project copy
-t_verify
-
-t_modify
-t_update
-t_verify
-
-t_revert
-cd copy
-cd ..
-
-t_done
+clean-local:
+	rm -f *.gcov *.gcda *.gcno

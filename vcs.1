@@ -17,6 +17,10 @@ the command name.
 .B \-\-verbose\fR, \fB\-v
 Verbose operation.
 .TP
+.B \-\-debug\fR, \fB-d
+Debug mode.
+Can be used more than once for extra debug output.
+.TP
 .B \-\-dry-run\fR, \fB\-n
 Instead of executing native commands, just display them on standard output.
 .TP
@@ -56,6 +60,10 @@ This is suitable for image files, etc.
 Note that not every native version control system has a corresponding
 option (some prefer to figure it out themselves or do no translation).
 In such cases, the \fB--binary\fR option is ignored.
+.PP
+If you try to add directories and the native version control system
+(for instance Perforce) does not support that, they are silently
+ignored.
 .SS annotate
 .B vcs
 .B annotate
@@ -118,7 +126,7 @@ lets the native system invoke the editor rather than doing so itself.
 .PP
 .B "vcs ci"
 is a synonym for
-.BR "vcs checkin" .
+.BR "vcs commit" .
 .SS diff
 .B vcs
 .B diff
@@ -183,8 +191,9 @@ individual files.
 Displays a summary of the current status, showing files that have been
 added, edited, removed or are not in version control (and not ignored).
 .PP
-Note that the output format is that of the native version control
-system.
+Note that the output format is generally that of the native version
+control system.
+One exception to this for Perforce; see below for full details.
 .SS update
 .B vcs
 .B update
@@ -238,6 +247,15 @@ CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
 .SS Bazaar
 Web page: http://bazaar\-vcs.org/
+.PP
+.B "vcs up"
+will invoke
+.B "bzr up"
+in a bound branch (created with
+.BR "bzr checkout" )
+and
+.B "bzr pull"
+in any other branch.
 .SS Subversion
 Web page: http://subversion.tigris.org/
 .SS Git
@@ -265,8 +283,6 @@ is required before editing existing files.
 .PP
 Commands that apply to multiple files are applied only to files in or
 below the current directory.
-The only exception to this is \fBvcs log\fR which applies to the whole
-depot.
 .PP
 .B "vcs status"
 produces CVS-like output summarizing which files are open and which are

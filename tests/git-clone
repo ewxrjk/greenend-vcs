@@ -1,3 +1,4 @@
+#! /bin/sh
 # This file is part of VCS
 # Copyright (C) 2009 Richard Kettlewell
 #
@@ -13,20 +14,25 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-dist_man_MANS=vcs.1
-EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
-	debian/rules scripts/setversion \
-	README.developers scripts/coverage scripts/dist scripts/htmlman
-SUBDIRS=src tests
+set -e
 
-clean-local:
-	rm -rf test-root
-	rm -f *.gcov *.gcda *.gcno
-	rm -f help.log errors.log bzr.log cvs.log svn.log git.log hg.log
-	rm -f darcs.log p4.log
+. ${top_srcdir:-.}/tests/utils.sh
 
-coverage: all
-	rm -f *.gcov */*.gcov
-	rm -f *.gcda */*.gcda
-	$(MAKE) check
-	(cd src && ${GCOV} *.cc) | ${srcdir}/scripts/coverage
+t_init git http://www.greenend.org.uk/rjk/git/example
+
+x vcs -n clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  echo "dry-run clone created target directory" >&2
+  ls -ld example
+  exit 1
+fi
+
+x vcs -v clone http://www.greenend.org.uk/rjk/git/example
+if [ -d example ]; then
+  :
+else
+  echo "clone didn't create target directory" >&2
+  exit 1
+fi
+
+t_done

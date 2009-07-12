@@ -53,6 +53,104 @@ span.command {
  </head>
  <body>
   <h1>VCS Change History</h1>
+
+  <h2>Changes in VCS 0.6</h2>
+
+  <div>
+
+   <h3>General</h3>
+
+   <div>
+   
+    <p><a href="http://expat.sourceforge.net/">Expat</a> is now required to
+    build <tt>vcs</tt>.</p>
+
+    <p>Detection of cURL is now improved, making it possible to build under OS
+    X without using Fink.</p>
+
+    <p>If you quit a pager (configured with <tt>VCS_PAGER</tt> for instance)
+    before some slow underyling command has finished executing, <tt>vcs</tt>
+    should now exit immediately rather than waiting for the subprocess to
+    complete.</p>
+ 
+   </div>
+
+   <h3>Changes to Perforce support</h3>
+   
+   <div>
+    
+    <p>Filenames containing <tt>@</tt>, <tt>%</tt>, <tt>#</tt> and
+    <tt>*</tt> should now be properly encoded and decoded.</p>
+
+    <p>If you try to <tt>vcs add</tt> a directory to Perforce, it will be
+    silently ignored.</p>
+
+    <p><tt>vcs status</tt> now shows files opened for delete and supports
+    &ldquo;incomplete&rdquo; client views (i.e. which don't cover every
+    possible filename below the client root) properly.</p>
+
+    <p><tt>vcs commit</tt> should now work for all four combinations of a
+    message being present or not and a list of files being present or not (<a
+    href="http://code.google.com/p/greenend-vcs/issues/detail?id=2">issue
+    #2</a>).</p>
+
+   </div>   
+
+   <h3>Changes to Bazaar support</h3>
+
+   <div>
+
+    <p><tt>vcs up</tt> will invoke <tt>bzr up</tt> in a bound branch (created
+    with <tt>bzr checkout</tt>) and <tt>bzr pull</tt> in any other branch.</p>
+
+   </div>
+
+   <h3>Changes to Subversion support</h3>
+
+   <div>
+    
+    <p><tt>vcs revert</tt> now supports Subversion back to 1.3 (previously it
+    would misparse output from 1.3 and 1.4).  A possible hang was also
+    removed.</p>
+
+   </div>
+
+   <h3>Changes to Git support</h3>
+   
+   <div>
+
+    <p>Improved support for older versions of Git and fixed <tt>vcs
+    status</tt>.</p>
+
+   </div>
+
+   <h3>Changes to Darcs support</h3>
+   
+   <div>
+
+    <p>Tests now set <tt>$EMAIL</tt> to avoid a interaction (or a hang!)</p>
+
+   </div>
+
+   <h3>Changes to Mercurial support</h3>
+   
+   <div>
+
+    <p><tt>vcs clone</tt> now recognizes the <tt>static-http:</tt> scheme.</p>
+
+    <p>Improved support for older versions.</p>
+
+   </div>
+
+   <h3>Changes to CVS support</h3>
+   
+   <div>
+
+    <p>Cope better with conflicts.</p>
+
+   </div>
+
+  </div>
   
   <h2>Changes in VCS 0.5</h2>
 
