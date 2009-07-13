@@ -18,6 +18,5 @@ Description: Wrapper for version control systems giving a uniform interface
  use vcs commands rather than adapt to the version control system
  currently in use.
  .
- Currently Bazaar, CVS and Subversion are supported, with a small set
- of commands.  More version control systems and more commands will,
- hopefuly, be added in the future.
+ Currently Bazaar, Git, CVS, Subversion, Mercurial, Darcs and Perforce
+ are supported, with a small set of commands.
