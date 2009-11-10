@@ -28,7 +28,10 @@ AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
 AC_CHECK_LIB([curl],[curl_easy_init])
 AC_CHECK_LIB([expat],[XML_ParserCreate])
-AC_CHECK_LIB([iconv],[iconv_open])
+# Cygwin's iconv.h redirects to non-standard names, breaking the usual
+# AC_CHECK_LIB heuristic.  Stupid Cygwin.
+AC_CHECK_LIB([iconv],[iconv_open],[],
+             [AC_CHECK_LIB([iconv],[libiconv_open])])
 AC_CHECK_HEADERS([curl/curl.h])
 
 RJK_GCOV
