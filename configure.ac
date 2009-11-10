@@ -33,8 +33,15 @@ AC_CHECK_HEADERS([curl/curl.h])
 
 RJK_GCOV
 
+WERROR=""
+AC_ARG_WITH([werror],
+            [AS_HELP_STRING([--without-werror],
+                            [Suppress -Werror option])],
+            [if test $withval = yes; then WERROR="-Werror"; fi],
+            [WERROR="-Werror"])
+
 if test "$GXX" = yes; then
-  CXX="${CXX} -Wall -W -Wmissing-declarations -pedantic -Werror"
+  CXX="${CXX} -Wall -W -Wmissing-declarations -pedantic $WERROR"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
