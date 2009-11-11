@@ -21,6 +21,7 @@ AM_INIT_AUTOMAKE(vcs, [0.DEV])
 AC_CONFIG_SRCDIR([src/vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
+AC_LANG([C++])
 AC_SET_MAKE
 AC_PROG_RANLIB
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
@@ -33,6 +34,35 @@ AC_CHECK_LIB([expat],[XML_ParserCreate])
 AC_CHECK_LIB([iconv],[iconv_open],[],
              [AC_CHECK_LIB([iconv],[libiconv_open])])
 AC_CHECK_HEADERS([curl/curl.h])
+
+# iconv() signature varies between platforms
+AC_CACHE_CHECK([for type of iconv inbuf argument],[rjk_cv_iconv_inbuf],
+               [AC_TRY_COMPILE([#include <iconv.h>],
+                               [char *inbuf;
+                                char *outbuf;
+                                size_t left;
+                                iconv_t cd;
+                                iconv(cd, &inbuf, &left, &outbuf, &left);],
+                               [rjk_cv_iconv_inbuf="char **"],
+                [AC_TRY_COMPILE([#include <iconv.h>],
+                                [const char *inbuf;
+                                 char *outbuf;
+                                 size_t left;
+                                 iconv_t cd;
+                                 iconv(cd, &inbuf, &left, &outbuf, &left);],
+                                [rjk_cv_iconv_inbuf="const char **"],
+                                [rjk_cv_iconv_inbuf="unknown"])])])
+
+case "$rjk_cv_iconv_inbuf" in
+"char **" )
+  ;;
+"const char **" )
+  AC_DEFINE([HAVE_BROKEN_ICONV],[1],[define if iconv takes const char **inbuf])
+  ;;
+"unknown" )
+  AC_MSG_WARN([cannot determine iconv inbuf type - winging it])
+  ;;
+esac
 
 RJK_GCOV
 
