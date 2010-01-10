@@ -205,6 +205,17 @@ t_revert() {
     # check for that
     t_verify
 
+    # Explicit paths
+    cd copy
+    echo three > three
+    x vcs -v add three
+    x vcs -v status
+    x vcs -v revert three
+    x vcs -v status
+    cd ..
+    t_verify
+    # TODO: also removal, modification
+
     # 'three' should not exist or not be under vc (at all).  The check will
     # have to be vc-specific.
 }
