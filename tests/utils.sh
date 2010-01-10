@@ -207,6 +207,7 @@ t_revert() {
 
     # Explicit paths 1: modified file
     cd copy
+    x vcs edit one
     echo extra >> one
     x vcs -v revert one
     x vcs -v status
