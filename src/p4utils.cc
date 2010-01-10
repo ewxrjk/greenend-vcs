@@ -414,8 +414,13 @@ void P4Info::gather() {
 
   // Identify files needing 'p4 resolve'
   vector<string> resolvable;
-  if((rc = capture(resolvable, "p4", "resolve", "-n", "...", (char *)NULL)))
+  if((rc = execute(makevs(command, "p4", "resolve", "-n", "...", (char *)NULL),
+                   NULL/*input*/,
+                   &resolvable,
+                   &errors))) {
+    report_lines(errors);
     fatal("'p4 resolve -n ...' exited with status %d", rc);
+  }
   // output is /full/local/path - merging //source/depot/path#revno
   for(size_t n = 0; n < resolvable.size(); ++n) {
     const string &r = resolvable[n];
@@ -426,8 +431,13 @@ void P4Info::gather() {
 
   // Identify files which have/haven't changed
   vector<string> unchanged;
-  if((rc = capture(unchanged, "p4", "revert", "-an", "...", (char *)NULL)))
+  if((rc = execute(makevs(command, "p4", "revert", "-an", "...", (char *)NULL),
+                   NULL/*input*/,
+                   &unchanged,
+                   &errors))) {
+    report_lines(errors);
     fatal("'p4 revert -an ...' exited with status %d", rc);
+  }
   // output is //DEPOT/PATH#REVNO - was ACTION, reverted
   for(size_t n = 0; n < unchanged.size(); ++n) {
     const string &u = unchanged[n];
