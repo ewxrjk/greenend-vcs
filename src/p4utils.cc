@@ -212,7 +212,8 @@ void p4__where(const list<string> &files,
 P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false) {
 }
 
-P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false) {
+P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
+                                         resolvable(false) {
   // Get the depot path
   string::size_type n = l.find('#');
   if(n == string::npos)
@@ -408,6 +409,18 @@ void P4Info::gather() {
       ++it) {
     it->second.relative_path = get_relative_path(it->second.local_path);
     by_relative[it->second.relative_path] = it->first;
+  }
+
+  // Identify files needing 'p4 resolve'
+  vector<string> resolvable;
+  if((rc = capture(resolvable, "p4", "resolve", "-n", "...", (char *)NULL)))
+    fatal("'p4 resolve -n ...' exited with status %d", rc);
+  // output is /full/local/path - merging //source/depot/path#revno
+  for(size_t n = 0; n < resolvable.size(); ++n) {
+    const string &r = resolvable[n];
+    const string local_path = p4_decode(r.substr(0, r.find(' ')));
+    const string depot_path = by_local[local_path];
+    info[depot_path].resolvable = true;
   }
 }
 

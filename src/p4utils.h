@@ -45,6 +45,7 @@ struct P4FileInfo {
   int chnum;                            // change number, -1 for default
   string type;                          // file type or "" if not known
   bool locked;                          // true for *locked*
+  bool resolvable;                      // true for resolve-needed
 };
 
 struct ltfilename {

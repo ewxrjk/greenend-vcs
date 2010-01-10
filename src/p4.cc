@@ -213,6 +213,8 @@ static int p4_status() {
     P4FileInfo fi;
     p4info.relative_find(*it, fi);
     status[*it] = fi.action.size() ? toupper(fi.action[0]) : 0;
+    if(fi.resolvable)
+      status[*it] = 'R';
     if(ignored.find(*it) != ignored.end())
       // Stash ignored files known to P4 for a moan later on
       known_ignored.push_back(*it);
