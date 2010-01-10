@@ -32,3 +32,4 @@ tests/t-xml
 tests/t-pager
 debian/vcs
 
+config.cache

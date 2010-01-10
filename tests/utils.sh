@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -213,7 +213,15 @@ t_revert() {
     cd ..
     t_verify
 
-    # Explicit paths 2: added file
+    # Explicit paths 2: deleted file
+    cd copy
+    x vcs -v rm one
+    x vcs -v revert one
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 3: added file
     cd copy
     echo three > three
     x vcs -v add three
@@ -222,8 +230,6 @@ t_revert() {
     x vcs -v status
     cd ..
     t_verify
-
-    # Explicit paths 3: deleted file
 
     # 'three' should not exist or not be under vc (at all).  The check will
     # have to be vc-specific.
