@@ -209,11 +209,12 @@ void p4__where(const list<string> &files,
 
 // P4FileInfo ------------------------------------------------------------------
 
-P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false) {
+P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false), 
+                          resolvable(false), changed(true) {
 }
 
 P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
-                                         resolvable(false) {
+                                         resolvable(false), changed(true) {
   // Get the depot path
   string::size_type n = l.find('#');
   if(n == string::npos)
@@ -421,6 +422,17 @@ void P4Info::gather() {
     const string local_path = p4_decode(r.substr(0, r.find(' ')));
     const string depot_path = by_local[local_path];
     info[depot_path].resolvable = true;
+  }
+
+  // Identify files which have/haven't changed
+  vector<string> unchanged;
+  if((rc = capture(unchanged, "p4", "revert", "-an", "...", (char *)NULL)))
+    fatal("'p4 revert -an ...' exited with status %d", rc);
+  // output is //DEPOT/PATH#REVNO - was ACTION, reverted
+  for(size_t n = 0; n < unchanged.size(); ++n) {
+    const string &u = unchanged[n];
+    const string depot_path = p4_decode(u.substr(0, u.find('#')));
+    info[depot_path].changed = false;
   }
 }
 

@@ -46,6 +46,7 @@ struct P4FileInfo {
   string type;                          // file type or "" if not known
   bool locked;                          // true for *locked*
   bool resolvable;                      // true for resolve-needed
+  bool changed;                         // true for changed files
 };
 
 struct ltfilename {
