@@ -72,16 +72,11 @@ static int git_commit(const char *msg, int nfiles, char **files) {
 }
 
 static int git_revert(int nfiles, char **files) {
-  /* Modern git-reset can take -- and a list of files.  However older
-   * versions don't like -- and don't accept a list of files.
-   *
-   * Currently we just fail if we are asked to selectively revert files on a
-   * too-old version of git, but we try to succeed in other possible cases.
-   */
+  /* git-reset will reset the whole tree.  git-checkout can be used to reset
+   * individual modified files. */
   if(nfiles)
     return execute("git",
-                   EXE_STR, "reset",
-                   EXE_STR, "--hard",
+                   EXE_STR, "checkout",
                    EXE_STR, "HEAD",
                    EXE_STR, "--",
                    EXE_STRS, nfiles, files,

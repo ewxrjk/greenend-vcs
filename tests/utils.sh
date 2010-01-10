@@ -205,7 +205,15 @@ t_revert() {
     # check for that
     t_verify
 
-    # Explicit paths
+    # Explicit paths 1: modified file
+    cd copy
+    echo extra >> one
+    x vcs -v revert one
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 2: added file
     cd copy
     echo three > three
     x vcs -v add three
@@ -214,7 +222,8 @@ t_revert() {
     x vcs -v status
     cd ..
     t_verify
-    # TODO: also removal, modification
+
+    # Explicit paths 3: deleted file
 
     # 'three' should not exist or not be under vc (at all).  The check will
     # have to be vc-specific.
