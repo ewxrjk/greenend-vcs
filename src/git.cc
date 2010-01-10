@@ -123,7 +123,7 @@ static int git_revert(int nfiles, char **files) {
       char **newfilelist = git_set_to_file_list(&nnewfilelist, newfiles);
       rc = execute("git",
                    EXE_STR, "rm",
-                   EXE_STR, "--force",
+                   EXE_STR, "-f",
                    EXE_STR, "--",
                    EXE_STRS, nnewfilelist, newfilelist,
                    EXE_END);
