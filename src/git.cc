@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,27 +71,83 @@ static int git_commit(const char *msg, int nfiles, char **files) {
   }
 }
 
+static char **git_set_to_file_list(int *nfilesp,
+                                   set<string> &files) {
+  vector<char *> v;
+  for(set<string>::iterator it = files.begin();
+      it != files.end();
+      ++it)
+    v.push_back((char *)it->c_str());
+  *nfilesp = v.size();
+  char **filelist = (char **)calloc(v.size(), sizeof (char *));
+  memcpy(filelist, &v[0], v.size() * sizeof (char *));
+  return filelist;
+}
+
 static int git_revert(int nfiles, char **files) {
-  /* Modern git-reset can take -- and a list of files.  However older
-   * versions don't like -- and don't accept a list of files.
-   *
-   * Currently we just fail if we are asked to selectively revert files on a
-   * too-old version of git, but we try to succeed in other possible cases.
-   */
-  if(nfiles)
-    return execute("git",
-                   EXE_STR, "reset",
-                   EXE_STR, "--hard",
+  if(nfiles) {
+    /* git-checkout can be used to reset individual modified files (included
+     * ones added to the index and deleted ones) but doesn't affect completely
+     * new files.  So we need identify newly added files among those on our
+     * command line. */
+    // First put the list of files to revert into something we can efficiently
+    // index.
+    set<string> revertfiles;
+    for(int n = 0; n < nfiles; ++n)
+      revertfiles.insert(string(files[n])); 
+    // Get the current tree status
+    vector<string> status;
+    capture(status, "git", "status", (char *)NULL);
+    // Find the set of new files
+    set<string> newfiles;
+    for(size_t n = 0; n < status.size(); ++n) {
+      const string &line = status[n];
+      static const char prefix[] = "#\tnew file:";
+      if(line.compare(0, (sizeof prefix)-1, prefix) == 0) {
+        // It's a new file; parse out the filename
+        size_t i = sizeof prefix;
+        while(i < line.size() && line[i] == ' ')
+          ++i;
+        const string path = line.substr(i, string::npos);
+        // If it's one of the targets, add it to the set to remove and remove
+        // from the set to checkout.
+        if(revertfiles.find(path) != revertfiles.end()) {
+          newfiles.insert(path);
+          revertfiles.erase(path);
+        }
+      }
+    }
+    int rc = 0;
+    if(newfiles.size()) {
+      int nnewfilelist;
+      char **newfilelist = git_set_to_file_list(&nnewfilelist, newfiles);
+      rc = execute("git",
+                   EXE_STR, "rm",
+                   EXE_STR, "--force",
+                   EXE_STR, "--",
+                   EXE_STRS, nnewfilelist, newfilelist,
+                   EXE_END);
+    }
+    if(!rc && revertfiles.size()) {
+      int nrevertfilelist;
+      char **revertfilelist = git_set_to_file_list(&nrevertfilelist,
+                                                   revertfiles);
+      rc = execute("git",
+                   EXE_STR, "checkout",
                    EXE_STR, "HEAD",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nrevertfilelist, revertfilelist,
                    EXE_END);
-  else
+    }
+    return rc;
+  } else {
+    /* git-reset will reset the whole tree. */
     return execute("git",
                    EXE_STR, "reset",
                    EXE_STR, "--hard",
                    EXE_STR, "HEAD",
                    EXE_END);
+  }
 }
 
 static int git_status() {
