@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -203,6 +203,33 @@ t_revert() {
 
     # 'one' and 'two' should be back to normal; we already have a
     # check for that
+    t_verify
+
+    # Explicit paths 1: modified file
+    cd copy
+    x vcs edit one
+    echo extra >> one
+    x vcs -v revert one
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 2: deleted file
+    cd copy
+    x vcs -v rm one
+    x vcs -v revert one
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 3: added file
+    cd copy
+    echo three > three
+    x vcs -v add three
+    x vcs -v status
+    x vcs -v revert three
+    x vcs -v status
+    cd ..
     t_verify
 
     # 'three' should not exist or not be under vc (at all).  The check will
