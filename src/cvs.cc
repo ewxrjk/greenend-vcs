@@ -206,6 +206,12 @@ static int cvs_annotate(const char *path) {
                  EXE_END);
 }
 
+static int cvs_rename(int /*nsources*/, 
+                      char **/*sources*/, 
+                      const char */*destination*/) {
+  fatal("CVS does not support renaming.");
+}
+
 const struct vcs vcs_cvs = {
   "CVS",
   cvs_diff,
@@ -219,6 +225,7 @@ const struct vcs vcs_cvs = {
   NULL,                                 // edit
   cvs_annotate,
   NULL,                                 // clone
+  cvs_rename
 };
 
 /*

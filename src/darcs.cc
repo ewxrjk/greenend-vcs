@@ -101,6 +101,14 @@ static int darcs_clone(const char *uri, const char *dir) {
                  EXE_END);
 }
 
+static int darcs_rename(int nsources, char **sources, const char *destination) {
+  return execute("darcs",
+                 EXE_STR, "mv",
+                 EXE_STRS, nsources, sources,
+                 EXE_STR, destination,
+                 EXE_END);
+}
+
 const struct vcs vcs_darcs = {
   "Bazaar",
   darcs_diff,
@@ -114,6 +122,7 @@ const struct vcs vcs_darcs = {
   NULL,                                 // edit
   darcs_annotate,
   darcs_clone,
+  darcs_rename,
 };
 
 /*

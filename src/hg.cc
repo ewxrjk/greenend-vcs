@@ -142,6 +142,14 @@ static int hg_clone(const char *uri, const char *dir) {
                  EXE_END);
 }
 
+static int hg_rename(int nsources, char **sources, const char *destination) {
+  return execute("hg",
+                 EXE_STR, "mv",
+                 EXE_STRS, nsources, sources,
+                 EXE_STR, destination,
+                 EXE_END);
+}
+
 const struct vcs vcs_hg = {
   "Mercurial",
   hg_diff,
@@ -155,6 +163,7 @@ const struct vcs vcs_hg = {
   NULL,                                 // edit
   hg_annotate,
   hg_clone,
+  hg_rename,
 };
 
 /*

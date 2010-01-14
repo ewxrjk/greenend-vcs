@@ -164,5 +164,7 @@ cd copy
 #fi
 cd ..
 
+t_rename
+
 t_done
 

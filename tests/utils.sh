@@ -236,6 +236,34 @@ t_revert() {
     # have to be vc-specific.
 }
 
+t_rename() {
+    cd project
+    x vcs -v rename one two subdir
+    for x in one two; do
+        if [ -e $x ]; then
+            echo "rename did not delete $x" >&2
+            exit 1
+        fi
+        if [ ! -e subdir/$x ]; then
+            echo "rename did not create subdir/$x" >&2
+            exit 1
+        fi
+    done
+    x vcs -v revert
+    x vcs -v rename one four
+    if [ -e one ]; then
+        echo "rename did not delete one" >&2
+        exit 1
+    fi
+    if [ ! -e four ]; then
+        echo "rename did not create four" >&2
+        exit 1
+    fi
+    x vcs -v revert
+    rm -f four
+    cd ..
+}
+
 check_match() {
     set +e
     x diff -u "$@"

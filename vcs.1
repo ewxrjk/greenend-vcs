@@ -170,6 +170,23 @@ control unconditionally.
 .B "vcs rm"
 is a synonym for
 .BR "vcs remove" .
+.SS rename
+.B vcs
+.B rename
+.IR SOURCE ...
+.I DESTINATION
+.PP
+Rename files.
+.PP
+If the destination does not exist then there must be only one source,
+and its name will be changed to match the destination.
+.PP
+If the destination does exist then it must be a directory, and all the
+source files and directories are renamed "into" it.
+.PP
+.B "vcs mv"
+is a synonym for
+.BR "vcs rename" .
 .SS revert
 .B vcs
 .B revert
@@ -245,6 +262,7 @@ Web page: http://www.nongnu.org/cvs/
 .PP
 CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
+\fBvcs rename\fR does not work with CVS.
 .SS Bazaar
 Web page: http://bazaar\-vcs.org/
 .PP

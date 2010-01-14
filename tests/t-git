@@ -44,4 +44,6 @@ touch -- -addme
 vcs -v add -- -addme
 cd ..
 
+t_rename
+
 t_done

@@ -161,6 +161,14 @@ static int svn_clone(const char *uri, const char *dir) {
                  EXE_END);
 }
 
+static int svn_rename(int nsources, char **sources, const char *destination) {
+  return execute("svn",
+                 EXE_STR, "mv",
+                 EXE_STRS, nsources, sources,
+                 EXE_STR, destination,
+                 EXE_END);
+}
+
 const struct vcs vcs_svn = {
   "Subversion",
   svn_diff,
@@ -174,6 +182,7 @@ const struct vcs vcs_svn = {
   NULL,                                 // edit
   svn_annotate,
   svn_clone,
+  svn_rename,
 };
 
 /*

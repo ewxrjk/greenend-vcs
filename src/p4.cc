@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  */
 #include "vcs.h"
 #include "p4utils.h"
+
+static void p4_rename_one(const string &source, const string &destination);
 
 static int p4_edit(int nfiles, char **files) {
   return execute("p4",
@@ -287,6 +289,48 @@ static int p4_annotate(const char *path) {
                  EXE_END);
 }
 
+static int p4_rename(int nsources, char **sources, const char *destination) {
+  if(exists(destination)) {
+    if(!isdir(destination))
+      fatal("%s already exists (and is not a directory)", destination);
+    // We're renaming files and/or directories "into" a directory
+    for(int n = 0; n < nsources; ++n) {
+      p4_rename_one(sources[n], 
+                    string(destination) + "/" + basename(sources[n]));
+    }
+  } else {
+    if(nsources != 1)
+      fatal("Cannot rename multiple sources to (nonexistent) destination %s",
+            destination);
+    // We're just changing the name of one file or directory
+    p4_rename_one(sources[0], destination);
+  }
+  return 0;
+}
+
+static void p4_rename_one(const string &source, const string &destination) {
+  string sp, dp;
+  if(isdir(source)) {
+    sp = source + "/...";
+    dp = destination + "/...";
+  } else {
+    sp = source;
+    dp = destination;
+  }
+  if(execute("p4",
+             EXE_STR, "integrate",
+             EXE_STR, "-t",
+             EXE_STR, p4_encode(sp).c_str(),
+             EXE_STR, p4_encode(dp).c_str(),
+             EXE_END))
+    exit(1);
+  if(execute("p4",
+             EXE_STR, "delete",
+             EXE_STR, p4_encode(sp).c_str(),
+             EXE_END))
+    exit(1);
+}
+
 const struct vcs vcs_p4 = {
   "Perforce",
   p4_diff,
@@ -300,6 +344,7 @@ const struct vcs vcs_p4 = {
   p4_edit,
   p4_annotate,
   NULL,                                 // clone
+  p4_rename,
 };
 
 /*

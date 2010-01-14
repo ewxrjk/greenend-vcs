@@ -41,4 +41,6 @@ if test "x$status" != 'x?'; then
 fi
 cd ..
 
+t_rename
+
 t_done

@@ -37,6 +37,9 @@ t_update
 t_verify
 
 t_revert
+
+t_rename
+
 cd copy
 cd ..
 

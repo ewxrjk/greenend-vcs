@@ -188,6 +188,14 @@ static int git_clone(const char *uri, const char *dir) {
                  EXE_END);
 }
 
+static int git_rename(int nsources, char **sources, const char *destination) {
+  return execute("git",
+                 EXE_STR, "mv",
+                 EXE_STRS, nsources, sources,
+                 EXE_STR, destination,
+                 EXE_END);
+}
+
 const struct vcs vcs_git = {
   "Git",
   git_diff,
@@ -201,6 +209,7 @@ const struct vcs vcs_git = {
   NULL,                                 // edit
   git_annotate,
   git_clone,
+  git_rename,
 };
 
 /*

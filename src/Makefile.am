@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ libvcs_a_SOURCES=guess.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
 	p4utils.h p4utils.cc xml.cc version.cc xml.h editor.cc
 vcs_SOURCES=vcs.cc \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
-	log.cc edit.cc annotate.cc clone.cc \
+	log.cc edit.cc annotate.cc clone.cc rename.cc \
 	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
 LDADD=libvcs.a
 

@@ -99,6 +99,14 @@ static int bzr_clone(const char *uri, const char *dir) {
                  EXE_END);
 }
 
+static int bzr_rename(int nsources, char **sources, const char *destination) {
+  return execute("bzr",
+                 EXE_STR, "mv",
+                 EXE_STRS, nsources, sources,
+                 EXE_STR, destination,
+                 EXE_END);
+}
+
 const struct vcs vcs_bzr = {
   "Bazaar",
   bzr_diff,
@@ -112,6 +120,7 @@ const struct vcs vcs_bzr = {
   NULL,                                 // edit
   bzr_annotate,
   bzr_clone,
+  bzr_rename,
 };
 
 /*

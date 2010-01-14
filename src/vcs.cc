@@ -94,6 +94,11 @@ static const struct command {
     vcs_remove
   },
   {
+    "rename", "mv",
+    "Rename file",
+    vcs_rename
+  },
+  {
     "revert", NULL,
     "Revert changes",
     vcs_revert

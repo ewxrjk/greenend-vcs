@@ -51,6 +51,7 @@ struct vcs {
   int (*edit)(int nfiles, char **files); // optional
   int (*annotate)(const char *file);
   int (*clone)(const char *uri, const char *dir);
+  int (*rename)(int nsources, char **sources, const char *destination);
 };
 
 extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
@@ -72,6 +73,7 @@ int vcs_log(int argc, char **argv);
 int vcs_edit(int argc, char **argv);
 int vcs_annotate(int argc, char **argv);
 int vcs_clone(int argc, char **argv);
+int vcs_rename(int argc, char **argv);
 
 const struct vcs *guess();
 const struct vcs *guess_branch(string uri);
@@ -86,6 +88,7 @@ int isreg(const string &s,
 int exists(const string &path);
 string cwd();
 string parentdir(const string &d);
+string basename(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) 
   attribute((noreturn))  

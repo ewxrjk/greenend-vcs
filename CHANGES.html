@@ -58,12 +58,26 @@ span.command {
 
   <div>
 
-    <h3>Build Scripts</h3>
+   <h3>General</h3>
+   
+   <div>
+    
+    <p>There is a new <tt>vcs rename</tt> command, which renames files under
+    version control.  This works with all the version control systems except
+    CVS.</p>
+
+   </div>
+
+   <h3>Build Scripts</h3>
+
+   <div>
 
     <p>You can now use <tt>./configure --without-werror</tt> if your platform
     generates warnings for its own header files.
     Fixes <a href="http://code.google.com/p/greenend-vcs/issues/detail?id=5">issue
     #5</a>.</p>
+
+   </div>
 
     <h3>Bugs Fixed</h3>
 
@@ -89,6 +103,10 @@ span.command {
         <tr>
           <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=7">#7</a></td>
           <td>Does not detect libiconv on cygwin</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=9">#9</a></td>
+          <td>could we have vcs rename?</td>
         </tr>
         <tr>
           <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=10">#10</a></td>
