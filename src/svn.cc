@@ -18,6 +18,8 @@
 #include "vcs.h"
 #include "xml.h"
 
+static void svn_rename_one(const string &source, const string &destination);
+
 static int svn_diff(int nfiles, char **files) {
   return execute("svn",
                  EXE_STR, "diff",
@@ -162,11 +164,27 @@ static int svn_clone(const char *uri, const char *dir) {
 }
 
 static int svn_rename(int nsources, char **sources, const char *destination) {
+#if 0
+  // At least up to svn 1.4.6, mv can only take a single source and
+  // destination.  At some point support for old versions will be dropped but
+  // currently I consider that too recent to ignore.
   return execute("svn",
                  EXE_STR, "mv",
                  EXE_STRS, nsources, sources,
                  EXE_STR, destination,
                  EXE_END);
+#endif
+  return generic_rename(nsources, sources, destination, svn_rename_one);
+}
+
+static void svn_rename_one(const string &source, const string &destination) {
+  string sp, dp;
+  if(execute("svn",
+             EXE_STR, "mv",
+             EXE_STR, source.c_str(),
+             EXE_STR, destination.c_str(),
+             EXE_END))
+    exit(1);
 }
 
 const struct vcs vcs_svn = {

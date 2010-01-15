@@ -290,22 +290,7 @@ static int p4_annotate(const char *path) {
 }
 
 static int p4_rename(int nsources, char **sources, const char *destination) {
-  if(exists(destination)) {
-    if(!isdir(destination))
-      fatal("%s already exists (and is not a directory)", destination);
-    // We're renaming files and/or directories "into" a directory
-    for(int n = 0; n < nsources; ++n) {
-      p4_rename_one(sources[n], 
-                    string(destination) + "/" + basename(sources[n]));
-    }
-  } else {
-    if(nsources != 1)
-      fatal("Cannot rename multiple sources to (nonexistent) destination %s",
-            destination);
-    // We're just changing the name of one file or directory
-    p4_rename_one(sources[0], destination);
-  }
-  return 0;
+  return generic_rename(nsources, sources, destination, p4_rename_one);
 }
 
 static void p4_rename_one(const string &source, const string &destination) {

@@ -142,6 +142,9 @@ string get_relative_path(const string &s);
 string dirname(const string &s);
 string basename(const string &s);
 int editor(vector<string> &file);
+int generic_rename(int nsources, char **sources, const char *destination,
+		   void (*rename_one)(const string &source,
+				      const string &destination));
 
 extern list<string> global_ignores;
 
