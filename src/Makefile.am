@@ -20,7 +20,7 @@ libvcs_a_SOURCES=vcs.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
 vcs_SOURCES=main.cc \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
 	log.cc edit.cc annotate.cc clone.cc rename.cc \
-	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc rename-generic.cc
+	cvs.cc git.cc svn.cc bzr.cc p4.cc hg.cc darcs.cc
 LDADD=libvcs.a
 
 clean-local:

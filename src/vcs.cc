@@ -126,6 +126,29 @@ const vcs *vcs::guess_branch(string uri) {
   fatal("cannot identify version control system");
 }
 
+int vcs::rename(int nsources, char **sources, const char *destination) const {
+  if(exists(destination)) {
+    if(!isdir(destination))
+      fatal("%s already exists (and is not a directory)", destination);
+    // We're renaming files and/or directories "into" a directory
+    for(int n = 0; n < nsources; ++n) {
+      rename_one(sources[n],
+		 string(destination) + "/" + basename(sources[n]));
+    }
+  } else {
+    if(nsources != 1)
+      fatal("Cannot rename multiple sources to (nonexistent) destination %s",
+            destination);
+    // We're just changing the name of one file or directory
+    rename_one(sources[0], destination);
+  }
+  return 0;
+}
+
+void vcs::rename_one(const string &, const string &) const {
+  fatal("%s does not support renaming.", name);
+}
+
 /*
 Local Variables:
 mode:c++

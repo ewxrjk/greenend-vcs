@@ -313,11 +313,7 @@ public:
                    EXE_END);
   }
 
-  int rename(int nsources, char **sources, const char *destination) const {
-    return generic_rename(nsources, sources, destination, p4_rename_one);
-  }
-
-  static void p4_rename_one(const string &source, const string &destination) {
+  void rename_one(const string &source, const string &destination) const {
     string sp, dp;
     if(isdir(source)) {
       sp = source + "/...";

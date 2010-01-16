@@ -56,7 +56,9 @@ public:
   virtual int edit(int nfiles, char **files) const; // optional
   virtual int annotate(const char *file) const = 0;
   virtual int clone(const char *uri, const char *dir) const; // optional
-  virtual int rename(int nsources, char **sources, const char *destination) const = 0;
+  virtual int rename(int nsources, char **sources, const char *destination) const;
+
+  virtual void rename_one(const string &source, const string &destination) const;
 
   static const vcs *guess();
   static const vcs *guess_branch(string uri);

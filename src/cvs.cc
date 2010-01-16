@@ -212,12 +212,6 @@ public:
                    EXE_STR, path,
                    EXE_END);
   }
-
-  int rename(int /*nsources*/, 
-             char **/*sources*/, 
-             const char */*destination*/) const {
-    fatal("CVS does not support renaming.");
-  }
 };
 
 static const cvs vcs_cvs;

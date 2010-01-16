@@ -170,21 +170,10 @@ public:
                    EXE_END);
   }
 
-  int rename(int nsources, char **sources, const char *destination) const {
-#if 0
-    // At least up to svn 1.4.6, mv can only take a single source and
-    // destination.  At some point support for old versions will be dropped but
-    // currently I consider that too recent to ignore.
-    return execute("svn",
-                   EXE_STR, "mv",
-                   EXE_STRS, nsources, sources,
-                   EXE_STR, destination,
-                   EXE_END);
-#endif
-    return generic_rename(nsources, sources, destination, svn_rename_one);
-  }
-
-  static void svn_rename_one(const string &source, const string &destination) {
+  // At least up to svn 1.4.6, mv can only take a single source and
+  // destination.  At some point support for old versions will be dropped but
+  // currently I consider that too recent to ignore.
+  void rename_one(const string &source, const string &destination) const {
     string sp, dp;
     if(execute("svn",
                EXE_STR, "mv",
