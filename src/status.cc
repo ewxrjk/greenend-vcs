@@ -49,7 +49,7 @@ int vcs_status(int argc, char **argv) {
     status_help(stderr);
     return 1;
   }
-  return guess()->status();
+  return vcs::guess()->status();
 }
 
 /*

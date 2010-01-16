@@ -52,7 +52,7 @@ int vcs_commit(int argc, char **argv) {
       return 1;
     }
   }
-  return guess()->commit(msg, argc - optind, argv + optind);
+  return vcs::guess()->commit(msg, argc - optind, argv + optind);
   
 }
 

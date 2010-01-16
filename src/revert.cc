@@ -46,7 +46,7 @@ int vcs_revert(int argc, char **argv) {
       return 1;
     }
   }
-  return guess()->revert(argc - optind, argv + optind);
+  return vcs::guess()->revert(argc - optind, argv + optind);
 }
 
 /*

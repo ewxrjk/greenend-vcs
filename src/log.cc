@@ -50,7 +50,7 @@ int vcs_log(int argc, char **argv) {
     return 1;
   }
   redirect(getenv("VCS_PAGER"));
-  return guess()->log(argc == optind ? NULL : argv[optind]);
+  return vcs::guess()->log(argc == optind ? NULL : argv[optind]);
 }
 
 /*

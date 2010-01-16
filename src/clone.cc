@@ -49,7 +49,7 @@ int vcs_clone(int argc, char **argv) {
     clone_help(stderr);
     return 1;
   }
-  const struct vcs *v = guess_branch(argv[optind]);
+  const vcs *v = vcs::guess_branch(argv[optind]);
   return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
 }
 

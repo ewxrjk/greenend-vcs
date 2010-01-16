@@ -50,7 +50,7 @@ int vcs_annotate(int argc, char **argv) {
     return 1;
   }
   redirect(getenv("VCS_PAGER"));
-  return guess()->annotate(argv[optind]);
+  return vcs::guess()->annotate(argv[optind]);
 }
 
 /*

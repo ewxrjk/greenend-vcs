@@ -43,11 +43,8 @@ public:
   const char *const name;
   vcs(const char *name_);
 
-  void register_subdir(const string &subdir);
-  void register_scheme(const string &scheme);
-  void register_substring(const string &substring);
-
   virtual bool detect(void) const;
+
   virtual int diff(int nfiles, char **files) const = 0;
   virtual int add(int binary, int nfiles, char **files) const = 0;
   virtual int remove(int force, int nfiles, char **files) const = 0;
@@ -61,6 +58,15 @@ public:
   virtual int clone(const char *uri, const char *dir) const; // optional
   virtual int rename(int nsources, char **sources, const char *destination) const = 0;
 
+  static const vcs *guess();
+  static const vcs *guess_branch(string uri);
+
+protected:
+  void register_subdir(const string &subdir);
+  void register_scheme(const string &scheme);
+  void register_substring(const string &substring);
+
+private:
   typedef list<vcs *> selves_t;
   static selves_t *selves;
 
@@ -90,9 +96,6 @@ int vcs_edit(int argc, char **argv);
 int vcs_annotate(int argc, char **argv);
 int vcs_clone(int argc, char **argv);
 int vcs_rename(int argc, char **argv);
-
-const struct vcs *guess();
-const struct vcs *guess_branch(string uri);
 
 const string uri_scheme(const string &uri);
 int uri_exists(const string &uri);

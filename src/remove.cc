@@ -54,8 +54,7 @@ int vcs_remove(int argc, char **argv) {
     remove_help(stderr);
     return 1;
   }
-  return guess()->remove(force, argc - optind, argv + optind);
-  
+  return vcs::guess()->remove(force, argc - optind, argv + optind);
 }
 
 /*

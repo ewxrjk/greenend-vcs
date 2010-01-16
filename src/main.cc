@@ -46,48 +46,6 @@ static void help(FILE *fp = stdout) {
           "Use 'vcs COMMAND --help' for per-command help.\n");
 }
 
-vcs::vcs(const char *name_): name(name_) {
-  if(!selves)
-    selves = new selves_t();
-  selves->push_back(this);
-}
-
-void vcs::register_scheme(const string &s) {
-  if(!schemes)
-    schemes = new schemes_t();
-  (*schemes)[s] = this;
-}
-
-void vcs::register_substring(const string &s) {
-  if(!substrings)
-    substrings = new substrings_t();
-  substrings->push_back(pair<string,vcs *>(s, this));
-}
-
-void vcs::register_subdir(const string &s) {
-  if(!subdirs)
-    subdirs = new substrings_t();
-  subdirs->push_back(pair<string,vcs *>(s, this));
-}
-
-bool vcs::detect(void) const {
-  return false;
-}
-
-int vcs::edit(int, char **) const {
-  return 0;
-}
-
-int vcs::clone(const char *, const char *) const {
-  fatal("guess_branch returned VCS '%s' which has no clone method!",
-        name);
-}
-
-vcs::selves_t *vcs::selves;
-vcs::schemes_t *vcs::schemes;
-vcs::substrings_t *vcs::substrings;
-vcs::substrings_t *vcs::subdirs;
-
 // Table of commands
 static const struct command {
   const char *name;
@@ -219,7 +177,7 @@ int main(int argc, char **argv) {
       commandlist();
       return 0;
     case 'g': {
-      const struct vcs *v = guess();
+      const vcs *v = vcs::guess();
       puts(v->name);
       return 0;
     }
