@@ -53,7 +53,7 @@ int vcs_diff(int argc, char **argv) {
   if(!pager)
     pager = getenv("VCS_PAGER");
   redirect(pager);
-  return guess()->diff(argc - optind, argv + optind);
+  return vcs::guess()->diff(argc - optind, argv + optind);
 }
 
 /*

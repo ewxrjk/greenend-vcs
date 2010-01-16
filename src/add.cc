@@ -54,8 +54,7 @@ int vcs_add(int argc, char **argv) {
     add_help(stderr);
     return 1;
   }
-  return guess()->add(binary, argc - optind, argv + optind);
-  
+  return vcs::guess()->add(binary, argc - optind, argv + optind);
 }
 
 /*

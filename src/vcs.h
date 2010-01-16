@@ -38,24 +38,48 @@
 
 using namespace std;
 
-struct vcs {
-  const char *name;
-  int (*diff)(int nfiles, char **files);
-  int (*add)(int binary, int nfiles, char **files);
-  int (*remove)(int force, int nfiles, char **files);
-  int (*commit)(const char *msg, int nfiles, char **files);
-  int (*revert)(int nfiles, char **files);
-  int (*status)();
-  int (*update)();
-  int (*log)(const char *file);
-  int (*edit)(int nfiles, char **files); // optional
-  int (*annotate)(const char *file);
-  int (*clone)(const char *uri, const char *dir);
-  int (*rename)(int nsources, char **sources, const char *destination);
-};
+class vcs {
+public:
+  const char *const name;
+  vcs(const char *name_);
 
-extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
-extern const struct vcs vcs_darcs;
+  virtual bool detect(void) const;
+
+  virtual int diff(int nfiles, char **files) const = 0;
+  virtual int add(int binary, int nfiles, char **files) const = 0;
+  virtual int remove(int force, int nfiles, char **files) const = 0;
+  virtual int commit(const char *msg, int nfiles, char **files) const = 0;
+  virtual int revert(int nfiles, char **files) const = 0;
+  virtual int status() const = 0;
+  virtual int update() const = 0;
+  virtual int log(const char *file) const = 0;
+  virtual int edit(int nfiles, char **files) const; // optional
+  virtual int annotate(const char *file) const = 0;
+  virtual int clone(const char *uri, const char *dir) const; // optional
+  virtual int rename(int nsources, char **sources, const char *destination) const;
+
+  virtual void rename_one(const string &source, const string &destination) const;
+
+  static const vcs *guess();
+  static const vcs *guess_branch(string uri);
+
+protected:
+  void register_subdir(const string &subdir);
+  void register_scheme(const string &scheme);
+  void register_substring(const string &substring);
+
+private:
+  typedef list<vcs *> selves_t;
+  static selves_t *selves;
+
+  typedef map<string, vcs *> schemes_t;
+  static schemes_t *schemes;
+
+  typedef list< pair<string, vcs *> > substrings_t;
+  static substrings_t *substrings;
+
+  static substrings_t *subdirs;
+};
 
 extern int verbose;
 extern int dryrun;
@@ -74,9 +98,6 @@ int vcs_edit(int argc, char **argv);
 int vcs_annotate(int argc, char **argv);
 int vcs_clone(int argc, char **argv);
 int vcs_rename(int argc, char **argv);
-
-const struct vcs *guess();
-const struct vcs *guess_branch(string uri);
 
 const string uri_scheme(const string &uri);
 int uri_exists(const string &uri);

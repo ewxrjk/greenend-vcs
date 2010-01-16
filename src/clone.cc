@@ -49,12 +49,8 @@ int vcs_clone(int argc, char **argv) {
     clone_help(stderr);
     return 1;
   }
-  const struct vcs *v = guess_branch(argv[optind]);
-  if(v->clone)
-    return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
-  else
-    fatal("guess_branch returned VCS '%s' which has no clone method!",
-          v->name);
+  const vcs *v = vcs::guess_branch(argv[optind]);
+  return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
 }
 
 /*

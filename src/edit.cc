@@ -49,11 +49,7 @@ int vcs_edit(int argc, char **argv) {
     edit_help(stderr);
     return 1;
   }
-  const struct vcs *v = guess();
-  if(v->edit)
-    return v->edit(argc - optind, argv + optind);
-  else
-    return 0;
+  return vcs::guess()->edit(argc - optind, argv + optind);
 }
 
 /*
