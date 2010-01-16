@@ -50,10 +50,7 @@ int vcs_edit(int argc, char **argv) {
     return 1;
   }
   const struct vcs *v = guess();
-  if(v->edit)
-    return v->edit(argc - optind, argv + optind);
-  else
-    return 0;
+  return v->edit(argc - optind, argv + optind);
 }
 
 /*

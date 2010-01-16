@@ -17,23 +17,26 @@
  */
 #include "vcs.h"
 
+static list<vcs *> vcsen;
+
 // Guess what VCS is in use; returns a pointer to its operation table.
 // Terminates the process if no VCS can be found.
-const struct vcs *guess() {
-  // CVS is easy as it has a CVS directory at every level.
-  if(isdir("CVS"))
-    return &vcs_cvs;
-  // Subversion too
-  if(isdir(".svn"))
-    return &vcs_svn;
-  if(isdir(".bzr"))
-    return &vcs_bzr;
-  if(isdir(".git"))
-    return &vcs_git;
-  if(isdir(".hg"))
-    return &vcs_hg;
-  if(isdir("_darcs"))
-    return &vcs_darcs;
+const vcs *guess() {
+  for(list<vcs *>::const_iterator it = vcs::selves.begin();
+      it != vcs::selves.end();
+      ++it) {
+    vcs *v = *it;
+    if(v->magicdir && isdir(v->magicdir))
+      return v;
+  }
+  for(list<vcs *>::const_iterator it = vcs::selves.begin();
+      it != vcs::selves.end();
+      ++it) {
+    vcs *v = *it;
+    if(v->detect())
+      return v;
+  }
+#if 0
   // Only attempt to detect Perforce if some Perforce-specific environment
   // variable is set.  We try this _before_ searching parent directories
   // for a VC-specific subdirectory, so that Perforce checkouts that are
@@ -49,18 +52,18 @@ const struct vcs *guess() {
                 EXE_END))
       return &vcs_p4;
   }
+#endif
   // Bazaar and Git only have their dot directories at the top level of the
   // branch, so we work our way back up.
   string d = cwd();
   for(;;) {
-    if(isdir(d + PATHSEPSTR + ".bzr"))
-      return &vcs_bzr;
-    if(isdir(d + PATHSEPSTR + ".git"))
-      return &vcs_git;
-    if(isdir(d + PATHSEPSTR + ".hg"))
-      return &vcs_hg;
-    if(isdir(d + PATHSEPSTR + "_darcs"))
-      return &vcs_darcs;
+    for(list<vcs *>::const_iterator it = vcs::selves.begin();
+        it != vcs::selves.end();
+        ++it) {
+      vcs *v = *it;
+      if(v->magicdir && isdir(d + PATHSEPSTR + v->magicdir))
+        return v;
+    }
     if(isroot(d))
       break;
     d = parentdir(d);

@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,25 @@ static void help(FILE *fp = stdout) {
           "  -4, -6            Force IP version for network access\n"
           "\n"
           "Use 'vcs COMMAND --help' for per-command help.\n");
+}
+
+vcs::vcs(const char *name_,
+         const char *magicdir_): name(name_),
+                                 magicdir(magicdir_) {
+  selves.push_back(this);
+}
+
+int vcs::detect(void) const {
+  return 0;
+}
+
+int vcs::edit(int, char **) const {
+  return 0;
+}
+
+int vcs::clone(const char *, const char *) const {
+  fatal("guess_branch returned VCS '%s' which has no clone method!",
+        name);
 }
 
 // Table of commands

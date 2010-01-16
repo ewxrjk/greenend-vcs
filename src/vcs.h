@@ -38,24 +38,28 @@
 
 using namespace std;
 
-struct vcs {
-  const char *name;
-  int (*diff)(int nfiles, char **files);
-  int (*add)(int binary, int nfiles, char **files);
-  int (*remove)(int force, int nfiles, char **files);
-  int (*commit)(const char *msg, int nfiles, char **files);
-  int (*revert)(int nfiles, char **files);
-  int (*status)();
-  int (*update)();
-  int (*log)(const char *file);
-  int (*edit)(int nfiles, char **files); // optional
-  int (*annotate)(const char *file);
-  int (*clone)(const char *uri, const char *dir);
-  int (*rename)(int nsources, char **sources, const char *destination);
-};
+class vcs {
+public:
+  const char *const name;
+  const char *magicdir;
+  vcs(const char *name_, const char *magicdir_);
 
-extern const struct vcs vcs_cvs, vcs_svn, vcs_bzr, vcs_git, vcs_p4, vcs_hg;
-extern const struct vcs vcs_darcs;
+  virtual int detect(void) const;
+  virtual int diff(int nfiles, char **files) const = 0;
+  virtual int add(int binary, int nfiles, char **files) const = 0;
+  virtual int remove(int force, int nfiles, char **files) const = 0;
+  virtual int commit(const char *msg, int nfiles, char **files) const = 0;
+  virtual int revert(int nfiles, char **files) const = 0;
+  virtual int status() const = 0;
+  virtual int update() const = 0;
+  virtual int log(const char *file) const = 0;
+  virtual int edit(int nfiles, char **files) const; // optional
+  virtual int annotate(const char *file) const = 0;
+  virtual int clone(const char *uri, const char *dir) const; // optional
+  virtual int rename(int nsources, char **sources, const char *destination) const = 0;
+
+  static list<vcs *> selves;
+};
 
 extern int verbose;
 extern int dryrun;

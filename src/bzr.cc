@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,111 +17,104 @@
  */
 #include "vcs.h"
 
-static int bzr_diff(int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "diff",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
+class bzr: public vcs {
+public:
 
-static int bzr_add(int /*binary*/, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "add",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
+  bzr(): vcs("Bazaar", ".bzr") {
+  }
 
-static int bzr_remove(int force, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "remove",
-                 EXE_IFSTR(force, "--force"),
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
-
-static int bzr_commit(const char *msg, int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "commit",
-                 EXE_IFSTR(msg, "-m"),
-                 EXE_IFSTR(msg, msg),
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
-
-static int bzr_revert(int nfiles, char **files) {
-  return execute("bzr",
-                 EXE_STR, "revert",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
-
-static int bzr_status() {
-  return execute("bzr",
-                 EXE_STR, "status",
-                 EXE_END);
-}
-
-static int bzr_update() {
-  vector<string> info;
-  int rc;
-  if((rc = capture(info, "bzr", "info", (char *)NULL)))
-    fatal("'bzr info' exited with status %d", rc);
-  if(info.size() > 0
-     && info[0].compare(0, 8, "Checkout") == 0)
+  int diff(int nfiles, char **files) const {
     return execute("bzr",
-                 EXE_STR, "up",
-                 EXE_END);
-  else
-    return execute("bzr",
-                   EXE_STR, "pull",
+                   EXE_STR, "diff",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
-}
+  }
 
-static int bzr_log(const char *path) {
-  return execute("bzr",
-                 EXE_STR, "log",
-                 EXE_IFSTR(path, path),
-                 EXE_END);
-}
+  int add(int /*binary*/, int nfiles, char **files) const {
+    return execute("bzr",
+                   EXE_STR, "add",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
 
-static int bzr_annotate(const char *path) {
-  return execute("bzr",
-                 EXE_STR, "annotate",
-                 EXE_STR, path,
-                 EXE_END);
-}
+  int remove(int force, int nfiles, char **files) const {
+    return execute("bzr",
+                   EXE_STR, "remove",
+                   EXE_IFSTR(force, "--force"),
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
 
-static int bzr_clone(const char *uri, const char *dir) {
-  return execute("bzr",
-                 EXE_STR, "clone",
-                 EXE_STR, uri,
-                 EXE_IFSTR(dir, dir),
-                 EXE_END);
-}
+  int commit(const char *msg, int nfiles, char **files) const {
+    return execute("bzr",
+                   EXE_STR, "commit",
+                   EXE_IFSTR(msg, "-m"),
+                   EXE_IFSTR(msg, msg),
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
 
-static int bzr_rename(int nsources, char **sources, const char *destination) {
-  return execute("bzr",
-                 EXE_STR, "mv",
-                 EXE_STRS, nsources, sources,
-                 EXE_STR, destination,
-                 EXE_END);
-}
+  int revert(int nfiles, char **files) const {
+    return execute("bzr",
+                   EXE_STR, "revert",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
+  
+  int status() const {
+    return execute("bzr",
+                   EXE_STR, "status",
+                   EXE_END);
+  }
 
-const struct vcs vcs_bzr = {
-  "Bazaar",
-  bzr_diff,
-  bzr_add,
-  bzr_remove,
-  bzr_commit,
-  bzr_revert,
-  bzr_status,
-  bzr_update,
-  bzr_log,
-  NULL,                                 // edit
-  bzr_annotate,
-  bzr_clone,
-  bzr_rename,
+  int update() const {
+    vector<string> info;
+    int rc;
+    if((rc = capture(info, "bzr", "info", (char *)NULL)))
+      fatal("'bzr info' exited with status %d", rc);
+    if(info.size() > 0
+       && info[0].compare(0, 8, "Checkout") == 0)
+      return execute("bzr",
+                     EXE_STR, "up",
+                     EXE_END);
+    else
+      return execute("bzr",
+                     EXE_STR, "pull",
+                     EXE_END);
+  }
+
+  int log(const char *path) const {
+    return execute("bzr",
+                   EXE_STR, "log",
+                   EXE_IFSTR(path, path),
+                   EXE_END);
+  }
+  
+  int annotate(const char *path) const {
+    return execute("bzr",
+                   EXE_STR, "annotate",
+                   EXE_STR, path,
+                   EXE_END);
+  }
+  
+  int clone(const char *uri, const char *dir) const {
+    return execute("bzr",
+                   EXE_STR, "clone",
+                   EXE_STR, uri,
+                   EXE_IFSTR(dir, dir),
+                   EXE_END);
+  }
+
+  int rename(int nsources, char **sources, const char *destination) const {
+    return execute("bzr",
+                   EXE_STR, "mv",
+                   EXE_STRS, nsources, sources,
+                   EXE_STR, destination,
+                   EXE_END);
+  }
 };
+
+const bzr vcs_bzr;
 
 /*
 Local Variables:
