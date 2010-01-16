@@ -60,7 +60,7 @@ public:
 
   int revert(int nfiles, char **files) const {
     // Subversion's revert insist you tell it what files to revert.  So if
-    // we want to revert everything we must cobble together list.
+    // we want to revert everything we must cobble together a list.
     if(!nfiles) {
       // Establish the current state
       vector<string> status;
