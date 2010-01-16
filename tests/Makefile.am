@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ t_pager_SOURCES=t-pager.cc
 LDADD=../src/libvcs.a
 AM_CXXFLAGS=-I${top_srcdir}/src
 TESTS_ENVIRONMENT=TESTLOG=true \
-	PATH=$(shell cd ../src && pwd):$$PATH \
-	top_srcdir=$(shell cd ${top_srcdir} && pwd)
+	PATH=`cd ../src && pwd`:$$PATH \
+	top_srcdir=`cd ${top_srcdir} && pwd`
 TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager \
 	t-help t-errors \
 	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 \
