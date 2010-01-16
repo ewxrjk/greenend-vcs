@@ -113,8 +113,15 @@ const vcs *vcs::guess_branch(string uri) {
   for(substrings_t::const_iterator it = substrings->begin();
       it != substrings->end();
       ++it)
-    if(uri.find(it->first) != string::npos)
-      return it->second;
+    if(uri.find(it->first) != string::npos) {
+      // The substring matches, see if there's a directory of the right name.
+      for(substrings_t::const_iterator jt = subdirs->begin();
+          jt != subdirs->end();
+          ++jt)
+        if(jt->second == it->second
+           && uri_exists(uri + "/" + jt->first))
+          return it->second;
+    }
 
   // Failing that we try without hints
   for(substrings_t::const_iterator it = subdirs->begin();
