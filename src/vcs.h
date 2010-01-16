@@ -44,7 +44,7 @@ public:
   const char *magicdir;
   vcs(const char *name_, const char *magicdir_);
 
-  virtual int detect(void) const;
+  virtual bool detect(void) const;
   virtual int diff(int nfiles, char **files) const = 0;
   virtual int add(int binary, int nfiles, char **files) const = 0;
   virtual int remove(int force, int nfiles, char **files) const = 0;

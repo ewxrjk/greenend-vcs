@@ -22,6 +22,7 @@ static list<vcs *> vcsen;
 // Guess what VCS is in use; returns a pointer to its operation table.
 // Terminates the process if no VCS can be found.
 const vcs *guess() {
+  // Look for a magic directory in the current directory
   for(list<vcs *>::const_iterator it = vcs::selves.begin();
       it != vcs::selves.end();
       ++it) {
@@ -29,6 +30,7 @@ const vcs *guess() {
     if(v->magicdir && isdir(v->magicdir))
       return v;
   }
+  // Try slow, complicated detection, for systems that need it
   for(list<vcs *>::const_iterator it = vcs::selves.begin();
       it != vcs::selves.end();
       ++it) {
@@ -36,24 +38,7 @@ const vcs *guess() {
     if(v->detect())
       return v;
   }
-#if 0
-  // Only attempt to detect Perforce if some Perforce-specific environment
-  // variable is set.  We try this _before_ searching parent directories
-  // for a VC-specific subdirectory, so that Perforce checkouts that are
-  // below (e.g.) Bazaar checkouts are correctly matched.  Our own test
-  // scripts are the motivating (and perhaps only) example.
-  if(getenv("P4PORT") || getenv("P4CONFIG") || getenv("P4CLIENT")) {
-    if(!execute("p4",
-                EXE_STR, "changes",
-                EXE_STR, "-m1",
-                EXE_STR, "...",
-                EXE_NO_STDOUT,
-                EXE_NO_STDERR,
-                EXE_END))
-      return &vcs_p4;
-  }
-#endif
-  // Bazaar and Git only have their dot directories at the top level of the
+  // Some systems only have their dot directories at the top level of the
   // branch, so we work our way back up.
   string d = cwd();
   for(;;) {

@@ -24,6 +24,27 @@ public:
   p4(): vcs("Perforce", NULL) {
   }
 
+  bool detect(void) const {
+    // Only attempt to detect Perforce if some Perforce-specific environment
+    // variable is set.
+    //
+    // detect() is rung _before_ searching parent directories for a VC-specific
+    // subdirectory, so that Perforce checkouts that are below (e.g.) Bazaar
+    // checkouts are correctly matched.  Our own test scripts are the
+    // motivating (and perhaps only) example.
+    if(getenv("P4PORT") || getenv("P4CONFIG") || getenv("P4CLIENT")) {
+      if(!execute("p4",
+                  EXE_STR, "changes",
+                  EXE_STR, "-m1",
+                  EXE_STR, "...",
+                  EXE_NO_STDOUT,
+                  EXE_NO_STDERR,
+                  EXE_END))
+        return true;
+    }
+    return false;
+  }
+
   int edit(int nfiles, char **files) const {
     return execute("p4",
                    EXE_STR, "edit",

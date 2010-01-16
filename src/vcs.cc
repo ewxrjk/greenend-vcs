@@ -52,8 +52,8 @@ vcs::vcs(const char *name_,
   selves.push_back(this);
 }
 
-int vcs::detect(void) const {
-  return 0;
+bool vcs::detect(void) const {
+  return false;
 }
 
 int vcs::edit(int, char **) const {
