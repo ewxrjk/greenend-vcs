@@ -114,7 +114,7 @@ public:
   }
 };
 
-const bzr vcs_bzr;
+static const bzr vcs_bzr;
 
 /*
 Local Variables:
