@@ -20,7 +20,9 @@
 class bzr: public vcs {
 public:
 
-  bzr(): vcs("Bazaar", ".bzr") {
+  bzr(): vcs("Bazaar") {
+    register_subdir(".bzr");
+    register_substring("bzr");
   }
 
   int diff(int nfiles, char **files) const {

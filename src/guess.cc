@@ -23,16 +23,14 @@ static list<vcs *> vcsen;
 // Terminates the process if no VCS can be found.
 const vcs *guess() {
   // Look for a magic directory in the current directory
-  for(list<vcs *>::const_iterator it = vcs::selves.begin();
-      it != vcs::selves.end();
-      ++it) {
-    vcs *v = *it;
-    if(v->magicdir && isdir(v->magicdir))
-      return v;
-  }
+  for(vcs::substrings_t::const_iterator it = vcs::subdirs->begin();
+      it != vcs::subdirs->end();
+      ++it)
+    if(isdir(it->first))
+      return it->second;
   // Try slow, complicated detection, for systems that need it
-  for(list<vcs *>::const_iterator it = vcs::selves.begin();
-      it != vcs::selves.end();
+  for(vcs::selves_t::const_iterator it = vcs::selves->begin();
+      it != vcs::selves->end();
       ++it) {
     vcs *v = *it;
     if(v->detect())
@@ -42,13 +40,11 @@ const vcs *guess() {
   // branch, so we work our way back up.
   string d = cwd();
   for(;;) {
-    for(list<vcs *>::const_iterator it = vcs::selves.begin();
-        it != vcs::selves.end();
-        ++it) {
-      vcs *v = *it;
-      if(v->magicdir && isdir(d + PATHSEPSTR + v->magicdir))
-        return v;
-    }
+    for(vcs::substrings_t::const_iterator it = vcs::subdirs->begin();
+        it != vcs::subdirs->end();
+        ++it)
+      if(isdir(d + PATHSEPSTR + it->first))
+        return it->second;
     if(isroot(d))
       break;
     d = parentdir(d);
@@ -56,40 +52,13 @@ const vcs *guess() {
   fatal("cannot identify native version control system");
 }
 
-// Table mapping scheme names to version control systems
-static const struct vcs_scheme {
-  const char *scheme;
-  const struct vcs *vcs;
-} scheme_mapping[] = {
-  { "git", &vcs_git },
-  { "svn", &vcs_svn },
-  { "svn+ssh", &vcs_svn },
-  { "static-http", &vcs_hg },
-  { 0, 0 }
-};
-
-// Table mapping subdirectories to version control systems
-static const struct vcs_subdir {
-  const char *substring;
-  const char *subdir;
-  const struct vcs *vcs;
-} subdir_mapping[] = {
-  { "git", ".git", &vcs_git },
-  { "bzr", ".bzr", &vcs_bzr },
-  { "hg", ".hg", &vcs_hg },
-  // Last since 'HEAD' isn't a dotfile:
-  { "git", "HEAD", &vcs_git },
-  { 0, 0, 0 }
-};
-
 // Guess what VCS a named branch belongs to
 const struct vcs *guess_branch(string uri) {
   // Perhaps we can guess just by looking at the URI
   const string scheme = uri_scheme(uri);
   if(scheme != "") {
-    for(const struct vcs_scheme *s = scheme_mapping; s->scheme; ++s)
-      if(scheme == s->scheme)
-        return s->vcs;
+    if(vcs::schemes->find(scheme) != vcs::schemes->end())
+      return vcs::schemes->find(scheme)->second;
   } else {
     // If there is no scheme then we assume it to be a local URI
     if(uri.size() && uri.at(0) == '/')
@@ -101,16 +70,19 @@ const struct vcs *guess_branch(string uri) {
   // Otherwise we must inspect what we find there.
 
   // First we try to use substrings as hints
-  for(const struct vcs_subdir *s = subdir_mapping; s->subdir; ++s)
-    if(s->substring && uri.find(s->substring) != string::npos)
-      if(uri_exists(uri + "/" + s->subdir))
-        return s->vcs;
+  for(vcs::substrings_t::const_iterator it = vcs::substrings->begin();
+      it != vcs::substrings->end();
+      ++it)
+    if(uri.find(it->first) != string::npos)
+      return it->second;
 
   // Failing that we try without hints
-  for(const struct vcs_subdir *s = subdir_mapping; s->subdir; ++s)
-    if(uri_exists(uri + "/" + s->subdir))
-      return s->vcs;
-  
+  for(vcs::substrings_t::const_iterator it = vcs::subdirs->begin();
+      it != vcs::subdirs->end();
+      ++it)
+    if(uri_exists(uri + "/" + it->first))
+      return it->second;
+
   fatal("cannot identify version control system");
 }
 

@@ -41,8 +41,11 @@ using namespace std;
 class vcs {
 public:
   const char *const name;
-  const char *magicdir;
-  vcs(const char *name_, const char *magicdir_);
+  vcs(const char *name_);
+
+  void register_subdir(const string &subdir);
+  void register_scheme(const string &scheme);
+  void register_substring(const string &substring);
 
   virtual bool detect(void) const;
   virtual int diff(int nfiles, char **files) const = 0;
@@ -58,7 +61,16 @@ public:
   virtual int clone(const char *uri, const char *dir) const; // optional
   virtual int rename(int nsources, char **sources, const char *destination) const = 0;
 
-  static list<vcs *> selves;
+  typedef list<vcs *> selves_t;
+  static selves_t *selves;
+
+  typedef map<string, vcs *> schemes_t;
+  static schemes_t *schemes;
+
+  typedef list< pair<string, vcs *> > substrings_t;
+  static substrings_t *substrings;
+
+  static substrings_t *subdirs;
 };
 
 extern int verbose;

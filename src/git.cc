@@ -20,7 +20,11 @@
 class git: public vcs {
 public:
 
-  git(): vcs("Git", ".git") {
+  git(): vcs("Git") {
+    register_subdir(".git");
+    register_subdir("HEAD");
+    register_scheme("git");
+    register_substring("git");
   }
 
   int diff(int nfiles, char **files) const {

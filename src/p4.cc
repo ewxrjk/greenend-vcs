@@ -21,7 +21,7 @@
 class p4: public vcs {
 public:
 
-  p4(): vcs("Perforce", NULL) {
+  p4(): vcs("Perforce") {
   }
 
   bool detect(void) const {

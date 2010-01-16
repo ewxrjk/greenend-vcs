@@ -20,7 +20,8 @@
 class darcs: public vcs {
 public:
 
-  darcs(): vcs("Darcs", "_darcs") {
+  darcs(): vcs("Darcs") {
+    register_subdir("_darcs");
   }
 
   int diff(int nfiles, char **files) const {

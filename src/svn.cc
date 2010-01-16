@@ -21,7 +21,10 @@
 class svn: public vcs {
 public:
 
-  svn(): vcs("Subversion", ".svn") {
+  svn(): vcs("Subversion") {
+    register_subdir(".svn");
+    register_scheme("svn");
+    register_scheme("svn+ssh");
   }
 
   int diff(int nfiles, char **files) const {

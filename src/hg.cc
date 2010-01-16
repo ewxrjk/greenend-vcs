@@ -20,7 +20,11 @@
 class hg: public vcs {
 public:
 
-  hg(): vcs("Mercurial", ".hg") {
+  hg(): vcs("Mercurial") {
+    register_subdir(".hg");
+    register_scheme("hg");
+    register_scheme("static-http");
+    register_substring("hg");
   }
 
   // Get the version of Mercurial

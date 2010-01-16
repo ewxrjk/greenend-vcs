@@ -21,7 +21,8 @@
 class cvs: public vcs {
 public:
 
-  cvs(): vcs("CVS", "CVS") {
+  cvs(): vcs("CVS") {
+    register_subdir("CVS");
   }
 
   int diff(int nfiles, char **files) const {
