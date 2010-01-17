@@ -23,6 +23,9 @@ vcs::vcs(const char *name_): name(name_) {
   selves->push_back(this);
 }
 
+vcs::~vcs() {
+}
+
 void vcs::register_scheme(const string &s) {
   if(!schemes)
     schemes = new schemes_t();
