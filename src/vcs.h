@@ -82,23 +82,30 @@ private:
   static substrings_t *subdirs;
 };
 
+class command {
+public:
+  command(const char *name_,
+          const char *description_);
+  virtual int execute(int argc, char **argv) const = 0;
+  virtual void help(FILE *fp = stdout) const = 0;
+
+  static void list(FILE *fp = stdout);
+  static const command *find(const string &cmd);
+
+  static inline const vcs *guess() { return vcs::guess(); }
+protected:
+  void register_alias(const char *alias);
+
+private:
+  const string name, description;
+  typedef map<string,command *> commands_t;
+  static commands_t *commands;
+};
+
 extern int verbose;
 extern int dryrun;
 extern int ipv;
 extern int debug;
-
-int vcs_add(int argc, char **argv);
-int vcs_remove(int argc, char **argv);
-int vcs_commit(int argc, char **argv);
-int vcs_diff(int argc, char **argv);
-int vcs_revert(int argc, char **argv);
-int vcs_status(int argc, char **argv);
-int vcs_update(int argc, char **argv);
-int vcs_log(int argc, char **argv);
-int vcs_edit(int argc, char **argv);
-int vcs_annotate(int argc, char **argv);
-int vcs_clone(int argc, char **argv);
-int vcs_rename(int argc, char **argv);
 
 const string uri_scheme(const string &uri);
 int uri_exists(const string &uri);

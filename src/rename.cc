@@ -22,42 +22,49 @@ static const struct option rename_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void rename_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs rename [OPTIONS] SOURCE... DESTINATION\n"
-          "Options:\n"
-          "  --help, -h     Display usage message\n"
-          "\n"
-          "Rename one or more files.\n");
-}
+class rename_: public command {
+public:
+  rename_(): command("rename", "Rename files") {
+    register_alias("mv");
+  }
 
-int vcs_rename(int argc, char **argv) {
-  int n;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs rename [OPTIONS] SOURCE... DESTINATION\n"
+            "Options:\n"
+            "  --help, -h     Display usage message\n"
+            "\n"
+            "Rename one or more files.\n");
+  }
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+h", rename_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      rename_help();
-      return 0;
-    default:
+  int execute(int argc, char **argv) const {
+    int n;
+
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+h", rename_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      default:
+        return 1;
+      }
+    }
+    if(argc < optind + 2) {
+      help(stderr);
       return 1;
     }
+    int nsources = (argc - optind) - 1;
+    char **sources = &argv[optind];
+    const char *destination = argv[argc - 1];
+    if(nsources > 1 && !isdir(destination))
+      fatal("When renaming multiple files, destination must be a directory.\n");
+    return guess()->rename(nsources, sources, destination);
   }
-  if(argc < optind + 2) {
-    rename_help(stderr);
-    return 1;
-  }
-  int nsources = (argc - optind) - 1;
-  char **sources = &argv[optind];
-  const char *destination = argv[argc - 1];
-  if(nsources > 1 && !isdir(destination))
-    fatal("When renaming multiple files, destination must be a directory.\n");
-  return vcs::guess()->rename(nsources, sources, destination);
-  
-}
+};
 
+static rename_ rename_command;
 
 /*
 Local Variables:

@@ -46,117 +46,11 @@ static void help(FILE *fp = stdout) {
           "Use 'vcs COMMAND --help' for per-command help.\n");
 }
 
-// Table of commands
-static const struct command {
-  const char *name;
-  const char *alias;
-  const char *description;
-  int (*action)(int argc, char **argv);
-} commands[] = {
-  {
-    "add", NULL,
-    "Add files to version control",
-    vcs_add
-  },
-  {
-    "annotate", "blame",
-    "Annotate each line with revision number",
-    vcs_annotate
-  },
-  {
-    "clone", "clone",
-    "Check files out of a repository",
-    vcs_clone
-  },
-  {
-    "commit", "ci",
-    "Commit changes",
-    vcs_commit
-  },
-  {
-    "diff", NULL,
-    "Display changes",
-    vcs_diff
-  },
-  {
-    "edit", NULL,
-    "Edit files",
-    vcs_edit
-  },
-  {
-    "log", NULL,
-    "Summarize history",
-    vcs_log
-  },
-  {
-    "remove", "rm",
-    "Remove files",
-    vcs_remove
-  },
-  {
-    "rename", "mv",
-    "Rename file",
-    vcs_rename
-  },
-  {
-    "revert", NULL,
-    "Revert changes",
-    vcs_revert
-  },
-  {
-    "status", NULL,
-    "Display current status",
-    vcs_status,
-  },
-  {
-    "update", NULL,
-    "Update working tree",
-    vcs_update,
-  },
-  { 0, 0, 0,0 }                         // that's all
-};
-
 // Display list of commands
 static void commandlist(FILE *fp = stdout) {
-  int n;
-  int maxlen = 0;
-
-  for(n = 0; commands[n].name; ++n) {
-    const int l = (int)strlen(commands[n].name);
-    if(l > maxlen)
-      maxlen = l;
-  }
   fprintf(fp, "vcs commmands:\n\n");
-  for(n = 0; commands[n].name; ++n) {
-    fprintf(fp, "  %-*s    %s\n", 
-            maxlen, commands[n].name, 
-            commands[n].description);
-  }
+  command::list(fp);
   fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
-}
-
-// Find a command given its name or a unique prefix of it
-static const struct command *find_command(const char *cmd) {
-  list<int> prefixes;
-  for(int n = 0; commands[n].name; ++n) {
-    // Exact matches win immediately
-    if(!strcmp(commands[n].name, cmd)
-       || (commands[n].alias && !strcmp(commands[n].alias, cmd)))
-      return &commands[n];
-    // Accumulate a list of prefix matches
-    // (NB we don't do prefix-matching on aliases.)
-    if(strlen(cmd) < strlen(commands[n].name)
-       && !strncmp(cmd, commands[n].name, strlen(cmd)))
-      prefixes.push_back(n);
-  }
-  switch(prefixes.size()) {
-  case 0:
-    fatal("unknown command '%s' (try vcs -H)", cmd);
-  case 1:
-    return &commands[prefixes.front()];
-  default:
-    fatal("'%s' is not a unique prefix (try vcs -H or a longer prefix)", cmd);
-  }
 }
 
 int main(int argc, char **argv) {
@@ -208,8 +102,8 @@ int main(int argc, char **argv) {
   if(rc)
     fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
 #endif
-  const struct command *c = find_command(argv[optind]);
-  const int status = c->action(argc - optind, argv + optind);
+  const struct command *c = command::find(argv[optind]);
+  const int status = c->execute(argc - optind, argv + optind);
   if(fclose(stdout) < 0)
     fatal("closing stdout: %s", strerror(errno));
   return status;

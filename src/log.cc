@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 210 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,36 +22,44 @@ static const struct option log_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void log_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs log [OPTIONS] [FILENAME ...]\n"
-          "Options:\n"
-          "  --help, -h     Display usage message\n"
-          "\n"
-          "Displays the history of files, or of your whole working tree.\n");
-}
+class log_: public command {
+public:
+  log_(): command("log", "Summarize history") {
+  }
 
-int vcs_log(int argc, char **argv) {
-  int n;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs log [OPTIONS] [FILENAME ...]\n"
+            "Options:\n"
+            "  --help, -h     Display usage message\n"
+            "\n"
+            "Displays the history of files, or of your whole working tree.\n");
+  }
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+h", log_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      log_help();
-      return 0;
-    default:
+  int execute(int argc, char **argv) const {
+    int n;
+
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+h", log_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      default:
+        return 1;
+      }
+    }
+    if(argc - optind > 1) {
+      help(stderr);
       return 1;
     }
+    redirect(getenv("VCS_PAGER"));
+    return guess()->log(argc == optind ? NULL : argv[optind]);
   }
-  if(argc - optind > 1) {
-    log_help(stderr);
-    return 1;
-  }
-  redirect(getenv("VCS_PAGER"));
-  return vcs::guess()->log(argc == optind ? NULL : argv[optind]);
-}
+};
+
+static log_ log_command;
 
 /*
 Local Variables:

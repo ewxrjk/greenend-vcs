@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,36 +22,44 @@ static const struct option clone_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void clone_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs clone [OPTIONS] URI [DIRECTORY]\n"
-          "Options:\n"
-          "  --help, -h     Display usage message\n"
-          "\n"
-          "Creates a local copy of a branch or (part of) a repository.\n");
-}
+class clone_: public command {
+public:
+  clone_(): command("clone", "Check files out of a repository") {
+  }
 
-int vcs_clone(int argc, char **argv) {
-  int n;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs clone [OPTIONS] URI [DIRECTORY]\n"
+            "Options:\n"
+            "  --help, -h     Display usage message\n"
+            "\n"
+            "Creates a local copy of a branch or (part of) a repository.\n");
+  }
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+h", clone_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      clone_help();
-      return 0;
-    default:
+  int execute(int argc, char **argv) const {
+    int n;
+
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+h", clone_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      default:
+        return 1;
+      }
+    }
+    if(argc - optind < 1 || argc - optind > 2) {
+      help(stderr);
       return 1;
     }
+    const vcs *v = vcs::guess_branch(argv[optind]);
+    return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
   }
-  if(argc - optind < 1 || argc - optind > 2) {
-    clone_help(stderr);
-    return 1;
-  }
-  const vcs *v = vcs::guess_branch(argv[optind]);
-  return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
-}
+};
+
+static clone_ command_clone;
 
 /*
 Local Variables:
