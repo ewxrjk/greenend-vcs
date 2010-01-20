@@ -86,6 +86,7 @@ class command {
 public:
   command(const char *name_,
           const char *description_);
+  virtual ~command();
   virtual int execute(int argc, char **argv) const = 0;
   virtual void help(FILE *fp = stdout) const = 0;
 

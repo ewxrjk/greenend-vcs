@@ -23,6 +23,9 @@ command::command(const char *name_,
   register_alias(name_);
 }
 
+command::~command() {
+}
+
 void command::register_alias(const char *alias) {
   if(!commands)
     commands = new commands_t();
