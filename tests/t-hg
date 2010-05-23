@@ -21,6 +21,10 @@ set -e
 t_init hg
 
 x hg init project
+cat >> project/.hg/hgrc <<EOF
+[ui]
+username = No Such User <nobody@example.com.invalid>
+EOF
 t_populate
 
 x hg clone project copy
