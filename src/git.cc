@@ -199,11 +199,19 @@ public:
   }
 
   int rename(int nsources, char **sources, const char *destination) const {
-    return execute("git",
-                   EXE_STR, "mv",
-                   EXE_STRS, nsources, sources,
-                   EXE_STR, destination,
-                   EXE_END);
+    // git mv allegedly supports multiple sources if the destination is a
+    // directory but (at least in 1.6.4.2) this does not actually work.
+    // Therefore we break the command up into multiple operations.
+    for(int n = 0; n < nsources; ++n) {
+      int rc =  execute("git",
+                        EXE_STR, "mv",
+                        EXE_STR, sources[n],
+                        EXE_STR, destination,
+                        EXE_END);
+      if(rc)
+        return rc;
+    }
+    return 0;
   }
 };
 
