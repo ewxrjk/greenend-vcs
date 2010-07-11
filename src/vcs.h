@@ -31,6 +31,8 @@
 #include <cstdarg>
 #include <getopt.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #if HAVE_CURL_CURL_H
 # include <curl/curl.h>
