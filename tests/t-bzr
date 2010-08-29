@@ -1,6 +1,6 @@
 #! /bin/sh
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
 set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
+
+BZR_EMAIL=just.testing@example.com
+export BZR_EMAIL
 
 t_init bzr
 
