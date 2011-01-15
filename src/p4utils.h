@@ -24,17 +24,19 @@ struct P4Where {
   string view_path;
   string local_path;
 
+  // Expects one line from 'p4 where'
   P4Where(const string &l) {
     parse(l);
   }
 
+  // Expects one line from 'p4 where'
   void parse(const string &l);
 };
 
 // Information about one file
 struct P4FileInfo {
   P4FileInfo();
-  P4FileInfo(const string &l);
+  P4FileInfo(const string &l);          // expands 'p4 opened' output
   ~P4FileInfo();
   string depot_path;                    // depot path
   string view_path;                     // view path (NB sometimes missing)

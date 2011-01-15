@@ -96,7 +96,7 @@ string p4_decode(const string &s) {
   
   for(n = 0; n < s.size(); ++n) {
     if(s[n] == '%') {
-      r += 16 * fromhex(s[n + 1]) + fromhex(s[n + 2]);
+      r += 16 * fromhex(s.at(n + 1)) + fromhex(s.at(n + 2));
       n += 2;
     } else
       r += s[n];
@@ -104,9 +104,16 @@ string p4_decode(const string &s) {
   return r;
 }
 
+// Expects one line in 'p4 where' syntax, which is a depot path,
+// a client path in p4 syntax and a client path in local syntax.
+//
+// If the original argument contain %-escape sequences (see the Issuing P4
+// Commands chapter in the Perforce user guide) then they are preserved in the
+// first two but are replaced by their expansion (which might be a space) in
+// the third.
 void P4Where::parse(const string &l) {
   string::size_type n = l.find(' ');
-  depot_path = p4_decode(l.substr( 0, n));
+  depot_path = p4_decode(l.substr(0, n));
   string::size_type m = n + 1;
   n = l.find(' ', m);
   view_path = p4_decode(l.substr(m, n - m));
@@ -213,6 +220,9 @@ P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false),
                           resolvable(false), changed(true) {
 }
 
+// Expects 'p4 opened' output.
+//
+//   depot-file#rev - action chnum change (type) [lock-status]
 P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
                                          resolvable(false), changed(true) {
   // Get the depot path
@@ -250,7 +260,7 @@ P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
   // Lock status
   while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
     ++n;
-  if(n < l.size() && l[n] == '*')
+  if(n < l.size() && l.at(n) == '*')
     locked = true;
 }
 
