@@ -217,6 +217,8 @@ individual files.
 .I CHANGE
 .PP
 Displays an existing, committed, change.
+The change is identified in the native way for the underlying version
+control system.
 .PP
 .B "vcs describe"
 is a synonym for
@@ -284,7 +286,7 @@ Web page: http://www.nongnu.org/cvs/
 .PP
 CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
-\fBvcs rename\fR does not work with CVS.
+\fBvcs rename\fR and \fBvcs show\fR do not work with CVS.
 .SS Bazaar
 Web page: http://bazaar\-vcs.org/
 .PP
@@ -313,6 +315,8 @@ will delete newly added files.
 Web page: http://www.selenic.com/mercurial/
 .SS Darcs
 Web page: http://darcs.net/
+.PP
+\fBvcs show\fR does not work with Darcs.
 .SS Perforce
 Web page: http://www.perforce.com/
 .PP
