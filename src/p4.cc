@@ -335,6 +335,14 @@ public:
                EXE_END))
       exit(1);
   }
+
+  int show(const char *change) const {
+    return execute("p4",
+                   EXE_STR, "describe",
+                   EXE_STR, "-du",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
 
 static const p4 vcs_p4;

@@ -159,6 +159,10 @@ void vcs::rename_one(const string &, const string &) const {
   fatal("%s does not support renaming.", name);
 }
 
+int vcs::show(const char *) const {
+  fatal("%s does not support 'vcs show'.", name);
+}
+
 /*
 Local Variables:
 mode:c++
