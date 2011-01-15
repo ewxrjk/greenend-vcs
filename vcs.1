@@ -136,6 +136,16 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.PP
+.B vcs
+.B diff
+.B -c
+.I CHANGE
+.PP
+This is equivalent to 
+.B vcs
+.B show
+.IR CHANGE .
 .SS edit
 .B vcs
 .B edit
@@ -205,6 +215,7 @@ individual files.
 .B vcs
 .B show
 .I CHANGE
+.PP
 Displays an existing, committed, change.
 .SS status
 .B vcs

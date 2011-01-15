@@ -32,25 +32,39 @@ public:
             "Usage:\n"
             "  vcs diff [OPTIONS] [FILENAME ....]\n"
             "Options:\n"
-            "  --help, -h    Display usage message\n"
+            "  --help, -h            Display usage message\n"
+            "  --change, -c CHANGE   Display changes for an existing commit\n"
             "\n"
-            "Shows differences from last commit.\n"
+            "Shows differences between the current tree and the last commit.\n"
             "\n"
             "If no filenames are specified then all changes are shown.\n"
             "If any filenames are specified then only changes to those files\n"
-            "are shown.\n");
+            "are shown.\n"
+            "\n"
+            "With -c, show the contents of the specified commit.\n"
+            "No filenames are allowed in this case.\n");
   }
 
   int execute(int argc, char **argv) const {
     int n;
+    const char *change = NULL;
 
     optind = 1;
-    while((n = getopt_long(argc, argv, "+h", diff_options, 0)) >= 0) {
+    while((n = getopt_long(argc, argv, "+hc:", diff_options, 0)) >= 0) {
       switch(n) {
       case 'h':
         help();
         return 0;
+      case 'c':
+        change = optarg;
+        break;
       default:
+        return 1;
+      }
+    }
+    if(change) {
+      if(optind != argc) {
+        help(stderr);
         return 1;
       }
     }
@@ -58,7 +72,10 @@ public:
     if(!pager)
       pager = getenv("VCS_PAGER");
     redirect(pager);
-    return guess()->diff(argc - optind, argv + optind);
+    if(change)
+      return guess()->show(change);
+    else
+      return guess()->diff(argc - optind, argv + optind);
   }
 
 };
