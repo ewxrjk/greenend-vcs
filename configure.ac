@@ -74,7 +74,19 @@ AC_ARG_WITH([werror],
             [WERROR="-Werror"])
 
 if test "$GXX" = yes; then
-  CXX="${CXX} -Wall -W -Wmissing-declarations -pedantic $WERROR"
+  AX_GXX_VERSION
+  AC_CACHE_CHECK([GNU C++ extra options],[rjk_cv_warnings],[
+    rjk_cv_warnings="-Wall -W -pedantic $WERROR"
+    # g++ only supports -Wmissing-declarations from 4.3 onwards
+    case "${GXX_VERSION}" in
+    3.* | 4.0 | 4.1 | 4.2 | 4.0.* | 4.1.* | 4.2.* )
+      ;;
+    * )
+      rjk_cv_warnings="${rjk_cv_warnings} -Wmissing-declarations"
+      ;;
+    esac
+  ])
+  CXX="${CXX} ${rjk_cv_warnings}"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
