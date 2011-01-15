@@ -19,6 +19,7 @@
 #include "p4utils.h"
 #include <sstream>
 #include <iomanip>
+#include <stdexcept>
 
 extern "C" {
   extern char **environ;
@@ -90,7 +91,7 @@ static int fromhex(int c) {
   }
 }
 
-string p4_decode(const string &s) {
+static string p4_decode_raw(const string &s) {
   string r;
   string::size_type n;
   
@@ -102,6 +103,16 @@ string p4_decode(const string &s) {
       r += s[n];
   }
   return r;
+}
+
+string p4_decode(const string &s) {
+  try {
+    return p4_decode_raw(s);
+  } catch(out_of_range &e) {
+    fprintf(stderr, "ERROR: out of range decoding path '%s'\n",
+            s.c_str());
+    throw e;
+  }
 }
 
 // Expects one line in 'p4 where' syntax, which is a depot path,
@@ -225,6 +236,20 @@ P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false),
 //   depot-file#rev - action chnum change (type) [lock-status]
 P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
                                          resolvable(false), changed(true) {
+  parse(l);
+}
+
+void P4FileInfo::parse(const string &l) {
+  try {
+    parse_raw(l);
+  } catch(out_of_range &e) {
+    fprintf(stderr, "ERROR: out of range in P4FileInfo::parse '%s'\n",
+            l.c_str());
+    throw e;
+  }
+}
+
+void P4FileInfo::parse_raw(const string &l) {
   // Get the depot path
   string::size_type n = l.find('#');
   if(n == string::npos)
@@ -370,11 +395,18 @@ void P4Info::gather() {
     const string depot_path = p4_decode(l.substr(0, i));
     ++i;
     string revs;
-    while(isdigit(l.at(i)))
-      revs += l[i++];
-    const int rev = atoi(revs.c_str());
-    while(l.at(i) == ' ' || l.at(i) == '-')
-      ++i;
+    int rev;
+    try {
+      while(isdigit(l.at(i)))
+        revs += l[i++];
+      rev = atoi(revs.c_str());
+      while(l.at(i) == ' ' || l.at(i) == '-')
+        ++i;
+    } catch(out_of_range &e) {
+      fprintf(stderr, "ERROR: out of range in P4Info::gather '%s'\n",
+              l.c_str());
+      throw e;
+    }
     const string local_path = l.substr(i);
     info_type::iterator it = info.find(depot_path);
     if(it == info.end()) {

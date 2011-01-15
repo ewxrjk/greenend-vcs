@@ -37,6 +37,8 @@ struct P4Where {
 struct P4FileInfo {
   P4FileInfo();
   P4FileInfo(const string &l);          // expands 'p4 opened' output
+  void parse(const string &l);
+  void parse_raw(const string &l);
   ~P4FileInfo();
   string depot_path;                    // depot path
   string view_path;                     // view path (NB sometimes missing)
