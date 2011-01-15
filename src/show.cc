@@ -25,6 +25,7 @@ static const struct option show_options[] = {
 class show: public command {
 public:
   show(): command("show", "Display historical changes") {
+    register_alias("describe");
   }
 
   void help(FILE *fp = stdout) const {
