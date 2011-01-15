@@ -213,6 +213,13 @@ public:
     }
     return 0;
   }
+
+  int show(const char *change) const {
+    return execute("git",
+                   EXE_STR, "show",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
 
 static git vcs_git;

@@ -136,6 +136,16 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.PP
+.B vcs
+.B diff
+.B -c
+.I CHANGE
+.PP
+This is equivalent to 
+.B vcs
+.B show
+.IR CHANGE .
 .SS edit
 .B vcs
 .B edit
@@ -201,6 +211,16 @@ Newly added files are removed from version control and may be deleted
 .PP
 Note that not all version control systems can selectively revert
 individual files.
+.SS show
+.B vcs
+.B show
+.I CHANGE
+.PP
+Displays an existing, committed, change.
+.PP
+.B "vcs describe"
+is a synonym for
+.BR "vcs show" .
 .SS status
 .B vcs
 .B status
@@ -238,7 +258,9 @@ to perform conflict resolution tool.
 .TP
 .B VCS_DIFF_PAGER
 .B "vcs diff"
-will filter its output through \fBVCS_DIFF_PAGER\fR or, if that is not
+and
+.B "vcs show"
+will filter their output through \fBVCS_DIFF_PAGER\fR or, if that is not
 set, \fBVCS_PAGER\fR.
 .B "vcs log"
 and

@@ -62,6 +62,7 @@ public:
   virtual int rename(int nsources, char **sources, const char *destination) const;
 
   virtual void rename_one(const string &source, const string &destination) const;
+  virtual int show(const char *change) const; // optional for now
 
   static const vcs *guess();
   static const vcs *guess_branch(string uri);

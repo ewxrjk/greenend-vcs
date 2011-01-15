@@ -182,6 +182,14 @@ public:
                EXE_END))
       exit(1);
   }
+
+  int show(const char *change) const {
+    return execute("svn",
+                   EXE_STR, "diff",
+                   EXE_STR, "-c",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
 
 static const svn vcs_svn;

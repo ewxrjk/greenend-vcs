@@ -159,6 +159,14 @@ public:
                    EXE_STR, destination,
                    EXE_END);
   }
+
+  int show(const char *change) const {
+    return execute("hg",
+                   EXE_STR, "diff",
+                   EXE_STR, "-c",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
 
 static const hg vcs_hg;
