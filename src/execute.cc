@@ -526,7 +526,7 @@ int inject(const vector<string> &input,
   if(dryrun) {
     display_command(command);
     for(size_t n = 0; n < input.size(); ++n)
-      printf("| %s\n", input[n].c_str());
+      fprintf(stderr, "| %s\n", input[n].c_str());
     return 0;
   }
   return execute(command, &input, NULL, NULL);

@@ -94,7 +94,7 @@ public:
   virtual int execute(int argc, char **argv) const = 0;
   virtual void help(FILE *fp = stdout) const = 0;
 
-  static void list(FILE *fp = stdout);
+  static void list();
   static const command *find(const string &cmd);
 
   static inline const vcs *guess() { return vcs::guess(); }
@@ -197,6 +197,9 @@ int editor(vector<string> &file);
 int generic_rename(int nsources, char **sources, const char *destination,
 		   void (*rename_one)(const string &source,
 				      const string &destination));
+
+// like printf but throws and knows what file it's writing to
+int writef(FILE *fp, const char *what, const char *fmt, ...);
 
 extern list<string> global_ignores;
 

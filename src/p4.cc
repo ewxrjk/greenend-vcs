@@ -266,10 +266,8 @@ public:
     for(status_type::const_iterator it = status.begin();
         it != status.end();
         ++it) {
-      if(it->second) {
-        if(printf("%c %s\n", it->second, it->first.c_str()) < 0)
-          fatal("error writing to stdout: %s", strerror(errno));
-      }
+      if(it->second)
+        writef(stdout, "stdout", "%c %s\n", it->second, it->first.c_str());
     }
 
     // Ensure warnings come right after the output so they are not swamped
@@ -399,35 +397,30 @@ private:
     while((c = getc(fp)) != EOF)
       if(c == '\n')
         ++lines;
-    if(printf(prefix == '+' ? "@@ -0,0 +1,%ld @@\n"
-                            : "@@ -1,%ld +0,0 @@\n",
-              lines) < 0)
-      fatal("writing to stdout: %s\n", strerror(errno));
+    writef(stdout, "stdout", prefix == '+' ? "@@ -0,0 +1,%ld @@\n"
+                                           : "@@ -1,%ld +0,0 @@\n",
+           lines);
     rewind(fp);
     bool start = true;
     while((c = getc(fp)) != EOF) {
       if(start) {
-        if(putchar(prefix) < 0)
-          fatal("writing to stdout: %s\n", strerror(errno));
+        writef(stdout, "stdout", "%c", prefix);
         start = false;
       }
-      if(putchar(c) < 0)
-        fatal("writing to stdout: %s\n", strerror(errno));
+      writef(stdout, "stdout", "%c", c);
       if(c == '\n')
         start = true;
     }
     fclose(fp);
     if(!start)
-      if(printf("\n\\ No newline at end of file\n") <0)
-        fatal("writing to stdout: %s\n", strerror(errno));
+      writef(stdout, "stdout", "\n\\ No newline at end of file\n");
   }
 
   void diff_new(const P4FileInfo &info) const {
     // New file, display the whole text with a suitable header.  We need to
     // count how many lines are in the new file.  The header we write is
     // consistent with p4 rather than with GNU diff.
-    if(printf("==== - %s ====\n", info.local_path.c_str()) < 0)
-      fatal("writing to stdout: %s\n", strerror(errno));
+    writef(stdout, "stdout", "==== - %s ====\n", info.local_path.c_str());
     diff_whole(info.local_path.c_str(), '+');
   }
 
@@ -446,8 +439,7 @@ private:
                      tmp.c_str()))) {
       fatal("p4 print failed with status %d", rc);
     }
-    if(printf("==== %s - ====\n", info.depot_path.c_str()) < 0)
-      fatal("writing to stdout: %s\n", strerror(errno));
+    writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
     diff_whole(tmp.c_str(), '-');
   }
 };

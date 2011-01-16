@@ -26,9 +26,7 @@ int editor(vector<string> &file) {
   if(!fp)
     fatal("opening %s: %s", tmpfile.c_str(), strerror(errno));
   for(size_t n = 0; n < file.size(); ++n)
-    if(fputs(file[n].c_str(), fp) < 0
-       || fputc('\n', fp) < 0)
-      fatal("error writing to %s: %s", tmpfile.c_str(), strerror(errno));
+    writef(fp, tmpfile.c_str(), "%s\n", file[n].c_str());
   if(fclose(fp) < 0)
     fatal("error writing to %s: %s", tmpfile.c_str(), strerror(errno));
   const char *editor = getenv("VISUAL");

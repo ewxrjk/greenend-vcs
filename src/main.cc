@@ -47,10 +47,10 @@ static void help(FILE *fp = stdout) {
 }
 
 // Display list of commands
-static void commandlist(FILE *fp = stdout) {
-  fprintf(fp, "vcs commmands:\n\n");
-  command::list(fp);
-  fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
+static void commandlist() {
+  writef(stdout, "stdout", "vcs commmands:\n\n");
+  command::list();
+  writef(stdout, "stdout", "\nUse 'vcs COMMAND --help' for per-command help.\n");
 }
 
 static int Main(int argc, char **argv) {
@@ -104,14 +104,15 @@ static int Main(int argc, char **argv) {
 #endif
   const struct command *c = command::find(argv[optind]);
   const int status = c->execute(argc - optind, argv + optind);
-  if(fclose(stdout) < 0)
-    fatal("closing stdout: %s", strerror(errno));
   return status;
 }
 
 int main(int argc, char **argv) {
   try {
-    return Main(argc, argv);
+    int status = Main(argc, argv);
+    if(fclose(stdout) < 0)
+      fatal("closing stdout: %s", strerror(errno));
+    return status;
   } catch(FatalError &e) {
     fprintf(stderr, "ERROR: %s\n", e.what());
     return 1;

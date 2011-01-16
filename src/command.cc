@@ -32,7 +32,7 @@ void command::register_alias(const char *alias) {
   commands->insert(commands_t::value_type(string(alias), this));
 }
 
-void command::list(FILE *fp) {
+void command::list() {
   int maxlen = 0;
 
   for(commands_t::iterator it = commands->begin(); 
@@ -50,7 +50,7 @@ void command::list(FILE *fp) {
       ++it) {
     command *c = it->second;
     if(it->first == c->name) {
-      fprintf(fp, "  %-*s    %s\n", 
+      writef(stdout, "stdout", "  %-*s    %s\n",
               maxlen, c->name.c_str(), c->description.c_str());
     }
   }
