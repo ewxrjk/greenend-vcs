@@ -53,7 +53,7 @@ static void commandlist(FILE *fp = stdout) {
   fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
 }
 
-int main(int argc, char **argv) {
+static int Main(int argc, char **argv) {
   int n;
 
   if(!setlocale(LC_CTYPE, ""))
@@ -107,6 +107,15 @@ int main(int argc, char **argv) {
   if(fclose(stdout) < 0)
     fatal("closing stdout: %s", strerror(errno));
   return status;
+}
+
+int main(int argc, char **argv) {
+  try {
+    return Main(argc, argv);
+  } catch(FatalError &e) {
+    fprintf(stderr, "ERROR: %s\n", e.what());
+    return 1;
+  }
 }
 
 /*

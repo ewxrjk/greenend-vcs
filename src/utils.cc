@@ -112,13 +112,12 @@ int isroot(const string &d) {
 // Report a fatal error
 void fatal(const char *msg, ...) {
   va_list ap;
+  char *formatted;
 
-  fprintf(stderr, "ERROR: ");
   va_start(ap, msg);
-  vfprintf(stderr, msg, ap);
+  vasprintf(&formatted, msg, ap);
   va_end(ap);
-  fputc('\n', stderr);
-  exit(1);
+  throw FatalError(formatted);
 }
 
 void *xmalloc(size_t n) {

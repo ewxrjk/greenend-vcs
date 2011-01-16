@@ -418,7 +418,7 @@ private:
     }
     fclose(fp);
     if(!start)
-      if(printf("\n\\ No newline at end of file\n") < 0)
+      if(printf("\n\\ No newline at end of file\n") <0)
         fatal("writing to stdout: %s\n", strerror(errno));
   }
 

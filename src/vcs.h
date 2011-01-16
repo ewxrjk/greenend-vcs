@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdexcept>
 
 #if HAVE_CURL_CURL_H
 # include <curl/curl.h>
@@ -104,6 +105,12 @@ private:
   const string name, description;
   typedef map<string,command *> commands_t;
   static commands_t *commands;
+};
+
+class FatalError: public runtime_error {
+public:
+  FatalError(const char *s): runtime_error(s) {}
+  FatalError(const std::string &s): runtime_error(s) {}
 };
 
 extern int verbose;
