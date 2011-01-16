@@ -506,7 +506,8 @@ int capture(vector<string> &lines,
   return vcapture(lines, command);
 }
 
-// Execute a command (specified in a string) and capture it output.
+// Execute a command (specified in a string) and capture its output (newlines
+// stripped).
 // Returns exit code.
 int vcapture(vector<string> &lines,
              const vector<string> &command) {

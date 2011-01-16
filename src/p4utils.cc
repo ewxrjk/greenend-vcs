@@ -531,6 +531,46 @@ bool ltfilename::operator()(const string &a, const string &b) const {
   return abits[n] < bbits[n];
 }
 
+// P4Describe -----------------------------------------------------------------
+
+P4Describe::P4Describe(const char *change) {
+  int rc = capture(lines, "p4", "describe", "-du", change, (char *)0);
+  if(rc)
+    fatal("p4 describe exited with status %d", rc);
+  // TODO catch nonexistent changes
+  map<string, size_t> file_index;
+  for(size_t n = 0; n < lines.size(); ++n) {
+    const string &line = lines[n];
+    if(line.size() > 6 && line.compare(0, 6, "... //", 6) == 0) {
+      // ... //depot/path/to/file#rev action
+      fileinfo fi;
+      const string::size_type hash = line.find('#');
+      if(hash == string::npos)
+        fatal("cannot parse p4 describe output '%s'", line.c_str());
+      fi.depot_path.assign(line, 4, hash - 4);
+      string::size_type n = line.find(' ', hash);
+      if(n == string::npos)
+        fatal("cannot parse p4 describe output '%s'", line.c_str());
+      const string revstr(line, hash + 1, n - (hash + 1));
+      fi.rev = atoi(revstr.c_str());
+      while(line.at(n) == ' ')
+        ++n;
+      fi.action.assign(line, n, line.size() - n);
+      file_index[fi.depot_path] = files.size();
+      files.push_back(fi);
+    }
+    if(line.size() > 5 && line.compare(0, 5, "==== ", 5) == 0) {
+      // ==== //depot/path/to/file#rev (type) ====
+      const string::size_type hash = line.find('#');
+      const string depot_path(line, 5, hash - 5);
+      files[file_index[depot_path]].line = n;
+    }
+  }
+}
+
+P4Describe::~P4Describe() {
+}
+
 /*
 Local Variables:
 c-basic-offset:2

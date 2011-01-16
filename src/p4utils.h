@@ -92,6 +92,24 @@ private:
   filemap_type by_relative;             // relative path -> depot path
 };
 
+// Output of 'p4 describe'
+struct P4Describe {
+public:
+  P4Describe(const char *change);
+  ~P4Describe();
+
+  struct fileinfo {
+    fileinfo(): rev(0), line(0) {}
+    string depot_path;                  // depot path of a file
+    int rev;                            // revision number in change
+    string action;                      // action in change
+    size_t line;                        // line diffs found at, or 0
+  };
+
+  vector<string> lines;                 // full text
+  vector<fileinfo> files;               // all files
+};
+
 string p4_encode(const string &s);
 char **p4_encode(int nfiles, char **files);
 string p4_decode(const string &s);

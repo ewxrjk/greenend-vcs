@@ -17,6 +17,7 @@
  */
 #include "vcs.h"
 #include "p4utils.h"
+#include <sstream>
 
 class p4: public vcs {
 public:
@@ -330,11 +331,44 @@ public:
   }
 
   int show(const char *change) const {
-    return execute("p4",
-                   EXE_STR, "describe",
-                   EXE_STR, "-du",
-                   EXE_STR, change,
-                   EXE_END);
+    static const char diffs[] = "Differences ...";
+    P4Describe description(change);
+    for(size_t n = 0;
+        (n < description.lines.size()
+         && description.lines[n] != diffs); 
+        ++n)
+      writef(stdout, "stdout", "%s\n", description.lines[n].c_str());
+    writef(stdout, "stdout", "%s\n", diffs);
+    for(size_t n = 0; n < description.files.size(); ++n) {
+      writef(stdout, "stdout", "\n");
+      const P4Describe::fileinfo &file = description.files[n];
+      if(file.line) {
+        // p4 has produce the diff for us
+        for(size_t m = file.line;
+            m < description.lines.size()
+              && (description.lines[m].size() || m == file.line + 1);
+            ++m) {
+          writef(stdout, "stdout", "%s\n", description.lines[m].c_str());
+        }
+      } else if(file.action == "add" || file.action == "branch") {
+        // File was added in this revision
+        TempFile tmp;
+        retrieve_file(file.depot_path, tmp.path(), file.rev);
+        writef(stdout, "stdout", "==== %s#%d (???\?) ====\n\n", // TODO type
+               file.depot_path.c_str(), file.rev);
+        diff_whole(tmp.c_str(), '+');
+      } else if(file.action == "delete") {
+        // File was removed in this revision
+        TempFile tmp;
+        retrieve_file(file.depot_path, tmp.path(), file.rev - 1);
+        writef(stdout, "stdout", "==== %s#%d (???\?) ====\n\n", // TODO type
+               file.depot_path.c_str(), file.rev);
+        diff_whole(tmp.c_str(), '-');
+      }
+      if(fflush(stdout) < 0)
+        fatal("writing to stdout: %s\n", strerror(errno));
+    }
+    return 0;
   }
 
 private:
@@ -428,19 +462,29 @@ private:
     // Deleted file, retrieve the old text with p4 print and print it with a
     // suitable header.  As with diff_new() we write a p4-like header.
     TempFile tmp;
+    retrieve_file(info.depot_path, tmp.path());
+    writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
+    diff_whole(tmp.c_str(), '-');
+  }
+
+  void retrieve_file(const string &path,
+                     const string &output,
+                     int rev = -1) const {
+    ostringstream s;
+    s << path;
+    if(rev != -1)
+      s << '#' << rev;
     int rc;
     vector<string> command;
     if((rc = execute(makevs(command,
-                            "p4", "print", info.depot_path.c_str(),
+                            "p4", "print", "-q", s.str().c_str(),
                             (char *)NULL),
                      NULL,
                      NULL,
                      NULL,
-                     tmp.c_str()))) {
+                     output.c_str()))) {
       fatal("p4 print failed with status %d", rc);
     }
-    writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
-    diff_whole(tmp.c_str(), '-');
   }
 };
 
