@@ -276,10 +276,12 @@ static void display_command(const vector<string> &vs) {
 // General purpose command execution
 static int exec(const vector<string> &args,
                 const list<monitor *> &monitors,
-                unsigned killfds = 0) {
+                unsigned killfds = 0,
+                const char *output = 0) {
   pid_t pid;
   list<monitor *>::const_iterator it;
   vector<const char *> cargs;
+  int outfd;
 
   // Convert args to C format
   cargs.reserve(args.size());
@@ -291,6 +293,12 @@ static int exec(const vector<string> &args,
     fputs("> ", stderr);
     display_command(args);
   }
+  if(output) {
+    outfd = open(output, O_WRONLY|O_TRUNC|O_CREAT, 0666);
+    if(outfd < 0)
+      fatal("error opening %s: %s", output, strerror(errno));
+  } else
+    outfd = -1;
   // Start subprocess
   if((pid = fork()) < 0)
     fatal("error calling fork: %s", strerror(errno));
@@ -311,6 +319,16 @@ static int exec(const vector<string> &args,
           _exit(-1);
         }
       if(close(nullfd) < 0) {
+        perror("close");
+        _exit(-1);
+      }
+    }
+    if(outfd != -1) {
+      if(dup2(outfd, 1) < 0) {
+        perror("dup2");
+        _exit(-1);
+      }
+      if(close(outfd) < 0) {
         perror("close");
         _exit(-1);
       }
@@ -530,7 +548,8 @@ void report_lines(const vector<string> &l,
 int execute(const vector<string> &command,
             const vector<string> *input,
             vector<string> *output,
-            vector<string> *errors) {
+            vector<string> *errors,
+            const char *outputPath) {
   list<monitor *> monitors;
   writefromstring w;
   readtostring ro, re;
@@ -551,7 +570,7 @@ int execute(const vector<string> &command,
     re.init(2);
     monitors.push_back(&re);
   }
-  const int rc = exec(command, monitors);
+  const int rc = exec(command, monitors, 0, outputPath);
   if(output) {
     split(*output, ro.str());
     if(debug > 1)

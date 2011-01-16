@@ -21,6 +21,7 @@
 #include <cerrno>
 #include <fcntl.h>
 #include <signal.h>
+#include <sstream>
 
 // Global debug level
 // 0 = no debugging output
@@ -320,6 +321,24 @@ string get_relative_path(const string &s) {
     pos = sl + 1;
   }
   return s;
+}
+
+string tempfile() {
+  // Pick a random filename
+  ostringstream s;
+  int fd;
+  const char *tmpdir = getenv("TMPDIR");
+  if(!tmpdir)
+    tmpdir = "/tmp";
+  do {
+    s.str().clear();
+    s << tmpdir << "/vcs." << rand() << ".txt";
+    fd = open(s.str().c_str(), O_WRONLY|O_CREAT|O_EXCL, 0600);
+  } while(fd < 0 && errno == EEXIST);
+  if(fd < 0)
+    fatal("creating %s: %s", s.str().c_str(), strerror(errno));
+  close(fd);
+  return s.str();
 }
 
 /*

@@ -53,18 +53,13 @@ public:
   }
 
   int diff(int nfiles, char **files) const {
-    if(nfiles)
-      return execute("p4",
-                     EXE_STR, "diff",
-                     EXE_STR, "-du",
-                     EXE_STRS, nfiles, p4_encode(nfiles, files),
-                     EXE_END);
-    else
-      return execute("p4",
-                     EXE_STR, "diff",
-                     EXE_STR, "-du",
-                     EXE_STR, "...",
-                     EXE_END);
+    if(nfiles) {
+      for(int n = 0; n < nfiles; ++n)
+        diff_one(files[n]);
+    } else {
+      diff_all();
+    }
+    return 0;
   }
 
   int add(int /*binary*/, int nfiles, char **files) const {
@@ -342,6 +337,120 @@ public:
                    EXE_STR, "-du",
                    EXE_STR, change,
                    EXE_END);
+  }
+
+private:
+  void diff_all() const {
+    P4Info info;
+    list<string> files;
+    info.gather();
+    info.depot_list(files);
+    for(list<string>::const_iterator it = files.begin();
+        it != files.end();
+        ++it) {
+      const string &path = *it;
+      P4FileInfo fi;
+      info.depot_find(path, fi);
+      diff_one(fi);
+    }
+  }
+
+  void diff_one(const char *path) const {
+    P4Info info;
+    list<string> files;
+    info.gather();
+    P4FileInfo fi;
+    // Any kind of path is accepable
+    if(info.local_find(path, fi))
+      diff_one(fi);
+    else if(info.relative_find(path, fi))
+      diff_one(fi);
+    else if(info.depot_find(path, fi))
+      diff_one(fi);
+    else
+      return;                           // no change, presumably
+  }
+
+  void diff_one(const P4FileInfo &info) const {
+    if(info.action == "edit" || info.action == "integrate") {
+      // We can diff the file directly
+      execute("p4",
+              EXE_STR, "diff",
+              EXE_STR, "-du",
+              EXE_STR, info.depot_path.c_str(),
+              EXE_END);
+    } else if(info.action == "branch" || info.action == "add") {
+      diff_new(info);
+    } else if(info.action == "delete") {
+      diff_deleted(info);
+    }
+    // Flush after every file (we're likely to be about to run a subprocess
+    // anyway)
+    if(fflush(stdout) < 0)
+      fatal("writing to stdout: %s\n", strerror(errno));
+  }
+
+  void diff_whole(const char *path, char prefix) const {
+    FILE *fp = fopen(path, "r");
+    if(!fp)
+      fatal("error opening %s: %s", path, strerror(errno));
+    int c;
+    long lines = 0;
+    while((c = getc(fp)) != EOF)
+      if(c == '\n')
+        ++lines;
+    if(printf(prefix == '+' ? "@@ -0,0 +1,%ld @@\n"
+                            : "@@ -1,%ld +0,0 @@\n",
+              lines) < 0)
+      fatal("writing to stdout: %s\n", strerror(errno));
+    rewind(fp);
+    bool start = true;
+    while((c = getc(fp)) != EOF) {
+      if(start) {
+        if(putchar(prefix) < 0)
+          fatal("writing to stdout: %s\n", strerror(errno));
+        start = false;
+      }
+      if(putchar(c) < 0)
+        fatal("writing to stdout: %s\n", strerror(errno));
+      if(c == '\n')
+        start = true;
+    }
+    fclose(fp);
+    if(!start)
+      if(printf("\n\\ No newline at end of file\n") < 0)
+        fatal("writing to stdout: %s\n", strerror(errno));
+  }
+
+  void diff_new(const P4FileInfo &info) const {
+    // New file, display the whole text with a suitable header.  We need to
+    // count how many lines are in the new file.  The header we write is
+    // consistent with p4 rather than with GNU diff.
+    if(printf("==== - %s ====\n", info.local_path.c_str()) < 0)
+      fatal("writing to stdout: %s\n", strerror(errno));
+    diff_whole(info.local_path.c_str(), '+');
+  }
+
+  void diff_deleted(const P4FileInfo &info) const {
+    // Deleted file, retrieve the old text with p4 print and print it with a
+    // suitable header.  As with diff_new() we write a p4-like header.
+    string tmp = tempfile();
+    int rc;
+    vector<string> command;
+    if((rc = execute(makevs(command,
+                            "p4", "print", info.depot_path.c_str(),
+                            (char *)NULL),
+                     NULL,
+                     NULL,
+                     NULL,
+                     tmp.c_str()))) {
+      ::remove(tmp.c_str());
+      fatal("p4 print failed with status %d", rc);
+    }
+    if(printf("==== %s - ====\n", info.depot_path.c_str()) < 0)
+      fatal("writing to stdout: %s\n", strerror(errno));
+    diff_whole(tmp.c_str(), '-');
+    ::remove(tmp.c_str());
   }
 };
 

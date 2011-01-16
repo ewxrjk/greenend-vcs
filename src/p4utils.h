@@ -51,6 +51,14 @@ struct P4FileInfo {
   bool locked;                          // true for *locked*
   bool resolvable;                      // true for resolve-needed
   bool changed;                         // true for changed files
+
+  static void get(map<string,P4FileInfo> &results,
+                  const string &pattern) {
+    get(results, pattern.c_str());
+  }
+
+  static void get(map<string,P4FileInfo> &results,
+                  const char *pattern);
 };
 
 struct ltfilename {

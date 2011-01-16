@@ -127,6 +127,7 @@ void fatal(const char *msg, ...)
   attribute((noreturn))  
   attribute((format (printf, 1, 2)));
 int erase(const char *s);
+string tempfile();
 
 void *xmalloc(size_t n);
 char *xstrdup(const char *s);
@@ -163,7 +164,8 @@ void remove_directories(int &nfiles, char **files);
 int execute(const vector<string> &command,
             const vector<string> *input = NULL,
             vector<string> *output = NULL,
-            vector<string> *errors = NULL);
+            vector<string> *errors = NULL,
+            const char *outputPath = NULL);
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...);

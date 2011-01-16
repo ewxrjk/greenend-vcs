@@ -292,6 +292,31 @@ void P4FileInfo::parse_raw(const string &l) {
 P4FileInfo::~P4FileInfo() {
 }
 
+void P4FileInfo::get(map<string,P4FileInfo> &results,
+                     const char *pattern) {
+  int rc;
+  vector<string> command, opened, errors;
+
+  results.clear();
+  if((rc = execute(makevs(command, "p4", "opened", pattern, (char *)0),
+                   NULL/*input*/,
+                   &opened,
+                   &errors))) {
+    report_lines(errors);
+    fatal("'p4 opened ...' exited with status %d", rc);
+  }
+  if(!(errors.size() == 0
+       || (errors.size() == 1
+           && errors[0] == "... - file(s) not opened on this client."))) {
+    report_lines(errors);
+    fatal("Unexpected error output from 'p4 opened ...'");
+  }
+  for(size_t n = 0; n < opened.size(); ++n) {
+    P4FileInfo fi(opened[n]);
+    results[fi.depot_path] = fi;
+  }
+}
+
 // P4Info ----------------------------------------------------------------------
 
 P4Info::P4Info() {
@@ -358,30 +383,7 @@ void P4Info::gather() {
   by_local.clear();
   by_relative.clear();
   
-  // 'p4 opened' gives all opened files, in the form:
-  //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
-  // ACTION is add, edit, delete, branch, integrate
-  // CHNUM is the change number or 'default'.
-  if((rc = execute(makevs(command, "p4", "opened", "...", (char *)0),
-                   NULL/*input*/,
-                   &opened,
-                   &errors))) {
-    report_lines(errors);
-    fatal("'p4 opened ...' exited with status %d", rc);
-  }
-  if(!(errors.size() == 0
-       || (errors.size() == 1
-           && errors[0] == "... - file(s) not opened on this client."))) {
-    report_lines(errors);
-    fatal("Unexpected error output from 'p4 opened ...'");
-  }
-  // Build the info array
-  for(size_t n = 0; n < opened.size(); ++n) {
-    P4FileInfo fi(opened[n]);
-
-    //fprintf(stderr, "opened: %s -> %s\n", fi.depot_path.c_str(), fi.action.c_str());
-    info[fi.depot_path] = fi;
-  }
+  P4FileInfo::get(info, "...");
 
   // 'p4 have' gives all files, in the form:
   //   DEPOT-PATH#REV - LOCAL-PATH
