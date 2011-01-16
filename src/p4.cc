@@ -434,7 +434,7 @@ private:
   void diff_deleted(const P4FileInfo &info) const {
     // Deleted file, retrieve the old text with p4 print and print it with a
     // suitable header.  As with diff_new() we write a p4-like header.
-    string tmp = tempfile();
+    TempFile tmp;
     int rc;
     vector<string> command;
     if((rc = execute(makevs(command,
@@ -444,13 +444,11 @@ private:
                      NULL,
                      NULL,
                      tmp.c_str()))) {
-      ::remove(tmp.c_str());
       fatal("p4 print failed with status %d", rc);
     }
     if(printf("==== %s - ====\n", info.depot_path.c_str()) < 0)
       fatal("writing to stdout: %s\n", strerror(errno));
     diff_whole(tmp.c_str(), '-');
-    ::remove(tmp.c_str());
   }
 };
 

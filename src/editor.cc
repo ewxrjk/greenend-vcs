@@ -21,7 +21,7 @@
 
 // Bring up the user's editor to edit the contents of FILE
 int editor(vector<string> &file) {
-  const string tmpfile = tempfile();
+  TempFile tmpfile;
   FILE *fp = fopen(tmpfile.c_str(), "w");
   if(!fp)
     fatal("opening %s: %s", tmpfile.c_str(), strerror(errno));
@@ -37,14 +37,14 @@ int editor(vector<string> &file) {
   if(!editor)
     editor = "vi";              // traditional fallback
   ostringstream cmd;
-  cmd << editor << " " << tmpfile;
+  cmd << editor << " " << tmpfile.path();
   int rc = system(cmd.str().c_str());
   if(!rc) {
     if(!(fp = fopen(tmpfile.c_str(), "r")))
       fatal("opening %s: %s", tmpfile.c_str(), strerror(errno));
     string l;
     file.clear();
-    while(readline(tmpfile, fp, l))
+    while(readline(tmpfile.path(), fp, l))
       file.push_back(l);
     fclose(fp);
   } else if(WIFEXITED(rc))
@@ -54,7 +54,6 @@ int editor(vector<string> &file) {
             WTERMSIG(rc), strsignal(WTERMSIG(rc)));
     rc = 128 + WTERMSIG(rc);
   }
-  erase(tmpfile.c_str());
   return rc;
 }
 

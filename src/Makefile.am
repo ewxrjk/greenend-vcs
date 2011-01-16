@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=vcs
 noinst_LIBRARIES=libvcs.a
-libvcs_a_SOURCES=vcs.cc utils.cc uri.cc ignore.cc vcs.h execute.cc \
-	p4utils.h p4utils.cc xml.cc version.cc xml.h editor.cc command.cc
+libvcs_a_SOURCES=vcs.cc utils.cc uri.cc ignore.cc vcs.h execute.cc	\
+	p4utils.h p4utils.cc xml.cc version.cc xml.h editor.cc		\
+	command.cc TempFile.cc
 vcs_SOURCES=main.cc \
 	add.cc remove.cc commit.cc diff.cc revert.cc status.cc update.cc \
 	log.cc edit.cc annotate.cc clone.cc rename.cc show.cc \

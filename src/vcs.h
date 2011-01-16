@@ -113,6 +113,16 @@ public:
   FatalError(const std::string &s): runtime_error(s) {}
 };
 
+class TempFile {
+public:
+  TempFile();
+  ~TempFile();
+  const std::string &path() const { return name; }
+  const char *c_str() const { return name.c_str(); }
+private:
+  std::string name;
+};
+
 extern int verbose;
 extern int dryrun;
 extern int ipv;
