@@ -113,9 +113,12 @@ int isroot(const string &d) {
 void fatal(const char *msg, ...) {
   va_list ap;
   char *formatted;
+  int n;
 
   va_start(ap, msg);
-  vasprintf(&formatted, msg, ap);
+  n = vasprintf(&formatted, msg, ap);
+  if(n < 0)
+    abort();
   va_end(ap);
   throw FatalError(formatted);
 }
