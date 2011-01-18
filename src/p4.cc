@@ -331,6 +331,8 @@ public:
   }
 
   int show(const char *change) const {
+    string type;
+    vector<string> lines;
     static const char diffs[] = "Differences ...";
     P4Describe description(change);
     for(size_t n = 0;
@@ -352,18 +354,16 @@ public:
         }
       } else if(file.action == "add" || file.action == "branch") {
         // File was added in this revision
-        TempFile tmp;
-        retrieve_file(file.depot_path, tmp.path(), file.rev);
-        writef(stdout, "stdout", "==== %s#%d (???\?) ====\n\n", // TODO type
-               file.depot_path.c_str(), file.rev);
-        diff_whole(tmp.c_str(), '+');
+        retrieve_file(file.depot_path, lines, &type, file.rev);
+        writef(stdout, "stdout", "==== %s#%d (%s) ====\n\n",
+               file.depot_path.c_str(), file.rev, type.c_str());
+        diff_whole(lines, '+');
       } else if(file.action == "delete") {
         // File was removed in this revision
-        TempFile tmp;
-        retrieve_file(file.depot_path, tmp.path(), file.rev - 1);
-        writef(stdout, "stdout", "==== %s#%d (???\?) ====\n\n", // TODO type
-               file.depot_path.c_str(), file.rev);
-        diff_whole(tmp.c_str(), '-');
+        retrieve_file(file.depot_path, lines, &type, file.rev - 1);
+        writef(stdout, "stdout", "==== %s#%d (%s) ====\n\n",
+               file.depot_path.c_str(), file.rev, type.c_str());
+        diff_whole(lines, '-');
       }
       if(fflush(stdout) < 0)
         fatal("writing to stdout: %s\n", strerror(errno));
@@ -450,6 +450,16 @@ private:
       writef(stdout, "stdout", "\n\\ No newline at end of file\n");
   }
 
+  void diff_whole(const vector<string> &lines, char prefix) const {
+    writef(stdout, "stdout", prefix == '+' ? "@@ -0,0 +1,%zu @@\n"
+                                           : "@@ -1,%ld +0,0 @@\n",
+           lines.size());
+    for(size_t n = 0; n < lines.size(); ++n)
+      writef(stdout, "stdout", "%c%s\n", prefix, lines[n].c_str());
+    // TODO we have no idea if there was a newline-less line at the end
+    // of the file.
+  }
+
   void diff_new(const P4FileInfo &info) const {
     // New file, display the whole text with a suitable header.  We need to
     // count how many lines are in the new file.  The header we write is
@@ -461,15 +471,17 @@ private:
   void diff_deleted(const P4FileInfo &info) const {
     // Deleted file, retrieve the old text with p4 print and print it with a
     // suitable header.  As with diff_new() we write a p4-like header.
-    TempFile tmp;
-    retrieve_file(info.depot_path, tmp.path());
+    vector<string> lines;
+    retrieve_file(info.depot_path, lines);
     writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
-    diff_whole(tmp.c_str(), '-');
+    diff_whole(lines, '-');
   }
 
   void retrieve_file(const string &path,
-                     const string &output,
+                     vector<string> &contents,
+                     string *type = NULL,
                      int rev = -1) const {
+    vector<string> lines;
     ostringstream s;
     s << path;
     if(rev != -1)
@@ -477,13 +489,23 @@ private:
     int rc;
     vector<string> command;
     if((rc = execute(makevs(command,
-                            "p4", "print", "-q", s.str().c_str(),
+                            "p4", "print", s.str().c_str(),
                             (char *)NULL),
-                     NULL,
-                     NULL,
-                     NULL,
-                     output.c_str()))) {
+                     NULL/*input*/,
+                     &lines,
+                     NULL)))
       fatal("p4 print failed with status %d", rc);
+    contents.assign(lines.begin() + 1, lines.end());
+    if(type) {
+      // syntax is:
+      //    //path/to/file#rev - ACTION change CHANGE (TYPE)
+      const string &l = lines[0];
+      string::size_type openb = l.rfind('(');
+      string::size_type closeb = l.rfind(')');
+      if(openb != string::npos && closeb != string::npos)
+        type->assign(l, openb + 1, closeb - (openb + 1));
+      else
+        type->clear();
     }
   }
 };
