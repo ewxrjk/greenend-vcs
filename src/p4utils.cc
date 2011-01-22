@@ -278,9 +278,11 @@ void P4FileInfo::parse_raw(const string &l) {
   else
     chnum = atoi(chstr.c_str());
   // The type
-  while(l.at(n) == ' ' || l.at(n) == '(')
+  while(n < l.size() && l.at(n) != '(')
     ++n;
-  while(l.at(n) != ')')
+  if(n < l.size())                      // must be '('
+    ++n;
+  while(n < l.size() && l.at(n) != ')')
     type += l[n++];
   // Lock status
   while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
