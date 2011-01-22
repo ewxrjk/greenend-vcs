@@ -357,13 +357,21 @@ public:
         retrieve_file(file.depot_path, lines, &type, file.rev);
         writef(stdout, "stdout", "==== %s#%d (%s) ====\n\n",
                file.depot_path.c_str(), file.rev, type.c_str());
-        diff_whole(lines, '+');
+        if(type == "binary")
+          writef(stdout, "stdout", "%s is a binary file\n",
+                 file.depot_path.c_str());
+        else
+          diff_whole(lines, '+');
       } else if(file.action == "delete") {
         // File was removed in this revision
         retrieve_file(file.depot_path, lines, &type, file.rev - 1);
         writef(stdout, "stdout", "==== %s#%d (%s) ====\n\n",
                file.depot_path.c_str(), file.rev, type.c_str());
-        diff_whole(lines, '-');
+        if(type == "binary")
+          writef(stdout, "stdout", "%s was a binary file\n",
+                 file.depot_path.c_str());
+        else
+          diff_whole(lines, '-');
       }
       if(fflush(stdout) < 0)
         fatal("writing to stdout: %s\n", strerror(errno));
@@ -465,16 +473,23 @@ private:
     // count how many lines are in the new file.  The header we write is
     // consistent with p4 rather than with GNU diff.
     writef(stdout, "stdout", "==== - %s ====\n", info.local_path.c_str());
-    diff_whole(info.local_path.c_str(), '+');
+    if(info.type == "binary")
+      writef(stdout, "stdout", "%s is a binary file\n", info.local_path.c_str());
+    else
+      diff_whole(info.local_path.c_str(), '+');
   }
 
   void diff_deleted(const P4FileInfo &info) const {
     // Deleted file, retrieve the old text with p4 print and print it with a
     // suitable header.  As with diff_new() we write a p4-like header.
     vector<string> lines;
-    retrieve_file(info.depot_path, lines);
+    std::string type;
+    retrieve_file(info.depot_path, lines, &type);
     writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
-    diff_whole(lines, '-');
+    if(type == "binary")
+      writef(stdout, "stdout", "%s was a binary file\n", info.depot_path.c_str());
+    else
+      diff_whole(lines, '-');
   }
 
   void retrieve_file(const string &path,
