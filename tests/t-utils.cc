@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +97,21 @@ int main(void) {
   assert(get_relative_path(cwd()) == cwd());
   assert(get_relative_path("/" + cwd()) == "/" + cwd());
   assert(get_relative_path(".") == ".");
+
+  int sparefd = dup(0);
+  assert(sparefd >= 0);
+  close(sparefd);
+  string t = tempfile();
+  // Check some properties of the created file
+  struct stat sb;
+  assert(lstat(t.c_str(), &sb) >= 0);
+  assert(S_ISREG(sb.st_mode));
+  assert((sb.st_mode & 0777) == 0600);
+  assert(sb.st_size == 0);
+  // Had better not leak an FD
+  int newsparefd = dup(0);
+  assert(newsparefd == sparefd);
+  erase(t.c_str());
 
   return 0;
 }
