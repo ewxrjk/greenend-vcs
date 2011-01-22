@@ -143,7 +143,7 @@ int vcs::rename(int nsources, char **sources, const char *destination) const {
     // We're renaming files and/or directories "into" a directory
     for(int n = 0; n < nsources; ++n) {
       rename_one(sources[n],
-		 string(destination) + "/" + basename(sources[n]));
+		 string(destination) + "/" + basename_(sources[n]));
     }
   } else {
     if(nsources != 1)

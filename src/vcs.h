@@ -138,7 +138,7 @@ int isreg(const string &s,
 int exists(const string &path);
 string cwd();
 string parentdir(const string &d);
-string basename(const string &d);
+string basename_(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) 
   attribute((noreturn))  
@@ -191,8 +191,6 @@ void report_lines(const vector<string> &l,
                   const char *prefix = NULL, 
                   FILE *fp = stderr);
 string get_relative_path(const string &s);
-string dirname(const string &s);
-string basename(const string &s);
 int editor(vector<string> &file);
 int generic_rename(int nsources, char **sources, const char *destination,
 		   void (*rename_one)(const string &source,

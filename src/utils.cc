@@ -91,7 +91,7 @@ string parentdir(const string &d) {
 }
 
 // Return the basename of F
-string basename(const string &d) {
+string basename_(const string &d) {
   size_t n = d.rfind(PATHSEP);
   if(n == string::npos)
     return d;
@@ -99,9 +99,9 @@ string basename(const string &d) {
     if(n == 0)
       return "/";                       // the path is just "/"
     // Strip the trailing / and try again
-    return basename(d.substr(0, n));
+    return basename_(d.substr(0, n));
   }
-  return d.substr(n, string::npos);
+  return d.substr(n + 1, string::npos);
 }
 
 // Return true if D is (a) root directory
