@@ -436,13 +436,13 @@ static void assemble(vector<string> &cmd,
 }
 
 // Split a string on newline
-static void split(vector<string> &lines, const string &s) {
+static void split(vector<string> &lines, const string &s, int stripNewlines = 1) {
   string::size_type pos = 0, n;
   const string::size_type limit = s.size();
   
   lines.clear();
   while(pos < limit && (n = s.find('\n', pos)) != string::npos) {
-    lines.push_back(s.substr(pos, n - pos));
+    lines.push_back(s.substr(pos, n - pos + !stripNewlines));
     pos = n + 1;
   }
   if(pos < limit)
@@ -554,7 +554,8 @@ int execute(const vector<string> &command,
             const vector<string> *input,
             vector<string> *output,
             vector<string> *errors,
-            const char *outputPath) {
+            const char *outputPath,
+            unsigned flags) {
   list<monitor *> monitors;
   writefromstring w;
   readtostring ro, re;
@@ -577,7 +578,7 @@ int execute(const vector<string> &command,
   }
   const int rc = exec(command, monitors, 0, outputPath);
   if(output) {
-    split(*output, ro.str());
+    split(*output, ro.str(), !(flags & EXE_RAW));
     if(debug > 1)
       report_lines(*output, "Output", "| ");
   }

@@ -463,9 +463,9 @@ private:
                                            : "@@ -1,%ld +0,0 @@\n",
            lines.size());
     for(size_t n = 0; n < lines.size(); ++n)
-      writef(stdout, "stdout", "%c%s\n", prefix, lines[n].c_str());
-    // TODO we have no idea if there was a newline-less line at the end
-    // of the file.
+      writef(stdout, "stdout", "%c%s", prefix, lines[n].c_str());
+    if(lines.size() && lines.back().find('\n') == string::npos)
+      writef(stdout, "stdout", "\n\\ No newline at end of file\n");
   }
 
   void diff_new(const P4FileInfo &info) const {
@@ -508,9 +508,11 @@ private:
     if((rc = execute(makevs(command,
                             "p4", "print", s.str().c_str(),
                             (char *)NULL),
-                     NULL/*input*/,
-                     &lines,
-                     NULL)))
+                     NULL,              // input
+                     &lines,            // output
+                     NULL,              // errors
+                     NULL,              // outputPath
+                     EXE_RAW)))         // flags
       fatal("p4 print failed with status %d", rc);
     contents.assign(lines.begin() + 1, lines.end());
     if(type) {

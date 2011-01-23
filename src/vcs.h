@@ -183,7 +183,9 @@ int execute(const vector<string> &command,
             const vector<string> *input = NULL,
             vector<string> *output = NULL,
             vector<string> *errors = NULL,
-            const char *outputPath = NULL);
+            const char *outputPath = NULL,
+            unsigned flags = 0);
+#define EXE_RAW 0x0001
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...);
