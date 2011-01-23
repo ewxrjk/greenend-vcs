@@ -33,7 +33,7 @@ int editor(vector<string> &file) {
   if(!editor)
     editor = getenv("EDITOR");
   if(!editor)
-    editor = "vi";              // traditional fallback
+    editor = EDITOR;
   ostringstream cmd;
   cmd << editor << " " << tmpfile.path();
   int rc = system(cmd.str().c_str());

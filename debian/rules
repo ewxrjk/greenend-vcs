@@ -17,7 +17,7 @@
 #
 
 # Options to configure.  This can be overridden by the caller if necessary.
-CONFIGURE=--prefix=/usr --mandir=/usr/share/man
+CONFIGURE=--prefix=/usr --mandir=/usr/share/man EDITOR=editor
 
 # Install commands.  You wouldn't normally override these.
 INSTALL=install

@@ -27,6 +27,9 @@ AC_PROG_RANLIB
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
+AC_ARG_VAR([EDITOR],[default text editor])
+EDITOR="${EDITOR:-vi}"
+AC_DEFINE_UNQUOTED([EDITOR],["${EDITOR}"],[default text editor])
 AC_CHECK_LIB([curl],[curl_easy_init])
 AC_CHECK_LIB([expat],[XML_ParserCreate])
 # Cygwin's iconv.h redirects to non-standard names, breaking the usual
