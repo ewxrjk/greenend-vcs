@@ -35,7 +35,7 @@ public:
   int add(int /*binary*/, int nfiles, char **files) const {
     return execute("darcs",
                    EXE_STR, "add",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS_DOTSTUFF, nfiles, files,
                    EXE_END);
   }
 

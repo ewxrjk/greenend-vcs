@@ -71,7 +71,7 @@ public:
     return execute("p4",
                    EXE_STR, "add",
                    EXE_STR, "-f",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS_DOTSTUFF, nfiles, files,
                    EXE_END);
   }
 

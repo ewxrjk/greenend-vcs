@@ -47,4 +47,7 @@ t_revert
 # Test rename
 t_rename
 
+# Test awkward filenames
+t_awkward
+
 t_done

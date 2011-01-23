@@ -317,6 +317,21 @@ t_rename() {
     cd ..
 }
 
+# Test awkward filenames.
+#
+# Tries to add various awkward filenames and verifies that it all works
+t_awkward() {
+  cd project
+  echo > foo@bar
+  echo > foo\#bar%wibble\*spong
+  echo > -addme
+  x vcs -v status
+  x vcs -v add foo*
+  x vcs -v add -- -addme
+  x vcs -v commit -m 'files with awkward names'
+  cd ..
+}
+
 # check_match FILE-A FILE-B
 #
 # Equivalent to diff -u but terminates the test if a difference is found.

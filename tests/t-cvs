@@ -73,8 +73,12 @@ status=$(cvs -n up one 2>/dev/null)
 if test "x$status" != 'x'; then
     fatal "Did not properly revert 'one'"
 fi
+cd ..
 
 # CVS does not support renaming
 #t_rename
+
+# Test awkward filenames
+t_awkward
 
 t_done

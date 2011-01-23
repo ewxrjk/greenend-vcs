@@ -44,12 +44,10 @@ if git log three >/dev/null 2>&1; then
   echo 'three still known to git' >&2
   exit 1
 fi
-
-# git-specific testing to make sure awkward filenames are handled
-# correctly
-touch -- -addme
-vcs -v add -- -addme
 cd ..
+
+# Check that awkward filenames are handled correctly
+t_awkward
 
 # Test rename
 t_rename

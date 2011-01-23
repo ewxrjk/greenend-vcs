@@ -36,7 +36,7 @@ public:
     return execute("cvs",
                    EXE_STR, "add",
                    EXE_IFSTR(binary, "-kb"),
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS_DOTSTUFF, nfiles, files,
                    EXE_END);
   }
 

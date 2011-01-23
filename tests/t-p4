@@ -72,18 +72,13 @@ t_verify
 export P4CLIENT=client2
 t_revert
 
-# P4-specific testing
-#
 # Check that awkward filenames are handled correctly
 export P4CLIENT=client1
-cd project
-echo > foo@bar
-echo > foo\#bar%wibble\*spong
-x vcs -v status
-x vcs -v add foo*
-x vcs -v commit -m 'files that need encoded names'
+t_awkward
 
 # .vcsignore testing
+export P4CLIENT=client1
+cd project
 x ln -s target link
 x vcs -v status
 x vcs -v status > status-output
