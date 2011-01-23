@@ -15,7 +15,7 @@ money just to test compatibility with a system I don't use myself.
 
 Please either send 'diff -u' format patches or make public a Bazaar
 branch that I can clone and merge from.  You should branch from:
-  http://www.greenend.org.uk/rjk/bzr/vcs.dev
+  http://www.greenend.org.uk/rjk/bzr/vcs.stable
 
 I can be emailed at:
   Richard Kettlewell <rjk@greenend.org.uk>
