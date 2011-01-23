@@ -1,6 +1,6 @@
 #! /bin/sh
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009-2011 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,10 @@ set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
 
+# Check dependencies
 t_init hg
 
+# Create test project
 x hg init project
 cat >> project/.hg/hgrc <<EOF
 [ui]
@@ -27,13 +29,16 @@ username = No Such User <nobody@example.com.invalid>
 EOF
 t_populate
 
+# Duplicate it
 x hg clone project copy
 t_verify
 
+# Test modification and update
 t_modify
 t_update
 t_verify
 
+# Test revert
 t_revert
 cd copy
 x hg status three
@@ -45,6 +50,7 @@ if test "x$status" != 'x?'; then
 fi
 cd ..
 
+# Test rename
 t_rename
 
 t_done

@@ -1,6 +1,6 @@
 #! /bin/sh
 # This file is part of VCS
-# Copyright (C) 2009, 2010 Richard Kettlewell
+# Copyright (C) 2009-2011 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,30 +18,36 @@ set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
 
+# bzr-specific setup
 BZR_EMAIL=just.testing@example.com
 export BZR_EMAIL
 
+# Check dependencies
 t_init bzr
 
+# Create test project
 x bzr init project
 t_populate
 
+# Duplicate it
 x vcs clone project copy
 t_verify
 
+# Test modification and update
 t_modify
 t_update
 t_verify
 
+# Test revert
 t_revert
-
-t_rename
-
 cd copy
 if bzr log three >/dev/null 2>&1; then
   echo 'three still known to bzr' >&2
   exit 1
 fi
 cd ..
+
+# Test rename
+t_rename
 
 t_done

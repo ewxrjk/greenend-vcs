@@ -1,6 +1,6 @@
 #! /bin/sh
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009-2011 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,29 +18,33 @@ set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
 
+# Check dependencies
 t_init darcs
 
+# darcs-specific setup
 EMAIL=vcs@rjk.greenend.org.uk.invalid
 export EMAIL
 
+# Create test project
 mkdir project
 cd project
 x darcs init
 cd ..
 t_populate
 
+# Duplicate it
 x darcs get project copy
 t_verify
 
+# Test modification and update
 t_modify
 t_update
 t_verify
 
+# Test revert
 t_revert
 
+# Test rename
 t_rename
-
-cd copy
-cd ..
 
 t_done
