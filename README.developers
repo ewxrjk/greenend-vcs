@@ -160,6 +160,11 @@ insert colordiff or similar tools.
 
 Invoke the command on the guessed version control system.
 
+> static commit command_commit;
+
+Define an object of the type of your new class.  The base class
+constructor will arrange for its registration.
+
 For each version control system add an implementation of the command.
 Here's the example from bzr.cc:
 
