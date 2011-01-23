@@ -91,16 +91,48 @@ t_populate() {
     fi
     x vcs -v add one two
     x vcs -v status
+    case "$0" in
+    *-git )
+      # git cannot diff the initial commit!
+      ;;
+    * )
+      # global diff should show all new files
+      x vcs -v diff > delta || true
+      cat delta
+      grep '^+one' delta > /dev/null
+      grep '^+two' delta > /dev/null
+      # single-file diff should only show that file's changes
+      x vcs -v diff one > delta || true
+      cat delta
+      grep '^+one' delta > /dev/null
+      grep '^+two' delta && exit 1
+      ;;
+    esac
     x vcs -v commit -m 'one and two'
+
     mkdir subdir
     x vcs -v add subdir
     cd subdir
     echo subone > subone
     x vcs add subone
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+subone' delta
     x vcs commit -m 'added subone'
+
     echo subtwo > subtwo
     cd ../
     x vcs add subdir/subtwo
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+subone' delta && exit 1
+    grep '^+subtwo' delta > /dev/null
+    x vcs -v diff subdir/subtwo > delta || true
+    cat delta
+    grep '^+subtwo' delta > /dev/null
+    grep '^+subone' delta && exit 1
+    grep '^+one' delta && exit 1
+    grep '^+two' delta && exit 1
     x vcs commit -m 'added subtwo'
     cd ..
 }
@@ -138,13 +170,9 @@ t_modify() {
     fi
     echo oneone >> one
     x vcs -v status
-    x vcs -v diff > diff-output-1 || true
-    if [ -s diff-output-1 ]; then
-        :
-    else
-        echo Modified one but no diff output >&2
-        exit 1
-    fi
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+oneone' delta
     x vcs -n commit -m 'oneone'
     x vcs -v diff > diff-output-2 || true
     if [ -s diff-output-2 ]; then
