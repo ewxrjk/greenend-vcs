@@ -27,6 +27,7 @@ class commit: public command {
 public:
   commit(): command("commit", "Commit changes") {
     register_alias("ci");
+    register_alias("checkin");
   }
 
   void help(FILE *fp = stdout) const {
