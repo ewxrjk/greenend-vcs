@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009, 2010 Richard Kettlewell
+ * Copyright (C) 2009-2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,8 +185,8 @@ public:
                  EXE_END))
         failed = 1;
       if(execute("mv", 
-                 EXE_STR, save.c_str(),
                  EXE_STR, "--",
+                 EXE_STR, save.c_str(),
                  EXE_STR, it->c_str(), 
                  EXE_END))
         return 1;
