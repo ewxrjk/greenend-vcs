@@ -7,8 +7,8 @@ use vcs commands rather than adapt to the version control system
 currently in use.
 
 Bazaar, Git, CVS, Subversion, Mercurial, Darcs and Perforce are
-supported, with a small set of commands.  More version control systems
-and more commands will, hopefuly, be added in the future.
+supported, with a small set of commands.  See the man page for more
+details.
 
 Installation
 ============
@@ -36,6 +36,9 @@ package are:
     Suppresses use of the -Werror option.  This is useful (for
     instance) if your platform generates warnings for its own header
     files.
+
+  ./configure --with-gcov
+    Enable coverage testing.  Only useful for developers.
 
 
 Feedback
