@@ -101,17 +101,21 @@ int main(void) {
   int sparefd = dup(0);
   assert(sparefd >= 0);
   close(sparefd);
-  string t = tempfile();
-  // Check some properties of the created file
-  struct stat sb;
-  assert(lstat(t.c_str(), &sb) >= 0);
-  assert(S_ISREG(sb.st_mode));
-  assert((sb.st_mode & 0777) == 0600);
-  assert(sb.st_size == 0);
-  // Had better not leak an FD
-  int newsparefd = dup(0);
-  assert(newsparefd == sparefd);
-  erase(t.c_str());
+  string name;
+  {
+    TempFile t;
+    name = t.path();
+    // Check some properties of the created file
+    struct stat sb;
+    assert(lstat(name.c_str(), &sb) >= 0);
+    assert(S_ISREG(sb.st_mode));
+    assert((sb.st_mode & 0777) == 0600);
+    assert(sb.st_size == 0);
+    // Had better not leak an FD
+    int newsparefd = dup(0);
+    assert(newsparefd == sparefd);
+  }
+  assert(!exists(name));
 
   return 0;
 }
