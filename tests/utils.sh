@@ -169,10 +169,13 @@ t_modify() {
         exit 1
     fi
     echo oneone >> one
+    x vcs -v edit two
+    echo twotwo >> two
     x vcs -v status
     x vcs -v diff > delta || true
     cat delta
     grep '^+oneone' delta
+    grep '^+twotwo' delta
     x vcs -n commit -m 'oneone'
     x vcs -v diff > diff-output-2 || true
     if [ -s diff-output-2 ]; then
@@ -181,7 +184,13 @@ t_modify() {
         echo Diff output went away after supposedly dry-run commit >&2
         exit 1
     fi
-    x vcs -v commit -m 'oneone'
+    x vcs -v commit -m 'oneone' one
+    # Should only have commited 'one'
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+twotwo' delta
+    x vcs -v revert two
+    # Should be nothing left
     x vcs -v diff > diff-output-3 || true
     # Stupid darcs appends a blank line to diff output even if it
     # would otherwise be empty.  As a hack we only consider nonblank
