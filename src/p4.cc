@@ -49,7 +49,7 @@ public:
   int edit(int nfiles, char **files) const {
     return execute("p4",
                    EXE_STR, "edit",
-                   EXE_STRS, nfiles, p4_encode(nfiles, files),
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -71,14 +71,14 @@ public:
     return execute("p4",
                    EXE_STR, "add",
                    EXE_STR, "-f",
-                   EXE_STRS_DOTSTUFF, nfiles, files,
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
                    EXE_END);
   }
 
   int remove(int /*force*/, int nfiles, char **files) const {
     return execute("p4",
                    EXE_STR, "delete",
-                   EXE_STRS, nfiles, p4_encode(nfiles, files),
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -200,7 +200,7 @@ public:
     if(nfiles)
       return execute("p4",
                      EXE_STR, "revert",
-                     EXE_STRS, nfiles, p4_encode(nfiles, files),
+                     EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
                      EXE_END);
     else
       return execute("p4",
@@ -295,7 +295,7 @@ public:
     return execute("p4",
                    EXE_STR, "changes",
                    EXE_STR, "-lt",
-                   EXE_STR, path ? path : "...",
+                   EXE_STR|EXE_DOTSTUFF, path ? path : "...",
                    EXE_END);
   }
 
@@ -303,7 +303,7 @@ public:
     return execute("p4",
                    EXE_STR, "annotate",
                    EXE_STR, "-c",
-                   EXE_STR, p4_encode(path).c_str(),
+                   EXE_STR|EXE_DOTSTUFF, p4_encode(path).c_str(),
                    EXE_END);
   }
 
@@ -319,13 +319,13 @@ public:
     if(execute("p4",
                EXE_STR, "integrate",
                EXE_STR, "-t",
-               EXE_STR, p4_encode(sp).c_str(),
-               EXE_STR, p4_encode(dp).c_str(),
+               EXE_STR|EXE_DOTSTUFF, p4_encode(sp).c_str(),
+               EXE_STR|EXE_DOTSTUFF, p4_encode(dp).c_str(),
                EXE_END))
       exit(1);
     if(execute("p4",
                EXE_STR, "delete",
-               EXE_STR, p4_encode(sp).c_str(),
+               EXE_STR|EXE_DOTSTUFF, p4_encode(sp).c_str(),
                EXE_END))
       exit(1);
   }
@@ -417,7 +417,7 @@ private:
       execute("p4",
               EXE_STR, "diff",
               EXE_STR, "-du",
-              EXE_STR, info.depot_path.c_str(),
+              EXE_STR|EXE_DOTSTUFF, info.depot_path.c_str(),
               EXE_END);
     } else if(info.action == "branch" || info.action == "add") {
       diff_new(info);
@@ -498,6 +498,8 @@ private:
                      int rev = -1) const {
     vector<string> lines;
     ostringstream s;
+    if(path.size() && path.at(0) == '-')
+      s << "./";
     s << path;
     if(rev != -1)
       s << '#' << rev;

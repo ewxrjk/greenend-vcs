@@ -28,6 +28,7 @@ public:
   int diff(int nfiles, char **files) const {
     return execute("cvs",
                    EXE_STR, "diff",
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -36,7 +37,8 @@ public:
     return execute("cvs",
                    EXE_STR, "add",
                    EXE_IFSTR(binary, "-kb"),
-                   EXE_STRS_DOTSTUFF, nfiles, files,
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
   }
 
@@ -44,6 +46,7 @@ public:
     return execute("cvs",
                    EXE_STR, "remove",
                    EXE_IFSTR(force, "-f"),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -53,6 +56,7 @@ public:
                    EXE_STR, "commit",
                    EXE_IFSTR(msg, "-m"),
                    EXE_IFSTR(msg, msg),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -126,12 +130,14 @@ public:
       if(conflicted.find(*it) != conflicted.end())
         if(execute("rm",
                    EXE_STR, "-f",
+                   EXE_STR, "--",
                    EXE_STR, it->c_str(),
                    EXE_END))
           return 1;
       if(execute("cvs",
                  EXE_STR, "up",
                  EXE_STR, "-C",
+                 EXE_STR, "--",
                  EXE_STR, it->c_str(),
                  EXE_END))
         return 1;
@@ -142,6 +148,7 @@ public:
         ++it)
       if(execute("cvs",
                  EXE_STR, "add",
+                 EXE_STR, "--",
                  EXE_STR, it->c_str(),
                  EXE_END))
         return 1;
@@ -166,17 +173,20 @@ public:
       } while(exists(s.str()));
       const string save = s.str();
       if(execute("mv", 
+                 EXE_STR, "--",
                  EXE_STR, it->c_str(), 
                  EXE_STR, save.c_str(),
                  EXE_END))
         return 1;
       if(execute("cvs",
                  EXE_STR, "rm",
+                 EXE_STR, "--",
                  EXE_STR, it->c_str(),
                  EXE_END))
         failed = 1;
       if(execute("mv", 
                  EXE_STR, save.c_str(),
+                 EXE_STR, "--",
                  EXE_STR, it->c_str(), 
                  EXE_END))
         return 1;
@@ -202,13 +212,15 @@ public:
   int log(const char *path) const {
     return execute("cvs",
                    EXE_STR, "log",
-                   EXE_IFSTR(path, path),
+                   EXE_STR, "--",
+                   EXE_IFSTR_DOTSTUFF(path, path),
                    EXE_END);
   }
 
   int annotate(const char *path) const {
     return execute("cvs",
                    EXE_STR, "annotate",
+                   EXE_STR, "--",
                    EXE_STR, path,
                    EXE_END);
   }

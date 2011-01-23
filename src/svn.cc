@@ -30,6 +30,7 @@ public:
   int diff(int nfiles, char **files) const {
     return execute("svn",
                    EXE_STR, "diff",
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -37,7 +38,8 @@ public:
   int add(int /*binary*/, int nfiles, char **files) const {
     return execute("svn",
                    EXE_STR, "add",
-                   EXE_STRS_DOTSTUFF, nfiles, files,
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
   }
 
@@ -45,6 +47,7 @@ public:
     return execute("svn",
                    EXE_STR, "delete",
                    EXE_IFSTR(force, "--force"),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -54,6 +57,7 @@ public:
                    EXE_STR, "commit",
                    EXE_IFSTR(msg, "-m"),
                    EXE_IFSTR(msg, msg),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -132,6 +136,7 @@ public:
     } else
       return execute("svn",
                      EXE_STR, "revert",
+                     EXE_STR, "--",
                      EXE_STRS, nfiles, files,
                      EXE_END);
   }
@@ -151,6 +156,7 @@ public:
   int log(const char *path) const {
     return execute("svn",
                    EXE_STR, "log",
+                   EXE_STR, "--",
                    EXE_IFSTR(path, path),
                    EXE_END);
   }
@@ -158,6 +164,7 @@ public:
   int annotate(const char *path) const {
     return execute("svn",
                    EXE_STR, "blame",
+                   EXE_STR, "--",
                    EXE_STR, path,
                    EXE_END);
   }
@@ -165,6 +172,7 @@ public:
   int clone(const char *uri, const char *dir) const {
     return execute("svn",
                    EXE_STR, "checkout",
+                   EXE_STR, "--",
                    EXE_STR, uri,
                    EXE_IFSTR(dir, dir),
                    EXE_END);
@@ -177,6 +185,7 @@ public:
     string sp, dp;
     if(execute("svn",
                EXE_STR, "mv",
+                   EXE_STR, "--",
                EXE_STR, source.c_str(),
                EXE_STR, destination.c_str(),
                EXE_END))

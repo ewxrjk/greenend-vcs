@@ -28,6 +28,7 @@ public:
   int diff(int nfiles, char **files) const {
     return execute("bzr",
                    EXE_STR, "diff",
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -35,7 +36,8 @@ public:
   int add(int /*binary*/, int nfiles, char **files) const {
     return execute("bzr",
                    EXE_STR, "add",
-                   EXE_STRS_DOTSTUFF, nfiles, files,
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
   }
 
@@ -43,6 +45,7 @@ public:
     return execute("bzr",
                    EXE_STR, "remove",
                    EXE_IFSTR(force, "--force"),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -52,6 +55,7 @@ public:
                    EXE_STR, "commit",
                    EXE_IFSTR(msg, "-m"),
                    EXE_IFSTR(msg, msg),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -59,6 +63,7 @@ public:
   int revert(int nfiles, char **files) const {
     return execute("bzr",
                    EXE_STR, "revert",
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -88,6 +93,7 @@ public:
   int log(const char *path) const {
     return execute("bzr",
                    EXE_STR, "log",
+                   EXE_STR, "--",
                    EXE_IFSTR(path, path),
                    EXE_END);
   }
@@ -95,6 +101,7 @@ public:
   int annotate(const char *path) const {
     return execute("bzr",
                    EXE_STR, "annotate",
+                   EXE_STR, "--",
                    EXE_STR, path,
                    EXE_END);
   }
@@ -102,6 +109,7 @@ public:
   int clone(const char *uri, const char *dir) const {
     return execute("bzr",
                    EXE_STR, "clone",
+                   EXE_STR, "--",
                    EXE_STR, uri,
                    EXE_IFSTR(dir, dir),
                    EXE_END);
@@ -110,6 +118,7 @@ public:
   int rename(int nsources, char **sources, const char *destination) const {
     return execute("bzr",
                    EXE_STR, "mv",
+                   EXE_STR, "--",
                    EXE_STRS, nsources, sources,
                    EXE_STR, destination,
                    EXE_END);

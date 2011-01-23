@@ -397,25 +397,29 @@ static void assemble(vector<string> &cmd,
     case EXE_STR:
       cmd.push_back(va_arg(ap, char *));
       break;
+    case EXE_STR|EXE_DOTSTUFF: {
+      const char *str = va_arg(ap, const char *);
+      if(str[0] == '-')
+        cmd.push_back(string("./") + str);
+      else
+        cmd.push_back(str);
+      break;
+    }
     case EXE_SKIPSTR:
+    case EXE_SKIPSTR|EXE_DOTSTUFF:
       va_arg(ap, char *);
       break;
     case EXE_STRS:
-    case EXE_STRS_DOTSTUFF: {
+    case EXE_STRS|EXE_DOTSTUFF: {
       int count = va_arg(ap, int);
       char **strs = va_arg(ap, char **);
-      int first = 1;
       while(count-- > 0) {
         const char *s = *strs++;
         string t;
-        if(first) {
-          if(s[0] == '-' && op == EXE_STRS_DOTSTUFF) {
-            t = string("./") + s;
-            s = t.c_str();
-          }
-          first = 0;
-        }
-        cmd.push_back(s);
+        if(s[0] == '-' && (op & EXE_DOTSTUFF))
+          cmd.push_back(string("./") + s);
+        else
+          cmd.push_back(s);
       }
       break;
     }

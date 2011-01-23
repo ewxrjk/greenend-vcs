@@ -44,7 +44,8 @@ public:
      * uncontrolled files as version-controlled, so we go with it anyway. */
     return execute("git",
                    EXE_STR, "add",
-                   EXE_STRS_DOTSTUFF, nfiles, files,
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
   }
 
@@ -56,6 +57,7 @@ public:
     return execute("git",
                    EXE_STR, "rm",
                    EXE_IFSTR(force, "-f"),
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
@@ -179,6 +181,7 @@ public:
   int log(const char *path) const {
     return execute("git",
                    EXE_STR, "log",
+                   EXE_STR, "--",
                    EXE_IFSTR(path, path),
                    EXE_END);
   }
@@ -186,6 +189,7 @@ public:
   int annotate(const char *path) const {
     return execute("git",
                    EXE_STR, "blame",
+                   EXE_STR, "--",
                    EXE_STR, path,
                    EXE_END);
   }
@@ -193,6 +197,7 @@ public:
   int clone(const char *uri, const char *dir) const {
     return execute("git",
                    EXE_STR, "clone",
+                   EXE_STR, "--",
                    EXE_STR, uri,
                    EXE_IFSTR(dir, dir),
                    EXE_END);
@@ -205,6 +210,7 @@ public:
     for(int n = 0; n < nsources; ++n) {
       int rc =  execute("git",
                         EXE_STR, "mv",
+                        EXE_STR, "--",
                         EXE_STR, sources[n],
                         EXE_STR, destination,
                         EXE_END);
@@ -217,6 +223,7 @@ public:
   int show(const char *change) const {
     return execute("git",
                    EXE_STR, "show",
+                   EXE_STR, "--",
                    EXE_STR, change,
                    EXE_END);
   }
