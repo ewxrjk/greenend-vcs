@@ -164,6 +164,9 @@ void redirect(const char *pager) {
   // Don't invoke pager if not sending to a terminal
   if(!isatty(1))
     return;
+  // Don't redirect in dry-run mode
+  if(dryrun)
+    return;
   // Create a pipe
   if(pipe(p) < 0)
     fatal("pipe failed: %s", strerror(errno));
