@@ -125,6 +125,15 @@ public:
                    EXE_STR, destination,
                    EXE_END);
   }
+
+  int show(const char *change) const {
+    return execute("darcs",
+                   EXE_STR, "diff",
+                   EXE_STR, "-u",
+                   EXE_STR, "--match",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
 
 static const darcs vcs_darcs;
