@@ -13,9 +13,9 @@ money just to test compatibility with a system I don't use myself.
 
 ** Submitting Patches
 
-Please either send 'diff -u' format patches or make public a Bazaar
+Please either send 'diff -u' format patches or make public a Git
 branch that I can clone and merge from.  You should branch from:
-  http://www.greenend.org.uk/rjk/bzr/vcs.stable
+  git://git.chiark.greenend.org.uk/~richardk/vcs.git
 
 I can be emailed at:
   Richard Kettlewell <rjk@greenend.org.uk>
