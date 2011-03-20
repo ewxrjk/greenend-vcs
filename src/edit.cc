@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,39 +22,43 @@ static const struct option edit_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void edit_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs edit [OPTIONS] FILENAME ...\n"
-          "Options:\n"
-          "  --help, -h              Display usage message\n"
-          "\n"
-          "Makes files editable.\n");
-}
+class edit: public command {
+public:
+  edit(): command("edit", "Edit files") {
+  }
 
-int vcs_edit(int argc, char **argv) {
-  int n;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs edit [OPTIONS] FILENAME ...\n"
+            "Options:\n"
+            "  --help, -h              Display usage message\n"
+            "\n"
+            "Makes files editable.\n");
+  }
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+h", edit_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      edit_help();
-      return 0;
-    default:
+  int execute(int argc, char **argv) const {
+    int n;
+
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+h", edit_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      default:
+        return 1;
+      }
+    }
+    if(argc == optind) {
+      help(stderr);
       return 1;
     }
+    return guess()->edit(argc - optind, argv + optind);
   }
-  if(argc == optind) {
-    edit_help(stderr);
-    return 1;
-  }
-  const struct vcs *v = guess();
-  if(v->edit)
-    return v->edit(argc - optind, argv + optind);
-  else
-    return 0;
-}
+};
+
+static edit command_edit;
 
 /*
 Local Variables:

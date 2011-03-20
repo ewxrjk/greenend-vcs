@@ -106,7 +106,11 @@ private:
     } else
       iconv(converter, NULL, NULL, NULL, NULL); // reset to initial state
     size_t inbufleft = len * sizeof *data;
+#if HAVE_BROKEN_ICONV
+    const char *inbuf = (const char *)data;
+#else
     char *inbuf = (char *)data;
+#endif
     vector<char> out(1);
     size_t outused = 0;
     // iconv() has a TERRIBLE interface.

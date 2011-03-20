@@ -18,8 +18,12 @@ set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
 
-# This test can only run if you have p4 and p4d installed.
+# Check dependencies
+#
+# (This test can only run if you have p4 and p4d installed.)
 t_init p4 p4d
+
+# P4-specific setup
 
 # Create a server
 mkdir repo
@@ -42,41 +46,21 @@ while :; do
 done
 
 # Create a couple of clients
-LOGNAME=${LOGNAME:-`whoami`}
-HOSTNAME=$(uname -n)
-p4 client -i <<EOF
-Client: client1
-Owner: $LOGNAME
-Host: $HOSTNAME
-Root: $testdir/project
-Options: noallwrite noclobber nocompress unlocked nomodtime normdir
-SubmitOptions:	submitunchanged
-LineEnd: local
-View:
-	//depot/... //client1/...
-EOF
+makep4client client1 $testdir/project
+makep4client client2 $testdir/copy
 
-p4 client -i <<EOF
-Client: client2
-Owner: $LOGNAME
-Host: $HOSTNAME
-Root: $testdir/copy
-Options: noallwrite noclobber nocompress unlocked nomodtime normdir
-SubmitOptions:	submitunchanged
-LineEnd: local
-View:
-	//depot/... //client2/...
-EOF
-
+# Create test project
 export P4CLIENT=client1
 x p4 sync
 mkdir project
 t_populate
 
+# Duplicate it
 export P4CLIENT=client2
 x p4 sync
 t_verify
 
+# Test modification and update
 export P4CLIENT=client1
 t_modify
 
@@ -84,17 +68,17 @@ export P4CLIENT=client2
 t_update
 t_verify
 
+# Test revert
 export P4CLIENT=client2
 t_revert
 
+# Check that awkward filenames are handled correctly
+export P4CLIENT=client1
+t_awkward
+
+# .vcsignore testing
 export P4CLIENT=client1
 cd project
-echo > foo@bar
-echo > foo\#bar%wibble\*spong
-x vcs -v status
-x vcs -v add foo*
-x vcs -v commit -m 'files that need encoded names'
-
 x ln -s target link
 x vcs -v status
 x vcs -v status > status-output
@@ -130,15 +114,17 @@ x vcs -v status
 x vcs -v status > status-output
 if fgrep ".vcsignore" status-output >/dev/null; then
   echo "*** unexpectedly found '.vcsignore' in status output"
+  cat -n status-output
   exit 1
 fi
 x vcs -v edit .vcsignore
 x vcs -v status
 x vcs -v status > status-output
-if fgrep "E .vcsignore" status-output >/dev/null; then
+if fgrep "e .vcsignore" status-output >/dev/null; then
   :
 else
-  echo "*** expected 'E .vcsignore' in status output"
+  echo "*** expected 'e .vcsignore' in status output"
+  cat -n status-output
   exit 1
 fi
 x vcs -v revert .vcsignore
@@ -149,17 +135,14 @@ if fgrep "D .vcsignore" status-output >/dev/null; then
   :
 else
   echo "*** expected 'D .vcsignore' in status output"
+  cat -n status-output
   exit 1
 fi
 
 cd ..
 
-cd copy
-#if bzr log three >/dev/null 2>&1; then
-#  echo 'three still known to bzr' >&2
-#  exit 1
-#fi
-cd ..
+# Test rename
+t_rename
 
 t_done
 

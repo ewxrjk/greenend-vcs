@@ -19,50 +19,30 @@
 #include <sstream>
 #include <fcntl.h>
 
-static string tempfile() {
-  // Pick a random filename
-  ostringstream s;
-  int fd;
-  const char *tmpdir = getenv("TMPDIR");
-  if(!tmpdir)
-    tmpdir = "/tmp";
-  do {
-    s.str().clear();
-    s << tmpdir << "/vcs." << rand() << ".txt";
-    fd = open(s.str().c_str(), O_WRONLY|O_CREAT|O_EXCL, 0600);
-  } while(fd < 0 && errno == EEXIST);
-  if(fd < 0)
-    fatal("creating %s: %s", s.str().c_str(), strerror(errno));
-  close(fd);
-  return s.str();
-}
-
 // Bring up the user's editor to edit the contents of FILE
 int editor(vector<string> &file) {
-  const string tmpfile = tempfile();
+  TempFile tmpfile;
   FILE *fp = fopen(tmpfile.c_str(), "w");
   if(!fp)
     fatal("opening %s: %s", tmpfile.c_str(), strerror(errno));
   for(size_t n = 0; n < file.size(); ++n)
-    if(fputs(file[n].c_str(), fp) < 0
-       || fputc('\n', fp) < 0)
-      fatal("error writing to %s: %s", tmpfile.c_str(), strerror(errno));
+    writef(fp, tmpfile.c_str(), "%s\n", file[n].c_str());
   if(fclose(fp) < 0)
     fatal("error writing to %s: %s", tmpfile.c_str(), strerror(errno));
   const char *editor = getenv("VISUAL");
   if(!editor)
     editor = getenv("EDITOR");
   if(!editor)
-    editor = "vi";              // traditional fallback
+    editor = EDITOR;
   ostringstream cmd;
-  cmd << editor << " " << tmpfile;
+  cmd << editor << " " << tmpfile.path();
   int rc = system(cmd.str().c_str());
   if(!rc) {
     if(!(fp = fopen(tmpfile.c_str(), "r")))
       fatal("opening %s: %s", tmpfile.c_str(), strerror(errno));
     string l;
     file.clear();
-    while(readline(tmpfile, fp, l))
+    while(readline(tmpfile.path(), fp, l))
       file.push_back(l);
     fclose(fp);
   } else if(WIFEXITED(rc))
@@ -72,7 +52,6 @@ int editor(vector<string> &file) {
             WTERMSIG(rc), strsignal(WTERMSIG(rc)));
     rc = 128 + WTERMSIG(rc);
   }
-  erase(tmpfile.c_str());
   return rc;
 }
 

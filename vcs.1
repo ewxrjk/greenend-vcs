@@ -125,7 +125,9 @@ If possible,
 lets the native system invoke the editor rather than doing so itself.
 .PP
 .B "vcs ci"
-is a synonym for
+and
+.B "vcs checkin"
+are a synonyms for
 .BR "vcs commit" .
 .SS diff
 .B vcs
@@ -136,6 +138,16 @@ Displays differences between the last committed version and the
 current checkout.
 If no filename is specified then all files are diffed.
 Otherwise only the listed files are diffed.
+.PP
+.B vcs
+.B diff
+.B -c
+.I CHANGE
+.PP
+This is equivalent to 
+.B vcs
+.B show
+.IR CHANGE .
 .SS edit
 .B vcs
 .B edit
@@ -170,6 +182,23 @@ control unconditionally.
 .B "vcs rm"
 is a synonym for
 .BR "vcs remove" .
+.SS rename
+.B vcs
+.B rename
+.IR SOURCE ...
+.I DESTINATION
+.PP
+Rename files.
+.PP
+If the destination does not exist then there must be only one source,
+and its name will be changed to match the destination.
+.PP
+If the destination does exist then it must be a directory, and all the
+source files and directories are renamed "into" it.
+.PP
+.B "vcs mv"
+is a synonym for
+.BR "vcs rename" .
 .SS revert
 .B vcs
 .B revert
@@ -184,6 +213,18 @@ Newly added files are removed from version control and may be deleted
 .PP
 Note that not all version control systems can selectively revert
 individual files.
+.SS show
+.B vcs
+.B show
+.I CHANGE
+.PP
+Displays an existing, committed, change.
+The change is identified in the native way for the underlying version
+control system.
+.PP
+.B "vcs describe"
+is a synonym for
+.BR "vcs show" .
 .SS status
 .B vcs
 .B status
@@ -214,14 +255,16 @@ You may have to run commands such as
 .B "bzr resolve"
 to indicate conflicts resolved or
 .B "p4 resolve"
-to perform conflict resolution tool.
+to invoke the conflict resolution tool.
 .SH ENVIRONMENT
 .TP
 .B VCS_PAGER
 .TP
 .B VCS_DIFF_PAGER
 .B "vcs diff"
-will filter its output through \fBVCS_DIFF_PAGER\fR or, if that is not
+and
+.B "vcs show"
+will filter their output through \fBVCS_DIFF_PAGER\fR or, if that is not
 set, \fBVCS_PAGER\fR.
 .B "vcs log"
 and
@@ -245,6 +288,7 @@ Web page: http://www.nongnu.org/cvs/
 .PP
 CVS does not auto-detect file types, so use of \fBvcs add \-\-binary\fR
 option when adding images files, etc is mandatory.
+\fBvcs rename\fR and \fBvcs show\fR do not work with CVS.
 .SS Bazaar
 Web page: http://bazaar\-vcs.org/
 .PP
@@ -292,8 +336,10 @@ The characters at the start of each line have the following meaning:
 .B A
 File is opened for add.
 .TP
-.B E
+.B E\fR, \fBe
 File is opened for edit.
+.B e
+means that it has not been modified.
 .TP
 .B D
 File is opened for delete.
@@ -301,8 +347,13 @@ File is opened for delete.
 .B B
 File is opened for branch.
 .TP
-.B I
+.B I\fR, \fBi
 File is opened for integrate.
+.B i
+means that it has not been modified.
+.TP
+.B R
+File needs to be resolved.
 .TP
 .B ?
 File is unknown to Perforce (and not ignored).

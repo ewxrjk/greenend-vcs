@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2010 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,34 @@
 #
 
 set -e
+
+# Find an automake
+if [ -z "$AUTOMAKE" ]; then
+  for prog in automake automake-1.10 automake-1.9 automake-1.8 automake-1.7; do
+    if type $prog >/dev/null 2>&1; then
+      AUTOMAKE=$prog
+      break
+    fi
+  done
+  if [ -s "$AUTOMAKE" ]; then
+    echo "ERROR: no automake found" >&2
+    exit 1
+  fi
+fi
+ACLOCAL=${AUTOMAKE/automake/aclocal}
+
 srcdir=$(dirname $0)
 here=$(pwd)
 cd $srcdir
 mkdir -p config.aux
-rm -f COPYING
-for f in /usr/share/common-licenses/GPL-3 $HOME/doc/GPL-3 $HOME/Documents/GPL-3; do
-  if test -e "$f"; then
-    ln -s "$f" COPYING
-    break
-  fi
-done
 if test -d $HOME/share/aclocal; then
-  aclocal --acdir=$HOME/share/aclocal
+  ${ACLOCAL} --acdir=$HOME/share/aclocal
 else
-  aclocal
+  ${ACLOCAL}
 fi
 #libtoolize
 autoconf
 autoheader
-automake -a || true		# for INSTALL
-automake --foreign -a
+${AUTOMAKE} -a || true		# for INSTALL
+${AUTOMAKE} --foreign -a
 

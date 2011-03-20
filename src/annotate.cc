@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,36 +22,46 @@ static const struct option annotate_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void annotate_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs annotate [OPTIONS] FILENAME\n"
-          "Options:\n"
-          "  --help, -h     Display usage message\n"
-          "\n"
-          "Lists each line of FILENAME with its origin.\n");
-}
+class annotate: public command {
+public:
+  annotate(): command("annotate", "Annotate each line with revision number") {
+    register_alias("blame");
+  }
 
-int vcs_annotate(int argc, char **argv) {
-  int n;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs annotate [OPTIONS] FILENAME\n"
+            "Options:\n"
+            "  --help, -h     Display usage message\n"
+            "\n"
+            "Lists each line of FILENAME with its origin.\n");
+  }
+  int execute(int argc, char **argv) const {
+    int n;
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+h", annotate_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      annotate_help();
-      return 0;
-    default:
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+h", annotate_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      default:
+        return 1;
+      }
+    }
+    if(argc - optind != 1) {
+      help(stderr);
       return 1;
     }
+    redirect(getenv("VCS_PAGER"));
+    return guess()->annotate(argv[optind]);
   }
-  if(argc - optind != 1) {
-    annotate_help(stderr);
-    return 1;
-  }
-  redirect(getenv("VCS_PAGER"));
-  return guess()->annotate(argv[optind]);
-}
+
+
+};
+
+static annotate command_annotate;
 
 /*
 Local Variables:

@@ -16,6 +16,7 @@
 dist_man_MANS=vcs.1
 EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/rules scripts/setversion \
+	images/vcs-55.png images/vcs-55.svg \
 	README.developers scripts/coverage scripts/dist scripts/htmlman
 SUBDIRS=src tests
 

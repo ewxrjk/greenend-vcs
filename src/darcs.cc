@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,104 +17,126 @@
  */
 #include "vcs.h"
 
-static int darcs_diff(int nfiles, char **files) {
-  return execute("darcs",
-                 EXE_STR, "diff",
-                 EXE_STR, "-u",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
+class darcs: public vcs {
+public:
 
-static int darcs_add(int /*binary*/, int nfiles, char **files) {
-  return execute("darcs",
-                 EXE_STR, "add",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
+  darcs(): vcs("Darcs") {
+    register_subdir("_darcs");
+  }
 
-static int darcs_remove(int force, int nfiles, char **files) {
-  if(force)
-    return execute("rm",
-                   EXE_STR, "-f",
-                   EXE_STRS, nfiles, files,
-                   EXE_END);
-  else
+  int diff(int nfiles, char **files) const {
     return execute("darcs",
-                   EXE_STR, "remove",
+                   EXE_STR, "diff",
+                   EXE_STR, "-u",
+                   EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);
-}
+  }
 
-static int darcs_commit(const char *msg, int nfiles, char **files) {
-  return execute("darcs",
-                 EXE_STR, "record",
-                 EXE_STR, "--all",
-                 EXE_IFSTR(msg, "-m"),
-                 EXE_IFSTR(msg, msg),
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
-
-static int darcs_revert(int nfiles, char **files) {
-  return execute("darcs",
-                 EXE_STR, "revert",
-                 EXE_STR, "--all",
-                 EXE_STRS, nfiles, files,
-                 EXE_END);
-}
-
-static int darcs_status() {
-  int rc = execute("darcs",
-                   EXE_STR, "whatsnew",
-                   EXE_STR, "--summary",
+  int add(int /*binary*/, int nfiles, char **files) const {
+    return execute("darcs",
+                   EXE_STR, "add",
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
                    EXE_END);
-  // darcs whatsnew exits non-0 if nothing's changed!  Insane.
-  return rc == 1 ? 0 : rc;
-}
+  }
 
-static int darcs_update() {
-  return execute("darcs",
-                 EXE_STR, "pull",
-                 EXE_STR, "--all",
-                 EXE_END);
-}
+  int remove(int force, int nfiles, char **files) const {
+    if(force)
+      return execute("rm",
+                     EXE_STR, "-f",
+                     EXE_STR, "--",
+                     EXE_STRS, nfiles, files,
+                     EXE_END);
+    else
+      return execute("darcs",
+                     EXE_STR, "remove",
+                     EXE_STR, "--",
+                     EXE_STRS, nfiles, files,
+                     EXE_END);
+  }
 
-static int darcs_log(const char *path) {
-  return execute("darcs",
-                 EXE_STR, "changes",
-                 EXE_IFSTR(path, path),
-                 EXE_END);
-}
+  int commit(const char *msg, int nfiles, char **files) const {
+    return execute("darcs",
+                   EXE_STR, "record",
+                   EXE_STR, "--all",
+                   EXE_IFSTR(msg, "-m"),
+                   EXE_IFSTR(msg, msg),
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
 
-static int darcs_annotate(const char *path) {
-  return execute("darcs",
-                 EXE_STR, "annotate",
-                 EXE_STR, path,
-                 EXE_END);
-}
+  int revert(int nfiles, char **files) const {
+    return execute("darcs",
+                   EXE_STR, "revert",
+                   EXE_STR, "--all",
+                   EXE_STR, "--",
+                   EXE_STRS, nfiles, files,
+                   EXE_END);
+  }
 
-static int darcs_clone(const char *uri, const char *dir) {
-  return execute("darcs",
-                 EXE_STR, "get",
-                 EXE_STR, uri,
-                 EXE_IFSTR(dir, dir),
-                 EXE_END);
-}
+  int status() const {
+    int rc = execute("darcs",
+                     EXE_STR, "whatsnew",
+                     EXE_STR, "--summary",
+                     EXE_END);
+    // darcs whatsnew exits non-0 if nothing's changed!  Insane.
+    return rc == 1 ? 0 : rc;
+  }
 
-const struct vcs vcs_darcs = {
-  "Bazaar",
-  darcs_diff,
-  darcs_add,
-  darcs_remove,
-  darcs_commit,
-  darcs_revert,
-  darcs_status,
-  darcs_update,
-  darcs_log,
-  NULL,                                 // edit
-  darcs_annotate,
-  darcs_clone,
+  int update() const {
+    return execute("darcs",
+                   EXE_STR, "pull",
+                   EXE_STR, "--all",
+                   EXE_END);
+  }
+
+  int log(const char *path) const {
+    return execute("darcs",
+                   EXE_STR, "changes",
+                   EXE_STR, "--",
+                   EXE_IFSTR(path, path),
+                   EXE_END);
+  }
+
+  int annotate(const char *path) const {
+    return execute("darcs",
+                   EXE_STR, "annotate",
+                   EXE_STR, "--",
+                   EXE_STR, path,
+                   EXE_END);
+  }
+
+  int clone(const char *uri, const char *dir) const {
+    return execute("darcs",
+                   EXE_STR, "get",
+                   EXE_STR, "--",
+                   EXE_STR, uri,
+                   EXE_IFSTR(dir, dir),
+                   EXE_END);
+  }
+
+  int rename(int nsources, char **sources, const char *destination) const {
+    return execute("darcs",
+                   EXE_STR, "mv",
+                   EXE_STR, "--",
+                   EXE_STRS, nsources, sources,
+                   EXE_STR, destination,
+                   EXE_END);
+  }
+
+  int show(const char *change) const {
+    return execute("darcs",
+                   EXE_STR, "diff",
+                   EXE_STR, "-u",
+                   EXE_STR, "--match",
+                   EXE_STR, change,
+                   EXE_END);
+  }
 };
+
+static const darcs vcs_darcs;
 
 /*
 Local Variables:

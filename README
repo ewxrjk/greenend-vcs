@@ -7,8 +7,8 @@ use vcs commands rather than adapt to the version control system
 currently in use.
 
 Bazaar, Git, CVS, Subversion, Mercurial, Darcs and Perforce are
-supported, with a small set of commands.  More version control systems
-and more commands will, hopefuly, be added in the future.
+supported, with a small set of commands.  See the man page for more
+details.
 
 Installation
 ============
@@ -26,6 +26,21 @@ Use the following commands:
 Read 'man vcs' for documentation.
 
 
+Using configure
+===============
+
+See 'INSTALL' for generic instructions.  Options specific to this
+package are:
+
+  ./configure --without-werror
+    Suppresses use of the -Werror option.  This is useful (for
+    instance) if your platform generates warnings for its own header
+    files.
+
+  ./configure --with-gcov
+    Enable coverage testing.  Only useful for developers.
+
+
 Feedback
 ========
 
@@ -39,7 +54,7 @@ system to: Richard Kettlewell <richard+vcs@sfere.greenend.org.uk>
 Copyright
 =========
 
-Copyright (C) 2009 Richard Kettlewell
+Copyright (C) 2009-2011 Richard Kettlewell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009-2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,197 +17,150 @@
  */
 #include "vcs.h"
 
-// Table of global options
-static const struct option options[] = {
-  { "help", no_argument, 0, 'h' },
-  { "commands", no_argument, 0, 'H' },
-  { "version", no_argument, 0, 'V' },
-  { "guess", no_argument, 0, 'g' },
-  { "verbose", no_argument, 0, 'v' },
-  { "dry-run", no_argument, 0, 'n' },
-  { "debug", no_argument, 0, 'd' },
-  { 0, 0, 0, 0 }
-};
-
-// Display help message
-static void help(FILE *fp = stdout) {
-  fprintf(fp, "Usage:\n"
-          "  vcs [OPTIONS] COMMAND ...\n"
-          "Options:\n"
-          "  -v, --verbose     Verbose operation\n"
-          "  -n, --dry-run     Report what would be done but do nothing\n"
-          "  -d, --debug       Display debug messages (-dd for more)\n"
-          "  -h, --help        Display usage message\n"
-          "  -H, --commands    Display command list\n"
-          "  -V, --version     Display version number\n"
-          "  -g, --guess       Guess which version control system is in use\n"
-          "  -4, -6            Force IP version for network access\n"
-          "\n"
-          "Use 'vcs COMMAND --help' for per-command help.\n");
+vcs::vcs(const char *name_): name(name_) {
+  if(!selves)
+    selves = new selves_t();
+  selves->push_back(this);
 }
 
-// Table of commands
-static const struct command {
-  const char *name;
-  const char *alias;
-  const char *description;
-  int (*action)(int argc, char **argv);
-} commands[] = {
-  {
-    "add", NULL,
-    "Add files to version control",
-    vcs_add
-  },
-  {
-    "annotate", "blame",
-    "Annotate each line with revision number",
-    vcs_annotate
-  },
-  {
-    "clone", "clone",
-    "Check files out of a repository",
-    vcs_clone
-  },
-  {
-    "commit", "ci",
-    "Commit changes",
-    vcs_commit
-  },
-  {
-    "diff", NULL,
-    "Display changes",
-    vcs_diff
-  },
-  {
-    "edit", NULL,
-    "Edit files",
-    vcs_edit
-  },
-  {
-    "log", NULL,
-    "Summarize history",
-    vcs_log
-  },
-  {
-    "remove", "rm",
-    "Remove files",
-    vcs_remove
-  },
-  {
-    "revert", NULL,
-    "Revert changes",
-    vcs_revert
-  },
-  {
-    "status", NULL,
-    "Display current status",
-    vcs_status,
-  },
-  {
-    "update", NULL,
-    "Update working tree",
-    vcs_update,
-  },
-  { 0, 0, 0,0 }                         // that's all
-};
-
-// Display list of commands
-static void commandlist(FILE *fp = stdout) {
-  int n;
-  int maxlen = 0;
-
-  for(n = 0; commands[n].name; ++n) {
-    const int l = (int)strlen(commands[n].name);
-    if(l > maxlen)
-      maxlen = l;
-  }
-  fprintf(fp, "vcs commmands:\n\n");
-  for(n = 0; commands[n].name; ++n) {
-    fprintf(fp, "  %-*s    %s\n", 
-            maxlen, commands[n].name, 
-            commands[n].description);
-  }
-  fprintf(fp, "\nUse 'vcs COMMAND --help' for per-command help.\n");
+vcs::~vcs() {
 }
 
-// Find a command given its name or a unique prefix of it
-static const struct command *find_command(const char *cmd) {
-  list<int> prefixes;
-  for(int n = 0; commands[n].name; ++n) {
-    // Exact matches win immediately
-    if(!strcmp(commands[n].name, cmd)
-       || (commands[n].alias && !strcmp(commands[n].alias, cmd)))
-      return &commands[n];
-    // Accumulate a list of prefix matches
-    // (NB we don't do prefix-matching on aliases.)
-    if(strlen(cmd) < strlen(commands[n].name)
-       && !strncmp(cmd, commands[n].name, strlen(cmd)))
-      prefixes.push_back(n);
-  }
-  switch(prefixes.size()) {
-  case 0:
-    fatal("unknown command '%s' (try vcs -H)", cmd);
-  case 1:
-    return &commands[prefixes.front()];
-  default:
-    fatal("'%s' is not a unique prefix (try vcs -H or a longer prefix)", cmd);
-  }
+void vcs::register_scheme(const string &s) {
+  if(!schemes)
+    schemes = new schemes_t();
+  (*schemes)[s] = this;
 }
 
-int main(int argc, char **argv) {
-  int n;
+void vcs::register_substring(const string &s) {
+  if(!substrings)
+    substrings = new substrings_t();
+  substrings->push_back(pair<string,vcs *>(s, this));
+}
 
-  if(!setlocale(LC_CTYPE, ""))
-    fatal("error calling setlocale: %s", strerror(errno));
-  // Parse global options
-  while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
-    switch(n) {
-    case 'h': 
-      help();
-      return 0;
-    case 'V':
-      puts("vcs "VERSION);
-      return 0;
-    case 'H':
-      commandlist();
-      return 0;
-    case 'g': {
-      const struct vcs *v = guess();
-      puts(v->name);
-      return 0;
+void vcs::register_subdir(const string &s) {
+  if(!subdirs)
+    subdirs = new substrings_t();
+  subdirs->push_back(pair<string,vcs *>(s, this));
+}
+
+bool vcs::detect(void) const {
+  return false;
+}
+
+int vcs::edit(int, char **) const {
+  return 0;
+}
+
+int vcs::clone(const char *, const char *) const {
+  fatal("guess_branch returned VCS '%s' which has no clone method!",
+        name);
+}
+
+vcs::selves_t *vcs::selves;
+vcs::schemes_t *vcs::schemes;
+vcs::substrings_t *vcs::substrings;
+vcs::substrings_t *vcs::subdirs;
+
+// Guess what VCS is in use; returns a pointer to its operation table.
+// Terminates the process if no VCS can be found.
+const vcs *vcs::guess() {
+  // Look for a magic directory in the current directory
+  for(substrings_t::const_iterator it = subdirs->begin();
+      it != subdirs->end();
+      ++it)
+    if(isdir(it->first))
+      return it->second;
+  // Try slow, complicated detection, for systems that need it
+  for(selves_t::const_iterator it = selves->begin();
+      it != selves->end();
+      ++it) {
+    vcs *v = *it;
+    if(v->detect())
+      return v;
+  }
+  // Some systems only have their dot directories at the top level of the
+  // branch, so we work our way back up.
+  string d = cwd();
+  for(;;) {
+    for(substrings_t::const_iterator it = subdirs->begin();
+        it != subdirs->end();
+        ++it)
+      if(isdir(d + PATHSEPSTR + it->first))
+        return it->second;
+    if(isroot(d))
+      break;
+    d = parentdir(d);
+  }
+  fatal("cannot identify native version control system");
+}
+
+// Guess what VCS a named branch belongs to
+const vcs *vcs::guess_branch(string uri) {
+  // Perhaps we can guess just by looking at the URI
+  const string scheme = uri_scheme(uri);
+  if(scheme != "") {
+    if(schemes->find(scheme) != schemes->end())
+      return schemes->find(scheme)->second;
+  } else {
+    // If there is no scheme then we assume it to be a local URI
+    if(uri.size() && uri.at(0) == '/')
+      uri = "file://" + uri;
+    else
+      uri = "file:///" + cwd() + "/" + uri;
+  }
+
+  // Otherwise we must inspect what we find there.
+
+  // First we try to use substrings as hints
+  for(substrings_t::const_iterator it = substrings->begin();
+      it != substrings->end();
+      ++it)
+    if(uri.find(it->first) != string::npos) {
+      // The substring matches, see if there's a directory of the right name.
+      for(substrings_t::const_iterator jt = subdirs->begin();
+          jt != subdirs->end();
+          ++jt)
+        if(jt->second == it->second
+           && uri_exists(uri + "/" + jt->first))
+          return it->second;
     }
-    case 'v':
-      ++verbose;
-      break;
-    case 'n':
-      dryrun = 1;
-      break;
-    case '4': 
-    case '6':
-      ipv = n - '0';
-      break;
-    case 'd':
-      ++debug;
-      break;
-    default:
-      exit(1);
+
+  // Failing that we try without hints
+  for(substrings_t::const_iterator it = subdirs->begin();
+      it != subdirs->end();
+      ++it)
+    if(uri_exists(uri + "/" + it->first))
+      return it->second;
+
+  fatal("cannot identify version control system");
+}
+
+int vcs::rename(int nsources, char **sources, const char *destination) const {
+  if(exists(destination)) {
+    if(!isdir(destination))
+      fatal("%s already exists (and is not a directory)", destination);
+    // We're renaming files and/or directories "into" a directory
+    for(int n = 0; n < nsources; ++n) {
+      rename_one(sources[n],
+		 string(destination) + "/" + basename_(sources[n]));
     }
+  } else {
+    if(nsources != 1)
+      fatal("Cannot rename multiple sources to (nonexistent) destination %s",
+            destination);
+    // We're just changing the name of one file or directory
+    rename_one(sources[0], destination);
   }
-  // Check for a known command
-  if(optind >= argc) {
-    help(stderr);
-    exit(1);
-  }
-#if HAVE_CURL_CURL_H
-  CURLcode rc = curl_global_init(CURL_GLOBAL_ALL);
-  if(rc)
-    fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
-#endif
-  const struct command *c = find_command(argv[optind]);
-  const int status = c->action(argc - optind, argv + optind);
-  if(fclose(stdout) < 0)
-    fatal("closing stdout: %s", strerror(errno));
-  return status;
+  return 0;
+}
+
+void vcs::rename_one(const string &, const string &) const {
+  fatal("%s does not support renaming.", name);
+}
+
+int vcs::show(const char *) const {
+  fatal("%s does not support 'vcs show'.", name);
 }
 
 /*

@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2010 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,40 +23,48 @@ static const struct option remove_options[] = {
   { 0, 0, 0, 0 },
 };
 
-static void remove_help(FILE *fp = stdout) {
-  fprintf(fp, 
-          "Usage:\n"
-          "  vcs remove [OPTIONS] FILENAME ...\n"
-          "Options:\n"
-          "  --help, -h     Display usage message\n"
-          "  --force, -f    Force removal\n"
-          "\n"
-          "Remove files from version control.\n");
-}
+class remove_: public command {
+public:
+  remove_(): command("remove", "Remove files") {
+    register_alias("rm");
+  }
 
-int vcs_remove(int argc, char **argv) {
-  int n, force = 0;
+  void help(FILE *fp = stdout) const {
+    fprintf(fp, 
+            "Usage:\n"
+            "  vcs remove [OPTIONS] FILENAME ...\n"
+            "Options:\n"
+            "  --help, -h     Display usage message\n"
+            "  --force, -f    Force removal\n"
+            "\n"
+            "Remove files from version control.\n");
+  }
 
-  optind = 1;
-  while((n = getopt_long(argc, argv, "+hf", remove_options, 0)) >= 0) {
-    switch(n) {
-    case 'h':
-      remove_help();
-      return 0;
-    case 'f':
-      force = 1;
-      break;
-    default:
+  int execute(int argc, char **argv) const {
+    int n, force = 0;
+
+    optind = 1;
+    while((n = getopt_long(argc, argv, "+hf", remove_options, 0)) >= 0) {
+      switch(n) {
+      case 'h':
+        help();
+        return 0;
+      case 'f':
+        force = 1;
+        break;
+      default:
+        return 1;
+      }
+    }
+    if(argc == optind) {
+      help(stderr);
       return 1;
     }
+    return guess()->remove(force, argc - optind, argv + optind);
   }
-  if(argc == optind) {
-    remove_help(stderr);
-    return 1;
-  }
-  return guess()->remove(force, argc - optind, argv + optind);
-  
-}
+};
+
+static remove_ remove_command;
 
 /*
 Local Variables:

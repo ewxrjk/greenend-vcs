@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009-2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <cerrno>
 #include <fcntl.h>
 #include <signal.h>
+#include <sstream>
 
 // Global debug level
 // 0 = no debugging output
@@ -89,6 +90,20 @@ string parentdir(const string &d) {
   return d.substr(0, n);
 }
 
+// Return the basename of F
+string basename_(const string &d) {
+  size_t n = d.rfind(PATHSEP);
+  if(n == string::npos)
+    return d;
+  else if(n == d.size() - 1) {
+    if(n == 0)
+      return "/";                       // the path is just "/"
+    // Strip the trailing / and try again
+    return basename_(d.substr(0, n));
+  }
+  return d.substr(n + 1, string::npos);
+}
+
 // Return true if D is (a) root directory
 int isroot(const string &d) {
   return d == "/";
@@ -97,13 +112,15 @@ int isroot(const string &d) {
 // Report a fatal error
 void fatal(const char *msg, ...) {
   va_list ap;
+  char *formatted;
+  int n;
 
-  fprintf(stderr, "ERROR: ");
   va_start(ap, msg);
-  vfprintf(stderr, msg, ap);
+  n = vasprintf(&formatted, msg, ap);
+  if(n < 0)
+    abort();
   va_end(ap);
-  fputc('\n', stderr);
-  exit(1);
+  throw FatalError(formatted);
 }
 
 void *xmalloc(size_t n) {
@@ -146,6 +163,9 @@ void redirect(const char *pager) {
     return;
   // Don't invoke pager if not sending to a terminal
   if(!isatty(1))
+    return;
+  // Don't redirect in dry-run mode
+  if(dryrun)
     return;
   // Create a pipe
   if(pipe(p) < 0)
@@ -306,6 +326,24 @@ string get_relative_path(const string &s) {
     pos = sl + 1;
   }
   return s;
+}
+
+string tempfile() {
+  // Pick a random filename
+  ostringstream s;
+  int fd;
+  const char *tmpdir = getenv("TMPDIR");
+  if(!tmpdir)
+    tmpdir = "/tmp";
+  do {
+    s.str().clear();
+    s << tmpdir << "/vcs." << rand() << ".txt";
+    fd = open(s.str().c_str(), O_WRONLY|O_CREAT|O_EXCL, 0600);
+  } while(fd < 0 && errno == EEXIST);
+  if(fd < 0)
+    fatal("creating %s: %s", s.str().c_str(), strerror(errno));
+  close(fd);
+  return s.str();
 }
 
 /*

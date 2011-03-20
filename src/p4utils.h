@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009-2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,21 @@ struct P4Where {
   string view_path;
   string local_path;
 
+  // Expects one line from 'p4 where'
   P4Where(const string &l) {
     parse(l);
   }
 
+  // Expects one line from 'p4 where'
   void parse(const string &l);
 };
 
 // Information about one file
 struct P4FileInfo {
   P4FileInfo();
-  P4FileInfo(const string &l);
+  P4FileInfo(const string &l);          // expands 'p4 opened' output
+  void parse(const string &l);
+  void parse_raw(const string &l);
   ~P4FileInfo();
   string depot_path;                    // depot path
   string view_path;                     // view path (NB sometimes missing)
@@ -45,6 +49,16 @@ struct P4FileInfo {
   int chnum;                            // change number, -1 for default
   string type;                          // file type or "" if not known
   bool locked;                          // true for *locked*
+  bool resolvable;                      // true for resolve-needed
+  bool changed;                         // true for changed files
+
+  static void get(map<string,P4FileInfo> &results,
+                  const string &pattern) {
+    get(results, pattern.c_str());
+  }
+
+  static void get(map<string,P4FileInfo> &results,
+                  const char *pattern);
 };
 
 struct ltfilename {
@@ -76,6 +90,24 @@ private:
   info_type info;                       // depot path -> information
   filemap_type by_local;                // local path -> depot path
   filemap_type by_relative;             // relative path -> depot path
+};
+
+// Output of 'p4 describe'
+struct P4Describe {
+public:
+  P4Describe(const char *change);
+  ~P4Describe();
+
+  struct fileinfo {
+    fileinfo(): rev(0), line(0) {}
+    string depot_path;                  // depot path of a file
+    int rev;                            // revision number in change
+    string action;                      // action in change
+    size_t line;                        // line diffs found at, or 0
+  };
+
+  vector<string> lines;                 // full text
+  vector<fileinfo> files;               // all files
 };
 
 string p4_encode(const string &s);

@@ -54,6 +54,84 @@ span.command {
  <body>
   <h1>VCS Change History</h1>
 
+  <h2>Changes in VCS 0.7</h2>
+
+  <div>
+
+   <h3>General</h3>
+   
+   <div>
+    
+    <p>There is a new <tt>vcs rename</tt> command, which renames files under
+    version control.  This works with all the version control systems except
+    CVS.</p>
+
+    <p>There is a new <tt>vcs show</tt> command, which shows the diff for an
+    existing commit.  You can use <tt>vcs diff -c</tt> to get the same effect.
+    This works with all the version control systems except CVS and Darcs.</p>
+
+   </div>
+
+    <h3>Bugs Fixed</h3>
+
+    <div class=section>
+
+      <table class=bugs>
+        <tr>
+          <th>ID</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=3">#3</a></td>
+          <td>'vcs status' should distinguish files in need of 'p4 resolve'</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=4">#4</a></td>
+          <td>vcs stat should distinguish edited but unmodified files</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=5">#5</a></td>
+          <td>Please add --without-werror option to configure</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=6">#6</a></td>
+          <td>iconv portability</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=7">#7</a></td>
+          <td>Does not detect libiconv on cygwin</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=9">#9</a></td>
+          <td>could we have vcs rename?</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=10">#10</a></td>
+          <td>'vcs revert FILENAME' does not work with git</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=11">#11</a></td>
+          <td>	vcs diff should emulate -N for p4</td>
+        </tr>
+        <tr>
+          <td><a href="http://code.google.com/p/greenend-vcs/issues/detail?id=12">#12</a></td>
+          <td>Show historical changes</td>
+        </tr>
+        <tr>
+          <td>(none)</td>
+          <td>Awkward filenames (e.g. starting with <tt>-</tt>) are more reliably handled.</td>
+        </tr>
+        <tr>
+          <td>(none)</td>
+          <td><tt>vcs -n ...</tt> never invokes a pager.</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+
   <h2>Changes in VCS 0.6</h2>
 
   <div>
@@ -228,10 +306,7 @@ span.command {
   
   <p>Other sources of change information:</p>
   <ul>
-   <li><a href="http://www.greenend.org.uk/rjk/bzr/vcs.dev.log">bzr
-     changelog for development branch</a>
-   <li><tt>bzr log</tt> in a clone
-    of <a href="http://www.greenend.org.uk/rjk/bzr/vcs.dev">http://www.greenend.org.uk/rjk/bzr/vcs.dev</a>
+   <li><a href="http://www.chiark.greenend.org.uk/ucgi/~richardk/git/vcs.git/">gitweb for vcs</a>
   </ul>
 
  </body>

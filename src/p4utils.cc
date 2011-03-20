@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009-2011 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include "p4utils.h"
 #include <sstream>
 #include <iomanip>
+#include <stdexcept>
 
 extern "C" {
   extern char **environ;
@@ -90,13 +91,13 @@ static int fromhex(int c) {
   }
 }
 
-string p4_decode(const string &s) {
+static string p4_decode_raw(const string &s) {
   string r;
   string::size_type n;
   
   for(n = 0; n < s.size(); ++n) {
     if(s[n] == '%') {
-      r += 16 * fromhex(s[n + 1]) + fromhex(s[n + 2]);
+      r += 16 * fromhex(s.at(n + 1)) + fromhex(s.at(n + 2));
       n += 2;
     } else
       r += s[n];
@@ -104,9 +105,26 @@ string p4_decode(const string &s) {
   return r;
 }
 
+string p4_decode(const string &s) {
+  try {
+    return p4_decode_raw(s);
+  } catch(out_of_range &e) {
+    fprintf(stderr, "ERROR: out of range decoding path '%s'\n",
+            s.c_str());
+    throw e;
+  }
+}
+
+// Expects one line in 'p4 where' syntax, which is a depot path,
+// a client path in p4 syntax and a client path in local syntax.
+//
+// If the original argument contain %-escape sequences (see the Issuing P4
+// Commands chapter in the Perforce user guide) then they are preserved in the
+// first two but are replaced by their expansion (which might be a space) in
+// the third.
 void P4Where::parse(const string &l) {
   string::size_type n = l.find(' ');
-  depot_path = p4_decode(l.substr( 0, n));
+  depot_path = p4_decode(l.substr(0, n));
   string::size_type m = n + 1;
   n = l.find(' ', m);
   view_path = p4_decode(l.substr(m, n - m));
@@ -209,10 +227,29 @@ void p4__where(const list<string> &files,
 
 // P4FileInfo ------------------------------------------------------------------
 
-P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false) {
+P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false), 
+                          resolvable(false), changed(true) {
 }
 
-P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false) {
+// Expects 'p4 opened' output.
+//
+//   depot-file#rev - action chnum change (type) [lock-status]
+P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false),
+                                         resolvable(false), changed(true) {
+  parse(l);
+}
+
+void P4FileInfo::parse(const string &l) {
+  try {
+    parse_raw(l);
+  } catch(out_of_range &e) {
+    fprintf(stderr, "ERROR: out of range in P4FileInfo::parse '%s'\n",
+            l.c_str());
+    throw e;
+  }
+}
+
+void P4FileInfo::parse_raw(const string &l) {
   // Get the depot path
   string::size_type n = l.find('#');
   if(n == string::npos)
@@ -241,18 +278,45 @@ P4FileInfo::P4FileInfo(const string &l): rev(-1), chnum(0), locked(false) {
   else
     chnum = atoi(chstr.c_str());
   // The type
-  while(l.at(n) == ' ' || l.at(n) == '(')
+  while(n < l.size() && l.at(n) != '(')
     ++n;
-  while(l.at(n) != ')')
+  if(n < l.size())                      // must be '('
+    ++n;
+  while(n < l.size() && l.at(n) != ')')
     type += l[n++];
   // Lock status
   while(n < l.size() && (l.at(n) == ' ' || l.at(n) == '('))
     ++n;
-  if(n < l.size() && l[n] == '*')
+  if(n < l.size() && l.at(n) == '*')
     locked = true;
 }
 
 P4FileInfo::~P4FileInfo() {
+}
+
+void P4FileInfo::get(map<string,P4FileInfo> &results,
+                     const char *pattern) {
+  int rc;
+  vector<string> command, opened, errors;
+
+  results.clear();
+  if((rc = execute(makevs(command, "p4", "opened", pattern, (char *)0),
+                   NULL/*input*/,
+                   &opened,
+                   &errors))) {
+    report_lines(errors);
+    fatal("'p4 opened ...' exited with status %d", rc);
+  }
+  if(!(errors.size() == 0
+       || (errors.size() == 1
+           && errors[0] == "... - file(s) not opened on this client."))) {
+    report_lines(errors);
+    fatal("Unexpected error output from 'p4 opened ...'");
+  }
+  for(size_t n = 0; n < opened.size(); ++n) {
+    P4FileInfo fi(opened[n]);
+    results[fi.depot_path] = fi;
+  }
 }
 
 // P4Info ----------------------------------------------------------------------
@@ -321,30 +385,7 @@ void P4Info::gather() {
   by_local.clear();
   by_relative.clear();
   
-  // 'p4 opened' gives all opened files, in the form:
-  //   DEPOT-PATH#REV - ACTION CHNUM change (TYPE) [...]
-  // ACTION is add, edit, delete, branch, integrate
-  // CHNUM is the change number or 'default'.
-  if((rc = execute(makevs(command, "p4", "opened", "...", (char *)0),
-                   NULL/*input*/,
-                   &opened,
-                   &errors))) {
-    report_lines(errors);
-    fatal("'p4 opened ...' exited with status %d", rc);
-  }
-  if(!(errors.size() == 0
-       || (errors.size() == 1
-           && errors[0] == "... - file(s) not opened on this client."))) {
-    report_lines(errors);
-    fatal("Unexpected error output from 'p4 opened ...'");
-  }
-  // Build the info array
-  for(size_t n = 0; n < opened.size(); ++n) {
-    P4FileInfo fi(opened[n]);
-
-    //fprintf(stderr, "opened: %s -> %s\n", fi.depot_path.c_str(), fi.action.c_str());
-    info[fi.depot_path] = fi;
-  }
+  P4FileInfo::get(info, "...");
 
   // 'p4 have' gives all files, in the form:
   //   DEPOT-PATH#REV - LOCAL-PATH
@@ -358,11 +399,18 @@ void P4Info::gather() {
     const string depot_path = p4_decode(l.substr(0, i));
     ++i;
     string revs;
-    while(isdigit(l.at(i)))
-      revs += l[i++];
-    const int rev = atoi(revs.c_str());
-    while(l.at(i) == ' ' || l.at(i) == '-')
-      ++i;
+    int rev;
+    try {
+      while(isdigit(l.at(i)))
+        revs += l[i++];
+      rev = atoi(revs.c_str());
+      while(l.at(i) == ' ' || l.at(i) == '-')
+        ++i;
+    } catch(out_of_range &e) {
+      fprintf(stderr, "ERROR: out of range in P4Info::gather '%s'\n",
+              l.c_str());
+      throw e;
+    }
     const string local_path = l.substr(i);
     info_type::iterator it = info.find(depot_path);
     if(it == info.end()) {
@@ -409,6 +457,39 @@ void P4Info::gather() {
     it->second.relative_path = get_relative_path(it->second.local_path);
     by_relative[it->second.relative_path] = it->first;
   }
+
+  // Identify files needing 'p4 resolve'
+  vector<string> resolvable;
+  if((rc = execute(makevs(command, "p4", "resolve", "-n", "...", (char *)NULL),
+                   NULL/*input*/,
+                   &resolvable,
+                   &errors))) {
+    report_lines(errors);
+    fatal("'p4 resolve -n ...' exited with status %d", rc);
+  }
+  // output is /full/local/path - merging //source/depot/path#revno
+  for(size_t n = 0; n < resolvable.size(); ++n) {
+    const string &r = resolvable[n];
+    const string local_path = p4_decode(r.substr(0, r.find(' ')));
+    const string depot_path = by_local[local_path];
+    info[depot_path].resolvable = true;
+  }
+
+  // Identify files which have/haven't changed
+  vector<string> unchanged;
+  if((rc = execute(makevs(command, "p4", "revert", "-an", "...", (char *)NULL),
+                   NULL/*input*/,
+                   &unchanged,
+                   &errors))) {
+    report_lines(errors);
+    fatal("'p4 revert -an ...' exited with status %d", rc);
+  }
+  // output is //DEPOT/PATH#REVNO - was ACTION, reverted
+  for(size_t n = 0; n < unchanged.size(); ++n) {
+    const string &u = unchanged[n];
+    const string depot_path = p4_decode(u.substr(0, u.find('#')));
+    info[depot_path].changed = false;
+  }
 }
 
 // ltfilename ------------------------------------------------------------------
@@ -450,6 +531,46 @@ bool ltfilename::operator()(const string &a, const string &b) const {
     return false;
   // Otherwise we compare the subsequent component
   return abits[n] < bbits[n];
+}
+
+// P4Describe -----------------------------------------------------------------
+
+P4Describe::P4Describe(const char *change) {
+  int rc = capture(lines, "p4", "describe", "-du", change, (char *)0);
+  if(rc)
+    fatal("p4 describe exited with status %d", rc);
+  // TODO catch nonexistent changes
+  map<string, size_t> file_index;
+  for(size_t n = 0; n < lines.size(); ++n) {
+    const string &line = lines[n];
+    if(line.size() > 6 && line.compare(0, 6, "... //", 6) == 0) {
+      // ... //depot/path/to/file#rev action
+      fileinfo fi;
+      const string::size_type hash = line.find('#');
+      if(hash == string::npos)
+        fatal("cannot parse p4 describe output '%s'", line.c_str());
+      fi.depot_path.assign(line, 4, hash - 4);
+      string::size_type n = line.find(' ', hash);
+      if(n == string::npos)
+        fatal("cannot parse p4 describe output '%s'", line.c_str());
+      const string revstr(line, hash + 1, n - (hash + 1));
+      fi.rev = atoi(revstr.c_str());
+      while(line.at(n) == ' ')
+        ++n;
+      fi.action.assign(line, n, line.size() - n);
+      file_index[fi.depot_path] = files.size();
+      files.push_back(fi);
+    }
+    if(line.size() > 5 && line.compare(0, 5, "==== ", 5) == 0) {
+      // ==== //depot/path/to/file#rev (type) ====
+      const string::size_type hash = line.find('#');
+      const string depot_path(line, 5, hash - 5);
+      files[file_index[depot_path]].line = n;
+    }
+  }
+}
+
+P4Describe::~P4Describe() {
 }
 
 /*

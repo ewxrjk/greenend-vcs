@@ -18,28 +18,30 @@ set -e
 
 . ${top_srcdir:-.}/tests/utils.sh
 
+# Check dependencies
 t_init svn
 
-repo=$testdir/repo
-
 # Create repository
+repo=$testdir/repo
 x svnadmin create $repo
 
-# Create an empty project and check it out
+# Create test project
 x mkdir project
 x svn import -m 'Import empty directory' project file://$repo/trunk/project
 x rmdir project
 x svn co file:///$repo/trunk/project
-
 t_populate
 
+# Duplicate it
 x svn co file:///$repo/trunk/project copy
 t_verify
 
+# Test modification and updtae
 t_modify
 t_update
 t_verify
 
+# Test revert
 t_revert
 cd copy
 x svn status three
@@ -48,5 +50,11 @@ if test "x$status" != 'x?'; then
     fatal "Did not properly revert 'three'"
 fi
 cd ..
+
+# Test rename
+t_rename
+
+# Test awkward filenames
+t_awkward
 
 t_done

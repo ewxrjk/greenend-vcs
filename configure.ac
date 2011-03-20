@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 #
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009-2011 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,20 +21,75 @@ AM_INIT_AUTOMAKE(vcs, [0.6])
 AC_CONFIG_SRCDIR([src/vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
+AC_LANG([C++])
 AC_SET_MAKE
 AC_PROG_RANLIB
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
+AC_ARG_VAR([EDITOR],[default text editor])
+EDITOR="${EDITOR:-vi}"
+AC_DEFINE_UNQUOTED([EDITOR],["${EDITOR}"],[default text editor])
 AC_CHECK_LIB([curl],[curl_easy_init])
 AC_CHECK_LIB([expat],[XML_ParserCreate])
-AC_CHECK_LIB([iconv],[iconv_open])
+# Cygwin's iconv.h redirects to non-standard names, breaking the usual
+# AC_CHECK_LIB heuristic.  Stupid Cygwin.
+AC_CHECK_LIB([iconv],[iconv_open],[],
+             [AC_CHECK_LIB([iconv],[libiconv_open])])
 AC_CHECK_HEADERS([curl/curl.h])
+
+# iconv() signature varies between platforms
+AC_CACHE_CHECK([for type of iconv inbuf argument],[rjk_cv_iconv_inbuf],
+               [AC_TRY_COMPILE([#include <iconv.h>],
+                               [char *inbuf;
+                                char *outbuf;
+                                size_t left;
+                                iconv_t cd;
+                                iconv(cd, &inbuf, &left, &outbuf, &left);],
+                               [rjk_cv_iconv_inbuf="char **"],
+                [AC_TRY_COMPILE([#include <iconv.h>],
+                                [const char *inbuf;
+                                 char *outbuf;
+                                 size_t left;
+                                 iconv_t cd;
+                                 iconv(cd, &inbuf, &left, &outbuf, &left);],
+                                [rjk_cv_iconv_inbuf="const char **"],
+                                [rjk_cv_iconv_inbuf="unknown"])])])
+
+case "$rjk_cv_iconv_inbuf" in
+"char **" )
+  ;;
+"const char **" )
+  AC_DEFINE([HAVE_BROKEN_ICONV],[1],[define if iconv takes const char **inbuf])
+  ;;
+"unknown" )
+  AC_MSG_WARN([cannot determine iconv inbuf type - winging it])
+  ;;
+esac
 
 RJK_GCOV
 
+WERROR=""
+AC_ARG_WITH([werror],
+            [AS_HELP_STRING([--without-werror],
+                            [Suppress -Werror option])],
+            [if test $withval = yes; then WERROR="-Werror"; fi],
+            [WERROR="-Werror"])
+
 if test "$GXX" = yes; then
-  CXX="${CXX} -Wall -W -Wmissing-declarations -pedantic -Werror"
+  AX_GXX_VERSION
+  AC_CACHE_CHECK([GNU C++ extra options],[rjk_cv_warnings],[
+    rjk_cv_warnings="-Wall -W -pedantic $WERROR"
+    # g++ only supports -Wmissing-declarations from 4.3 onwards
+    case "${GXX_VERSION}" in
+    3.* | 4.0 | 4.1 | 4.2 | 4.0.* | 4.1.* | 4.2.* )
+      ;;
+    * )
+      rjk_cv_warnings="${rjk_cv_warnings} -Wmissing-declarations"
+      ;;
+    esac
+  ])
+  CXX="${CXX} ${rjk_cv_warnings}"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__

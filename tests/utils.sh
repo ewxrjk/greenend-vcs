@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009-2011 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# t_init [DEPENDENCY ...]
+#
+# DEPENDENCY can be an http:... URL, which must be reachable using
+# curl, or a command name, which must be on the path.  If a dependency
+# cannot be satisifed then the test is skipped (exit 77).
 t_init() {
 
     # Check all dependencies are present
@@ -50,11 +55,26 @@ t_init() {
     cd $testdir
 }
 
+# Called at the end of tests to clean up.
+#
+# In fact at present, not cleanup is done; it's convenine to see what
+# is left behind, for further testing.
 t_done() {
     cd /
 #    rm -rf $testdir
 }
 
+# Create an initial test project.
+#
+# On entry, 'project' should exist and be initialized into the system
+# under test (i.e. bzr init or whatever).  It will be populated as
+# follows over the course of three commits:
+#    project/one
+#    project/two
+#    project/subdir/
+#    project/subdir/subone
+#    project/subdir/subtwo
+# Each file's contents will be its name (plus a newline).
 t_populate() {
     cd project
     echo one > one
@@ -71,20 +91,58 @@ t_populate() {
     fi
     x vcs -v add one two
     x vcs -v status
+    case "$0" in
+    *-git )
+      # git cannot diff the initial commit!
+      ;;
+    * )
+      # global diff should show all new files
+      x vcs -v diff > delta || true
+      cat delta
+      grep '^+one' delta > /dev/null
+      grep '^+two' delta > /dev/null
+      # single-file diff should only show that file's changes
+      x vcs -v diff one > delta || true
+      cat delta
+      grep '^+one' delta > /dev/null
+      grep '^+two' delta && exit 1
+      ;;
+    esac
     x vcs -v commit -m 'one and two'
+
     mkdir subdir
     x vcs -v add subdir
     cd subdir
     echo subone > subone
     x vcs add subone
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+subone' delta
     x vcs commit -m 'added subone'
+
     echo subtwo > subtwo
     cd ../
     x vcs add subdir/subtwo
-    x vcs commit -m 'added saubtwo'
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+subone' delta && exit 1
+    grep '^+subtwo' delta > /dev/null
+    x vcs -v diff subdir/subtwo > delta || true
+    cat delta
+    grep '^+subtwo' delta > /dev/null
+    grep '^+subone' delta && exit 1
+    grep '^+one' delta && exit 1
+    grep '^+two' delta && exit 1
+    x vcs commit -m 'added subtwo'
     cd ..
 }
 
+# Modify the test project.
+#
+# On entry, 'project' should be as per the result of t_populate.
+# project/one will have 'oneone' appended.  Most of the work is
+# examining differences rather than making changes.
+# 
 t_modify() {
     cd project
     if [ -w one ]; then
@@ -111,14 +169,13 @@ t_modify() {
         exit 1
     fi
     echo oneone >> one
+    x vcs -v edit two
+    echo twotwo >> two
     x vcs -v status
-    x vcs -v diff > diff-output-1 || true
-    if [ -s diff-output-1 ]; then
-        :
-    else
-        echo Modified one but no diff output >&2
-        exit 1
-    fi
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+oneone' delta
+    grep '^+twotwo' delta
     x vcs -n commit -m 'oneone'
     x vcs -v diff > diff-output-2 || true
     if [ -s diff-output-2 ]; then
@@ -127,7 +184,13 @@ t_modify() {
         echo Diff output went away after supposedly dry-run commit >&2
         exit 1
     fi
-    x vcs -v commit -m 'oneone'
+    x vcs -v commit -m 'oneone' one
+    # Should only have commited 'one'
+    x vcs -v diff > delta || true
+    cat delta
+    grep '^+twotwo' delta
+    x vcs -v revert two
+    # Should be nothing left
     x vcs -v diff > diff-output-3 || true
     # Stupid darcs appends a blank line to diff output even if it
     # would otherwise be empty.  As a hack we only consider nonblank
@@ -141,6 +204,12 @@ t_modify() {
     cd ..
 }
 
+# Update a copy of the test project
+#
+# On entry 'copy' should be a checked out duplicate of 'project'.  For
+# DVCS systems this will be a branch (clone); for p4 it is a checkout
+# in a separate client.  'copy' is updated, presumably to match 'project',
+# though this is not verified.
 t_update() {
     cd copy
     if [ `wc -l < one` != 1 ]; then
@@ -158,11 +227,28 @@ t_update() {
     cd ..
 }
 
+# Compare files in the test project and its copy
+#
+# Checks that .../one and .../two match in 'project' and 'copy'.  Used
+# by t_revert.
 t_verify() {
     if diff -u project/one copy/one; then :; else exit 1; fi
     if diff -u project/two copy/two; then :; else exit 1; fi
 }
 
+# Test 'vcs revert'.
+#
+# On entry 'copy' should be an up to date duplicate of 'project'.
+# This test modfies various files 'copy' and then reverts them, using
+# the contents of 'project' to verify that the revert succeeded.
+#
+# Changes that are subsequently reverted are:
+#   - modify copy/one
+#   - remove copy/two
+#   - add new copy/three
+#
+# This is done more than one, to test global revert and file-specific
+# revert.
 t_revert() {
     cd copy
     x vcs -v edit one
@@ -205,10 +291,87 @@ t_revert() {
     # check for that
     t_verify
 
+    # Explicit paths 1: modified file
+    cd copy
+    x vcs edit one
+    echo extra >> one
+    x vcs -v revert one
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 2: deleted file
+    cd copy
+    x vcs -v rm two
+    x vcs -v revert two
+    x vcs -v status
+    cd ..
+    t_verify
+
+    # Explicit paths 3: added file
+    cd copy
+    echo three > three
+    x vcs -v add three
+    x vcs -v status
+    x vcs -v revert three
+    x vcs -v status
+    cd ..
+    t_verify
+
     # 'three' should not exist or not be under vc (at all).  The check will
     # have to be vc-specific.
 }
 
+# Test renaming.
+#
+# Tests renaming within 'project'.  Currently discards eventual changes,
+# which is not a very good test!  TODO
+t_rename() {
+    cd project
+    x vcs -v rename one two subdir
+    for x in one two; do
+        if [ -e $x ]; then
+            echo "rename did not delete $x" >&2
+            exit 1
+        fi
+        if [ ! -e subdir/$x ]; then
+            echo "rename did not create subdir/$x" >&2
+            exit 1
+        fi
+    done
+    x vcs -v revert
+    x vcs -v rename one four
+    if [ -e one ]; then
+        echo "rename did not delete one" >&2
+        exit 1
+    fi
+    if [ ! -e four ]; then
+        echo "rename did not create four" >&2
+        exit 1
+    fi
+    x vcs -v revert
+    rm -f four
+    cd ..
+}
+
+# Test awkward filenames.
+#
+# Tries to add various awkward filenames and verifies that it all works
+t_awkward() {
+  cd project
+  echo > foo@bar
+  echo > foo\#bar%wibble\*spong
+  echo > -addme
+  x vcs -v status
+  x vcs -v add foo*
+  x vcs -v add -- -addme
+  x vcs -v commit -m 'files with awkward names'
+  cd ..
+}
+
+# check_match FILE-A FILE-B
+#
+# Equivalent to diff -u but terminates the test if a difference is found.
 check_match() {
     set +e
     x diff -u "$@"
@@ -220,12 +383,18 @@ check_match() {
     fi
 }
 
+# x COMMAND [ARGUMENT ...]
+#
+# Echo a command and then execute it
 x() {
     echo ">>> PWD=`pwd`" >&2
     echo ">>>" "$@" >&2
     "$@"
 }
 
+# xfail COMMAND [ARGUMENT ...]
+#
+# Execute a command and check that it does NOT succeed
 xfail() {
     echo "!!! PWD=`pwd`" >&2
     echo "!!!" "$@" >&2
@@ -235,10 +404,34 @@ xfail() {
     fi
 }
   
-
+# fatal MESSAGE...
+#
+# Exit with a fatal error
 fatal() {
     echo "$@" >&2
     exit 1
+}
+
+# makep4client NAME ROOT
+#
+# Create a p4 client called NAME rooted at ROOT.
+makep4client() {
+  local NAME="$1"
+  local ROOT="$2"
+  local LOGNAME=${LOGNAME:-`whoami`}
+  local HOSTNAME=$(uname -n)
+
+  p4 client -i <<EOF
+Client: $NAME
+Owner: $LOGNAME
+Host: $HOSTNAME
+Root: $ROOT
+Options: noallwrite noclobber nocompress unlocked nomodtime normdir
+SubmitOptions:	submitunchanged
+LineEnd: local
+View:
+	//depot/... //$NAME/...
+EOF
 }
 
 # Sanitize environment
@@ -258,6 +451,7 @@ unset P4USER || true
 builddir=`pwd`
 PATH=$builddir/src:$PATH
 
+# Save output to a logfile rather than standard output
 if ${TESTLOG:-false}; then
   exec > ${0##*/}.log 2>&1
 fi

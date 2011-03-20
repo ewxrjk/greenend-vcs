@@ -1,0 +1,6 @@
+#! /bin/sh
+set -e
+path="$1"
+grep "abra" "${path}" > /dev/null
+echo cadabra > "${path}"
+exit 0

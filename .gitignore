@@ -1,5 +1,6 @@
+*.o
+*.a
 .deps
-COPYING
 INSTALL
 Makefile
 Makefile.in
@@ -31,4 +32,5 @@ TAGS
 tests/t-xml
 tests/t-pager
 debian/vcs
-
+config.cache
+tests/t-editor
