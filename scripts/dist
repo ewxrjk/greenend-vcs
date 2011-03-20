@@ -36,8 +36,7 @@ build() {
   scp $h:_builds/*.deb $web/.
 }
 
-build erjin etch etch oldstable
-build leucomorph lenny "" stable
-build araminta lenny "" stable
+build sandestin squeeze "" stable
+build araminta squeeze "" stable
 cp $src $web
 scripts/htmlman vcs.1 > $web/vcs.1.html
