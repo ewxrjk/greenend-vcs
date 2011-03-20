@@ -1,3 +1,10 @@
+vcs (0.7) unstable; urgency=low
+
+  * New 'vcs show' and 'vcs rename' commands.
+  * Many bugs fixed.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 20 Mar 2011 17:34:04 +0000
+
 vcs (0.6) unstable; urgency=low
 
   * If you quit a pager (configured with VCS_PAGER for instance) before
