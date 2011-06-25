@@ -63,82 +63,86 @@ public:
   // Return the name of the working file corresponding to PATH
   static string getWorkfile(const string &path) {
     if(isFlagfile(path)) {
-      return parentdir(path) + "/" + basename_(path).substr(6);
+      if(path.find('/') == std::string::npos)
+        return path.substr(6);
+      else
+        return parentdir(path) + "/" + basename_(path).substr(6);
     } else if(isRcsfile(path)) {
       string d = parentdir(path);
       string b = basename_(path);
-      if(basename_(d) == "RCS")
-        return parentdir(d) + "/" + b.substr(0, b.size() - 2);
-      else
+      if(basename_(d) == "RCS") {
+        if(d == "RCS")
+          return b.substr(0, b.size() - 2);
+        else
+          return parentdir(d) + "/" + b.substr(0, b.size() - 2);
+      } else
         return path.substr(0, path.size() - 2);
     } else {
       return path;
     }
   }
 
-  // Get a list of RCS-managed files in the current directory,
-  // optionally restricting to writable files only.
-  static void getFiles(vector<string> &files,
-                       bool onlyWritable = false) {
-    const char *dirs[] = { "RCS", "." };
-    string name, rawName;
+  // Possible file states
+  static const int fileWritable = 1;
+  static const int fileTracked = 2;
+  static const int fileExists = 4;
+  static const int fileAdded = 8;
+  static const int fileIgnored = 16;
+
+  // Get information about files below the current directory
+  static void getFiles(map<string,int> &files) {
     files.clear();
-    std::set<std::string> fileset;
-    for(size_t i = 0; i < sizeof dirs / sizeof *dirs; ++i) {
-      if(exists(dirs[i])) {
-        Dir d(dirs[i]);
-        while(d.get(name)) {
-          if(isRcsfile(name)) {
-            rawName = getWorkfile(name);
-            if(!onlyWritable || writable(rawName))
-              fileset.insert(rawName);
-          } else if(isFlagfile(name)) {
-            std::string fileToAdd(name, 6);
-            if(exists(fileToAdd)) {
-              if(!exists(rcsfile(fileToAdd)))
-                fileset.insert(fileToAdd);
-              else {
-                // If the rcsfile exists then quietly delete the flag file
-                unlink(name.c_str());
-              }
-            } else {
-              // If the file has gone then quietly delete the flag file
-              unlink(name.c_str());
-            }
-          }
-        }
+    list<string> filenames;
+    set<string> ignored;
+    listfiles("", filenames, ignored, true);
+    for(list<string>::iterator it = filenames.begin();
+        it != filenames.end();
+        ++it) {
+      const string &name = *it;
+      if(isRcsfile(name))
+        files[getWorkfile(name)] |= fileTracked;
+      else if(isFlagfile(name))
+        files[getWorkfile(name)] |= fileAdded;
+      else {
+        files[name] |= fileExists;
+        if(writable(name))
+          files[name] |= fileWritable;
+        if(ignored.find(name) != ignored.end())
+          files[name] |= fileIgnored;
       }
     }
-    files.assign(fileset.begin(), fileset.end());
-  }
-
-  static char **getFiles(int &nfiles, bool onlyWritable) {
-    vector<string> fileList;
-    getFiles(fileList, onlyWritable);
-    nfiles = fileList.size();
-    char **files = new char *[nfiles];
-    for(int n = 0; n < nfiles; ++n)
-      files[n] = xstrdup(fileList[n].c_str());
-    return files;
   }
 
   int diff(int nfiles, char **files) const {
-    if(nfiles == 0)
-      files = getFiles(nfiles, true);
     std::vector<char *> rcsdiff;
     std::vector<char *> newfiles;
-    for(int n = 0; n < nfiles; ++n) {
-      if(exists(rcsfile(files[n]))) {
-        if(!writable(files[n]) || !exists(files[n]))
-          continue;
-        rcsdiff.push_back(files[n]);
-      } else if(exists(flagfile(files[n]))
-                && exists(files[n])) {
-        newfiles.push_back(files[n]);
-      } else if(exists(files[n])) {
-        fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
-      } else {
-        fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
+    if(nfiles == 0) {
+      map<string,int> allFiles;
+      getFiles(allFiles);
+      for(map<string,int>::iterator it = allFiles.begin();
+          it != allFiles.end();
+          ++it) {
+        int flags = it->second;
+        if((flags & fileTracked)
+           && (flags & fileWritable))
+          rcsdiff.push_back(xstrdup(it->first.c_str()));
+        else if(flags & fileAdded)
+          newfiles.push_back(xstrdup(it->first.c_str()));
+      }
+    } else {
+      for(int n = 0; n < nfiles; ++n) {
+        if(exists(rcsfile(files[n]))) {
+          if(!writable(files[n]) || !exists(files[n]))
+            continue;
+          rcsdiff.push_back(files[n]);
+        } else if(exists(flagfile(files[n]))
+                  && exists(files[n])) {
+          newfiles.push_back(files[n]);
+        } else if(exists(files[n])) {
+          fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
+        } else {
+          fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
+        }
       }
     }
     int rc = 0;
@@ -215,10 +219,22 @@ public:
   }
 
   int commit(const char *msg, int nfiles, char **files) const {
+    vector<char *> newfiles;
     if(nfiles == 0) {
-      files = getFiles(nfiles, true);
-      if(nfiles == 0)
-        fatal("nothing to commit");
+      map<string,int> allFiles;
+      getFiles(allFiles);
+      for(map<string,int>::iterator it = allFiles.begin();
+          it != allFiles.end();
+          ++it) {
+        int flags = it->second;
+        if(flags & fileAdded)
+          newfiles.push_back(xstrdup(it->first.c_str()));
+        else if(flags & fileTracked)
+          if(flags & fileWritable)
+            newfiles.push_back(xstrdup(it->first.c_str()));            
+      }
+      files = &newfiles[0];
+      nfiles = newfiles.size();
     }
     if(!msg) {
       // Gather one commit message for all the files
@@ -267,40 +283,87 @@ public:
   }
 
   int revert(int nfiles, char **files) const {
-    return execute("co",
-                   EXE_STR, "-f",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
-                   EXE_END);
+    vector<char *> checkout, unadd;
+    if(nfiles == 0) {
+      map<string,int> allFiles;
+      getFiles(allFiles);
+      for(map<string,int>::iterator it = allFiles.begin();
+          it != allFiles.end();
+          ++it) {
+        int flags = it->second;
+        if((flags & fileTracked)
+           && ((flags & fileWritable)
+               || !(flags & fileExists)))
+          checkout.push_back(xstrdup(it->first.c_str()));
+        else if(flags & fileAdded)
+          unadd.push_back(xstrdup(it->first.c_str()));
+      }
+    } else {
+      for(int n = 0; n < nfiles; ++n) {
+        if(exists(rcsfile(files[n]))) {
+          // This file is tracked.  Restore to pristine state either if its
+          // modifed or if the working file is missing.
+          if(!exists(files[n]) || writable(files[n]))
+            checkout.push_back(files[n]);
+        } else if(exists(flagfile(files[n])))
+          unadd.push_back(files[n]);
+      }
+    }
+    for(size_t n = 0; n < unadd.size(); ++n) {
+      int rc = execute("rm",
+                       EXE_STR, "-f",
+                       EXE_STR, flagfile(unadd[n]).c_str(),
+                       EXE_END);
+      if(rc)
+        return rc;
+    }
+    if(checkout.size())
+      return execute("co",
+                     EXE_STR, "-f",
+                     EXE_STRS|EXE_DOTSTUFF, (int)checkout.size(), &checkout[0],
+                     EXE_END);
+    return 0;
   }
 
   int status() const {
-    std::vector<std::string> files;
-    std::vector<char *> missing;
-    getFiles(files);
-    for(size_t n = 0; n < files.size(); ++n) {
-      int state = 0;
-      if(!exists(files[n]))
-        state = 'U';
-      else if(!exists(rcsfile(files[n])))
-        state = 'A';
-      else if(writable(files[n]))
-        state = 'M';
+    map<string,int> allFiles;
+    getFiles(allFiles);
+    for(map<string,int>::iterator it = allFiles.begin();
+        it != allFiles.end();
+        ++it) {
+      int flags = it->second;
+      int state;
+      
+      if(!(flags & fileExists))
+        state = 'U';                    // update required
+      else if(flags & fileTracked) {
+        if(flags & fileWritable)
+          state = 'M';                  // modified
+        else
+          state = 0;                    // tracked, unmodified
+      } else if(flags & fileAdded)
+        state = 'A';                    // added
+      else if(flags & fileIgnored)
+        state = 0;                      // untracked, ignored
+      else
+        state = '?';                    // untracked, not ignored
       if(state)
-        writef(stdout, "stdout", "%c %s\n", state, files[n].c_str());
+        writef(stdout, "stdout", "%c %s\n", state, it->first.c_str());
     }
-    // TODO we should support .vcsignore and report untracked,
-    // unignored files as '?'.
     return 0;
   }
 
   int update() const {
     // We treat 'update' as meaning 'ensure working files exist'
-    std::vector<std::string> files;
     std::vector<char *> missing;
-    getFiles(files);
-    for(size_t n = 0; n < files.size(); ++n) {
-      if(!exists(files[n]) || !writable(files[n]))
-        missing.push_back(xstrdup(files[n].c_str()));
+    map<string,int> allFiles;
+    getFiles(allFiles);
+    for(map<string,int>::iterator it = allFiles.begin();
+        it != allFiles.end();
+        ++it) {
+      int flags = it->second;
+      if(!(flags & fileExists))
+        missing.push_back(xstrdup(it->first.c_str()));
     }
     if(missing.size() == 0)
       return 0;

@@ -178,7 +178,8 @@ int is_ignored(const list<string> &ignores,
                const string &file);
 void listfiles(string path,
                list<string> &files,
-               set<string> &ignored);
+               set<string> &ignored,
+               bool followrcs = false);
 int version_compare(const string &a, const string &b);
 void remove_directories(int &nfiles, char **files);
 int execute(const vector<string> &command,
