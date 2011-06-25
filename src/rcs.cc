@@ -113,13 +113,35 @@ public:
   int diff(int nfiles, char **files) const {
     if(nfiles == 0)
       files = getFiles(nfiles, true);
-    if(!nfiles)
-      return 0;                 // no writable files -> no differences
-    // TODO what about added files
-    return execute("rcsdiff",
+    std::vector<char *> rcsdiff;
+    std::vector<char *> newfiles;
+    for(int n = 0; n < nfiles; ++n) {
+      if(exists(rcsfile(files[n]))) {
+        if(!writable(files[n]) || !exists(files[n]))
+          continue;
+        rcsdiff.push_back(files[n]);
+      } else if(exists(flagfile(files[n]))
+                && exists(files[n])) {
+        newfiles.push_back(files[n]);
+      } else if(exists(files[n])) {
+        fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
+      } else {
+        fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
+      }
+    }
+    int rc = 0;
+    if(rcsdiff.size())
+      rc = execute("rcsdiff",
                    EXE_STR, "-u",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_STRS|EXE_DOTSTUFF, (int)rcsdiff.size(), &rcsdiff[0],
                    EXE_END);
+    for(int n = 0; n < (int)newfiles.size(); ++n)
+      rc |= execute("diff",
+                    EXE_STR, "-u",
+                    EXE_STR, "/dev/null",
+                    EXE_STR|EXE_DOTSTUFF, newfiles[n],
+                    EXE_END);
+    return (rc & 2 ? 2 : rc);
   }
 
 
