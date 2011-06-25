@@ -263,7 +263,10 @@ public:
     command.push_back("-t-" + string(msg));
     command.push_back("-m" + string(msg));
     for(int n = 0; n < nfiles; ++n)
-      command.push_back(files[n]); // TODO ./
+      if(n == 0 && files[n][0] == '-')
+        command.push_back("./" + std::string(files[n]));
+      else
+        command.push_back(files[n]);
     if(dryrun || verbose)
       display_command(command);
     if(dryrun)
