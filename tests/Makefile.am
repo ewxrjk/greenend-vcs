@@ -34,7 +34,7 @@ TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor \
 	t-help t-errors \
 	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 \
 	bzr-clone git-clone hg-clone
-EXTRA_DIST=utils.sh
+EXTRA_DIST=utils.sh git.config
 
 clean-local:
 	rm -rf test-root
