@@ -149,10 +149,20 @@ public:
       fatal("--binary option not supported for RCS");
     std::vector<char *> flags;
     for(int n = 0; n < nfiles; ++n) {
-      if(!isreg(files[n]))
+      if(isdir(files[n])) {
+        const std::string rcsdir = std::string(files[n]) + "/RCS";
+        if(!exists(rcsdir)) {
+          int rc = execute("mkdir",
+                           EXE_STR, rcsdir.c_str(),
+                           EXE_END);
+          if(rc)
+            return rc;
+        }
+      } else if(isreg(files[n])) {
+        if(!exists(rcsfile(files[n])))
+          flags.push_back(xstrdup(flagfile(files[n]).c_str()));
+      } else
         fatal("%s is not a regular file", files[n]);
-      if(!exists(rcsfile(files[n])))
-        flags.push_back(xstrdup(flagfile(files[n]).c_str()));
     }
     if(flags.size())
       return execute("touch",

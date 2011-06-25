@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <cerrno>
 #include <fcntl.h>
