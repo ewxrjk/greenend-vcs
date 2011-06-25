@@ -103,10 +103,9 @@ public:
     vector<string> fileList;
     getFiles(fileList, onlyWritable);
     nfiles = fileList.size();
-    char **files = new char *[nfiles + 1];
+    char **files = new char *[nfiles];
     for(int n = 0; n < nfiles; ++n)
       files[n] = xstrdup(fileList[n].c_str());
-    files[nfiles] = NULL;
     return files;
   }
 
@@ -149,9 +148,12 @@ public:
     if(binary)
       fatal("--binary option not supported for RCS");
     std::vector<char *> flags;
-    for(int n = 0; n < nfiles; ++n)
+    for(int n = 0; n < nfiles; ++n) {
+      if(!isreg(files[n]))
+        fatal("%s is not a regular file", files[n]);
       if(!exists(rcsfile(files[n])))
         flags.push_back(xstrdup(flagfile(files[n]).c_str()));
+    }
     if(flags.size())
       return execute("touch",
                      EXE_STRS|EXE_DOTSTUFF, (int)flags.size(), &flags[0],
