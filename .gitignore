@@ -34,3 +34,4 @@ tests/t-pager
 debian/vcs
 config.cache
 tests/t-editor
+*~
