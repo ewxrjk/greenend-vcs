@@ -50,17 +50,30 @@ public:
     return result;
   }
 
+  // Return true if PATH is a .#add# file
+  static bool isFlagfile(const string &path) {
+    return basename_(path).compare(0, 6, ".#add#") == 0;
+  }
+
   // Return the path to the add-flag file for PATH
   static std::string flagfile(const std::string &path) {
     return parentdir(path) + "/.#add#" + basename_(path);
   }
 
-  static void getRawName(const string &path,
-                         string &name) {
-    string::size_type lastSlash = path.rfind('/');
-    string::size_type pos = (lastSlash == string::npos
-                                  ? 0 : lastSlash +1);
-    name.assign(path, pos, path.size() - pos - 2);
+  // Return the name of the working file corresponding to PATH
+  static string getWorkfile(const string &path) {
+    if(isFlagfile(path)) {
+      return parentdir(path) + "/" + basename_(path).substr(6);
+    } else if(isRcsfile(path)) {
+      string d = parentdir(path);
+      string b = basename_(path);
+      if(basename_(d) == "RCS")
+        return parentdir(d) + "/" + b.substr(0, b.size() - 2);
+      else
+        return path.substr(0, path.size() - 2);
+    } else {
+      return path;
+    }
   }
 
   // Get a list of RCS-managed files in the current directory,
@@ -76,10 +89,10 @@ public:
         Dir d(dirs[i]);
         while(d.get(name)) {
           if(isRcsfile(name)) {
-            getRawName(name, rawName);
+            rawName = getWorkfile(name);
             if(!onlyWritable || writable(rawName))
               fileset.insert(rawName);
-          } else if(name.compare(0, 6, ".#add#") == 0) {
+          } else if(isFlagfile(name)) {
             std::string fileToAdd(name, 6);
             if(exists(fileToAdd)) {
               if(!exists(rcsfile(fileToAdd)))
