@@ -34,8 +34,25 @@ public:
     return false;
   }
 
+  // Return true if PATH is a ,v file
   static bool isRcsfile(const string &path) {
     return path.size() > 2 && path.compare(path.size() - 2, 2, ",v") == 0;
+  }
+
+  // Return the path to the ,v file for PATH (it might not exist)
+  static std::string rcsfile(const std::string &path) {
+    std::string result = path + ",v";
+    if(exists(result))
+      return result;
+    std::string rcsdir = parentdir(path) + "/RCS";
+    if(exists(rcsdir))
+      result = rcsdir + "/" + basename_(path) + ",v";
+    return result;
+  }
+
+  // Return the path to the add-flag file for PATH
+  static std::string flagfile(const std::string &path) {
+    return parentdir(path) + "/.#add#" + basename_(path);
   }
 
   static void getRawName(const string &path,
@@ -53,6 +70,7 @@ public:
     const char *dirs[] = { "RCS", "." };
     string name, rawName;
     files.clear();
+    std::set<std::string> fileset;
     for(size_t i = 0; i < sizeof dirs / sizeof *dirs; ++i) {
       if(exists(dirs[i])) {
         Dir d(dirs[i]);
@@ -60,11 +78,25 @@ public:
           if(isRcsfile(name)) {
             getRawName(name, rawName);
             if(!onlyWritable || writable(rawName))
-              files.push_back(rawName);
+              fileset.insert(rawName);
+          } else if(name.compare(0, 6, ".#add#") == 0) {
+            std::string fileToAdd(name, 6);
+            if(exists(fileToAdd)) {
+              if(!exists(rcsfile(fileToAdd)))
+                fileset.insert(fileToAdd);
+              else {
+                // If the rcsfile exists then quietly delete the flag file
+                unlink(name.c_str());
+              }
+            } else {
+              // If the file has gone then quietly delete the flag file
+              unlink(name.c_str());
+            }
           }
         }
       }
     }
+    files.assign(fileset.begin(), fileset.end());
   }
 
   static char **getFiles(int &nfiles, bool onlyWritable) {
@@ -83,6 +115,7 @@ public:
       files = getFiles(nfiles, true);
     if(!nfiles)
       return 0;                 // no writable files -> no differences
+    // TODO what about added files
     return execute("rcsdiff",
                    EXE_STR, "-u",
                    EXE_STRS|EXE_DOTSTUFF, nfiles, files,
@@ -93,18 +126,16 @@ public:
   int add(int binary, int nfiles, char **files) const {
     if(binary)
       fatal("--binary option not supported for RCS");
-    for(int n = 0; n < nfiles; ++n) {
-      string opt_t = "-t-" + string(files[n]);
-      int rc;
-      if((rc = execute("ci",
-                       EXE_STR, "-l", // keep writable, don't delete
-                       EXE_STR, opt_t.c_str(),
-                       EXE_STR, "-mInitial commit",
-                       EXE_STR|EXE_DOTSTUFF, files[n],
-                       EXE_END)))
-        return rc;
-    }
-    return 0;
+    std::vector<char *> flags;
+    for(int n = 0; n < nfiles; ++n)
+      if(!exists(rcsfile(files[n])))
+        flags.push_back(xstrdup(flagfile(files[n]).c_str()));
+    if(flags.size())
+      return execute("touch",
+                     EXE_STRS|EXE_DOTSTUFF, (int)flags.size(), &flags[0],
+                     EXE_END);
+    else
+      return 0;
   }
 
   int remove(int force, int nfiles, char **files) const {
@@ -166,12 +197,26 @@ public:
     vector<string> command;
     command.push_back("ci");
     command.push_back("-u");    // don't delete work file
+    command.push_back("-t-" + string(msg));
     command.push_back("-m" + string(msg));
     for(int n = 0; n < nfiles; ++n)
       command.push_back(files[n]); // TODO ./
     if(dryrun || verbose)
       display_command(command);
-    return dryrun ? 0 : execute(command);
+    if(dryrun)
+      return 0;
+    int rc = execute(command);
+    // Clean up .#add# files
+    std::vector<char *> cleanup;
+    for(int n = 0; n < nfiles; ++n)
+      if(exists(rcsfile(files[n])) && exists(flagfile(files[n])))
+        cleanup.push_back(xstrdup(flagfile(files[n]).c_str()));
+    if(cleanup.size())
+      execute("rm",
+              EXE_STR, "-f", 
+              EXE_STRS, (int)cleanup.size(), &cleanup[0],
+              EXE_END);
+    return rc;    
   }
 
   int revert(int nfiles, char **files) const {
@@ -189,6 +234,8 @@ public:
       int state = 0;
       if(!exists(files[n]))
         state = 'U';
+      else if(!exists(rcsfile(files[n])))
+        state = 'A';
       else if(writable(files[n]))
         state = 'M';
       if(state)
@@ -205,7 +252,7 @@ public:
     std::vector<char *> missing;
     getFiles(files);
     for(size_t n = 0; n < files.size(); ++n) {
-      if(!exists(files[n]))
+      if(!exists(files[n]) || !writable(files[n]))
         missing.push_back(xstrdup(files[n].c_str()));
     }
     if(missing.size() == 0)
@@ -216,6 +263,8 @@ public:
   }
 
   int log(const char *path) const {
+    if(!path)
+      fatal("'vcs log' requires a filename with RCS");
     return execute("rlog",
                    EXE_STR|EXE_DOTSTUFF, path,
                    EXE_END);

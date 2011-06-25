@@ -138,7 +138,7 @@ int isreg(const string &s,
 int exists(const string &path);
 bool writable(const string &path);
 string cwd();
-string parentdir(const string &d);
+string parentdir(const string &d, bool allowDot = true);
 string basename_(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) 

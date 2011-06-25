@@ -90,7 +90,7 @@ const vcs *vcs::guess() {
         return it->second;
     if(isroot(d))
       break;
-    d = parentdir(d);
+    d = parentdir(d, false);
   }
   fatal("cannot identify native version control system");
 }

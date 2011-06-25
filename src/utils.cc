@@ -86,10 +86,14 @@ string cwd() {
 }
 
 // Return the (lexical) parent of directory D
-string parentdir(const string &d) {
+string parentdir(const string &d,
+                 bool allowDot) {
   size_t n = d.rfind(PATHSEP);
-  if(n == string::npos)
+  if(n == string::npos) {
+    if(allowDot)
+      return ".";
     fatal("invalid directory name: %s", d.c_str());
+  }
   if(n == 0)                         // it's the root or a subdirectory thereof
     return "/";
   return d.substr(0, n);
