@@ -72,6 +72,11 @@ int exists(const string &path) {
   return 1;
 }
 
+// Return true if the file is writable
+bool writable(const std::string &path) {
+  return access(path.c_str(), W_OK) == 0;
+}
+
 // Return the current working directory
 string cwd() {
   char b[8192];

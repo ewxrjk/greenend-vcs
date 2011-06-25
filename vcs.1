@@ -373,6 +373,25 @@ or
 is set, and detection works by invoking
 .B "p4 changes"
 to see if the current directory is inside a P4 workspace.
+.SS RCS
+Web page: http://www.gnu.org/software/rcs/
+.PP
+For the commands that take multiple filenames, if none are given, then
+(relevant) RCS-controlled files in the current directory are affected.
+\fBvcs\fR will not recursively search subdirectories.
+.PP
+\fBvcs edit\fR is required before editing existing files.
+.PP
+\fBvcs add\fR will do an initial commit but leave the file opened for
+editing.
+This may change in a future version but that would imply providing
+some way for \fBvcs\fR to remember that the file was to be checked in
+with a future commit.
+.PP
+\fBvcs update\fR will ensure that working files exist.
+.PP
+\fBvcs annotate\fR, \fBvcs rename\fR and \fBvcs show\fR are not
+implemented for RCS.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.

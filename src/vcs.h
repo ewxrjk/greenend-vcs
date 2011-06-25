@@ -136,6 +136,7 @@ int isdir(const string &s,
 int isreg(const string &s,
           int links_count = 1);
 int exists(const string &path);
+bool writable(const string &path);
 string cwd();
 string parentdir(const string &d);
 string basename_(const string &d);
@@ -185,6 +186,7 @@ int execute(const vector<string> &command,
             vector<string> *errors = NULL,
             const char *outputPath = NULL,
             unsigned flags = 0);
+void display_command(const vector<string> &vs);
 #define EXE_RAW 0x0001
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
