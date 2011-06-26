@@ -40,100 +40,17 @@ public:
     return name.substr(0, name.size() - 2);
   }
 
-  int diff(int nfiles, char **files) const {
-    std::vector<char *> rcsdiff;
-    std::vector<char *> newfiles;
-    if(nfiles == 0) {
-      map<string,int> allFiles;
-      enumerate(allFiles);
-      for(map<string,int>::iterator it = allFiles.begin();
-          it != allFiles.end();
-          ++it) {
-        int flags = it->second;
-        if((flags & fileTracked)
-           && (flags & fileWritable))
-          rcsdiff.push_back(xstrdup(it->first.c_str()));
-        else if(flags & fileAdded)
-          newfiles.push_back(xstrdup(it->first.c_str()));
-      }
-    } else {
-      for(int n = 0; n < nfiles; ++n) {
-        if(is_tracked(files[n])) {
-          if(!writable(files[n]) || !exists(files[n]))
-            continue;
-          rcsdiff.push_back(files[n]);
-        } else if(is_flagged(files[n]) && exists(files[n])) {
-          newfiles.push_back(files[n]);
-        } else if(exists(files[n])) {
-          fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
-        } else {
-          fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
-        }
-      }
-    }
-    int rc = 0;
-    if(rcsdiff.size())
-      rc = execute("rcsdiff",
+  int native_diff(int nfiles, char **files) const {
+    return execute("rcsdiff",
                    EXE_STR, "-u",
-                   EXE_STRS|EXE_DOTSTUFF, (int)rcsdiff.size(), &rcsdiff[0],
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
                    EXE_END);
-    for(int n = 0; n < (int)newfiles.size(); ++n)
-      rc |= execute("diff",
-                    EXE_STR, "-u",
-                    EXE_STR, "/dev/null",
-                    EXE_STR|EXE_DOTSTUFF, newfiles[n],
-                    EXE_END);
-    return (rc & 2 ? 2 : rc);
   }
 
   int add(int binary, int nfiles, char **files) const {
     if(binary)
       fatal("--binary option not supported for RCS");
-    std::vector<char *> flags;
-    for(int n = 0; n < nfiles; ++n) {
-      if(isdir(files[n])) {
-        const std::string rcsdir = std::string(files[n]) + "/" + tracking_directory();
-        if(!exists(rcsdir)) {
-          int rc = execute("mkdir",
-                           EXE_STR, rcsdir.c_str(),
-                           EXE_END);
-          if(rc)
-            return rc;
-        }
-      } else if(isreg(files[n])) {
-        if(!is_tracked(files[n]))
-          flags.push_back(xstrdup(flag_path(files[n]).c_str()));
-      } else
-        fatal("%s is not a regular file", files[n]);
-    }
-    if(flags.size())
-      return execute("touch",
-                     EXE_STRS|EXE_DOTSTUFF, (int)flags.size(), &flags[0],
-                     EXE_END);
-    else
-      return 0;
-  }
-
-  int remove(int force, int nfiles, char **files) const {
-    // Use rm as a convenient way of making -n/-v work properly.
-    for(int n = 0; n < nfiles; ++n) {
-      if(is_tracked(files[n])) {
-        string tpath = tracking_path(files[n]);
-        if(execute("rm",
-                   EXE_STR, "-f",
-                   EXE_STR, "--",
-                   EXE_STR, tpath.c_str(),
-                   EXE_END))
-          return 1;
-        if(force && exists(files[n]) && execute("rm",
-                                                EXE_STR, "-f",
-                                                EXE_STR, "--",
-                                                EXE_STR, files[n],
-                                                EXE_END))
-          return 1;
-      }
-    }
-    return 0;
+    return rcsbase::add(binary, nfiles, files);
   }
 
   int commit(const char *msg, int nfiles, char **files) const {
@@ -246,34 +163,6 @@ public:
     return 0;
   }
 
-  int status() const {
-    map<string,int> allFiles;
-    enumerate(allFiles);
-    for(map<string,int>::iterator it = allFiles.begin();
-        it != allFiles.end();
-        ++it) {
-      int flags = it->second;
-      int state;
-      
-      if(!(flags & fileExists))
-        state = 'U';                    // update required
-      else if(flags & fileTracked) {
-        if(flags & fileWritable)
-          state = 'M';                  // modified
-        else
-          state = 0;                    // tracked, unmodified
-      } else if(flags & fileAdded)
-        state = 'A';                    // added
-      else if(flags & fileIgnored)
-        state = 0;                      // untracked, ignored
-      else
-        state = '?';                    // untracked, not ignored
-      if(state)
-        writef(stdout, "stdout", "%c %s\n", state, it->first.c_str());
-    }
-    return 0;
-  }
-
   int update() const {
     // 'update' is treated as meaning 'ensure working files exist'
     //
@@ -303,11 +192,6 @@ public:
     return execute("rlog",
                    EXE_STR|EXE_DOTSTUFF, path,
                    EXE_END);
-  }
-
-  int annotate(const char */*path*/) const {
-    // Anyone fancy implementing this? l-)
-    fatal("RCS does not support 'vcs annotate'.");
   }
 
   int edit(int nfiles, char **files) const {

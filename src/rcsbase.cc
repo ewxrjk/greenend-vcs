@@ -106,6 +106,130 @@ void rcsbase::enumerate(map<string,int> &files) const {
   }
 }
 
+int rcsbase::diff(int nfiles, char **files) const {
+  vector<char *> native;
+  vector<char *> added;
+  if(nfiles == 0) {
+    map<string,int> allFiles;
+    enumerate(allFiles);
+    for(map<string,int>::iterator it = allFiles.begin();
+        it != allFiles.end();
+        ++it) {
+      int flags = it->second;
+      if((flags & fileTracked)
+         && (flags & fileWritable))
+        native.push_back(xstrdup(it->first.c_str()));
+      else if(flags & fileAdded)
+        added.push_back(xstrdup(it->first.c_str()));
+    }
+  } else {
+    for(int n = 0; n < nfiles; ++n) {
+      if(is_tracked(files[n])) {
+        if(!writable(files[n]) || !exists(files[n]))
+          continue;
+        native.push_back(files[n]);
+      } else if(is_flagged(files[n]) && exists(files[n])) {
+        added.push_back(files[n]);
+      } else if(exists(files[n])) {
+        fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
+      } else {
+        fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
+      }
+    }
+  }
+  int rc = 0;
+  if(native.size())
+    rc = native_diff(native.size(), &native[0]);
+  for(int n = 0; n < (int)added.size(); ++n)
+    rc |= execute("diff",
+                  EXE_STR, "-u",
+                  EXE_STR, "/dev/null",
+                  EXE_STR|EXE_DOTSTUFF, added[n],
+                  EXE_END);
+  return (rc & 2 ? 2 : rc);
+}
+
+int rcsbase::add(int binary, int nfiles, char **files) const {
+  std::vector<char *> flags;
+  for(int n = 0; n < nfiles; ++n) {
+    if(isdir(files[n])) {
+      const std::string rcsdir = std::string(files[n]) + "/" + tracking_directory();
+      if(!exists(rcsdir)) {
+        int rc = execute("mkdir",
+                         EXE_STR, rcsdir.c_str(),
+                         EXE_END);
+        if(rc)
+          return rc;
+      }
+    } else if(isreg(files[n])) {
+      if(!is_tracked(files[n]))
+        flags.push_back(xstrdup(flag_path(files[n]).c_str()));
+    } else
+      fatal("%s is not a regular file", files[n]);
+  }
+  if(!dryrun) {
+    for(size_t n = 0; n < flags.size(); ++n) {
+      FILE *fp = fopen(flags[n], "w");
+      if(!fp)
+        fatal("opening %s: %s\n", flags[n], strerror(errno));
+      if(fprintf(fp, "%d\n", binary) < 0
+         || fclose(fp) < 0)
+        fatal("writing %s: %s\n", flags[n], strerror(errno));
+    }
+  }
+  return 0;
+}
+
+int rcsbase::remove(int force, int nfiles, char **files) const {
+  // Use rm as a convenient way of making -n/-v work properly.
+  for(int n = 0; n < nfiles; ++n) {
+    if(is_tracked(files[n])) {
+      string tpath = tracking_path(files[n]);
+      if(execute("rm",
+                 EXE_STR, "-f",
+                 EXE_STR, "--",
+                 EXE_STR, tpath.c_str(),
+                 EXE_END))
+        return 1;
+      if(force && exists(files[n]) && execute("rm",
+                                              EXE_STR, "-f",
+                                              EXE_STR, "--",
+                                              EXE_STR, files[n],
+                                              EXE_END))
+        return 1;
+    }
+  }
+  return 0;
+}
+
+int rcsbase::status() const {
+  map<string,int> allFiles;
+  enumerate(allFiles);
+  for(map<string,int>::iterator it = allFiles.begin();
+      it != allFiles.end();
+      ++it) {
+    int flags = it->second;
+    int state;
+      
+    if(!(flags & fileExists))
+      state = 'U';                    // update required
+    else if(flags & fileTracked) {
+      if(flags & fileWritable)
+        state = 'M';                  // modified
+      else
+        state = 0;                    // tracked, unmodified
+    } else if(flags & fileAdded)
+      state = 'A';                    // added
+    else if(flags & fileIgnored)
+      state = 0;                      // untracked, ignored
+    else
+      state = '?';                    // untracked, not ignored
+    if(state)
+      writef(stdout, "stdout", "%c %s\n", state, it->first.c_str());
+  }
+  return 0;
+}
+
 /*
 Local Variables:
 mode:c++

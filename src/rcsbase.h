@@ -51,6 +51,12 @@ public:
   // Enumerate all files below here
   void enumerate(map<string,int> &files) const;
 
+  virtual int native_diff(int nfiles, char **files) const = 0;
+  int diff(int nfiles, char **files) const;
+  virtual int add(int binary, int nfiles, char **files) const;
+  int remove(int force, int nfiles, char **files) const;
+  int status() const;
+
   bool detect(void) const;
 };
 

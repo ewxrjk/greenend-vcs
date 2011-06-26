@@ -59,7 +59,7 @@ public:
   virtual int update() const = 0;
   virtual int log(const char *file) const = 0;
   virtual int edit(int nfiles, char **files) const; // optional
-  virtual int annotate(const char *file) const = 0;
+  virtual int annotate(const char *file) const;     // optional
   virtual int clone(const char *uri, const char *dir) const; // optional
   virtual int rename(int nsources, char **sources, const char *destination) const;
 

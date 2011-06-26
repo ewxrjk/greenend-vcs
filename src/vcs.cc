@@ -163,6 +163,10 @@ int vcs::show(const char *) const {
   fatal("%s does not support 'vcs show'.", name);
 }
 
+int vcs::annotate(const char */*path*/) const {
+  fatal("%s does not support 'vcs annotate'.", name);
+}
+
 /*
 Local Variables:
 mode:c++
