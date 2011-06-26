@@ -3,7 +3,7 @@ Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
 Section: devel
 Priority: extra
 Standards-Version: 3.7.2.2
-Vcs-Bzr: http://www.greenend.org.uk/rjk/bzr/vcs.stable/
+Vcs-Git: http://www.chiark.greenend.org.uk/ucgi/~richardk/git/vcs.git/
 Homepage: http://www.greenend.org.uk/rjk/2009/vcs.html
 Build-Depends: libcurl-dev,libexpat-dev
 
