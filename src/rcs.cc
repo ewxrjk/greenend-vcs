@@ -16,101 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
-#include "Dir.h"
+#include "rcsbase.h"
 
-class rcs: public vcs {
+class rcs: public rcsbase {
 public:
-  rcs(): vcs("RCS") {
+  rcs(): rcsbase("RCS") {
     register_subdir("RCS");
   }
 
-  bool detect(void) const {
-    // Look for ,v files in the current directory.
-    Dir d(".");
-    string name;
-    while(d.get(name))
-      if(isRcsfile(name))
-        return true;
-    return false;
+  string tracking_directory() const {
+    return "RCS";
   }
 
-  // Return true if PATH is a ,v file
-  static bool isRcsfile(const string &path) {
+  bool is_tracking_file(const string &path) const {
     return path.size() > 2 && path.compare(path.size() - 2, 2, ",v") == 0;
   }
 
-  // Return the path to the ,v file for PATH (it might not exist)
-  static std::string rcsfile(const std::string &path) {
-    std::string result = path + ",v";
-    if(exists(result))
-      return result;
-    std::string rcsdir = parentdir(path) + "/RCS";
-    if(exists(rcsdir))
-      result = rcsdir + "/" + basename_(path) + ",v";
-    return result;
+  string tracking_basename(const string &name) const {
+    return name + ",v";
   }
 
-  // Return true if PATH is a .#add# file
-  static bool isFlagfile(const string &path) {
-    return basename_(path).compare(0, 6, ".#add#") == 0;
-  }
-
-  // Return the path to the add-flag file for PATH
-  static std::string flagfile(const std::string &path) {
-    return parentdir(path) + "/.#add#" + basename_(path);
-  }
-
-  // Return the name of the working file corresponding to PATH
-  static string getWorkfile(const string &path) {
-    if(isFlagfile(path)) {
-      if(path.find('/') == std::string::npos)
-        return path.substr(6);
-      else
-        return parentdir(path) + "/" + basename_(path).substr(6);
-    } else if(isRcsfile(path)) {
-      string d = parentdir(path);
-      string b = basename_(path);
-      if(basename_(d) == "RCS") {
-        if(d == "RCS")
-          return b.substr(0, b.size() - 2);
-        else
-          return parentdir(d) + "/" + b.substr(0, b.size() - 2);
-      } else
-        return path.substr(0, path.size() - 2);
-    } else {
-      return path;
-    }
-  }
-
-  // Possible file states
-  static const int fileWritable = 1;
-  static const int fileTracked = 2;
-  static const int fileExists = 4;
-  static const int fileAdded = 8;
-  static const int fileIgnored = 16;
-
-  // Get information about files below the current directory
-  static void getFiles(map<string,int> &files) {
-    files.clear();
-    list<string> filenames;
-    set<string> ignored;
-    listfiles("", filenames, ignored, true);
-    for(list<string>::iterator it = filenames.begin();
-        it != filenames.end();
-        ++it) {
-      const string &name = *it;
-      if(isRcsfile(name))
-        files[getWorkfile(name)] |= fileTracked;
-      else if(isFlagfile(name))
-        files[getWorkfile(name)] |= fileAdded;
-      else {
-        files[name] |= fileExists;
-        if(writable(name))
-          files[name] |= fileWritable;
-        if(ignored.find(name) != ignored.end())
-          files[name] |= fileIgnored;
-      }
-    }
+  string working_basename(const string &name) const {
+    return name.substr(0, name.size() - 2);
   }
 
   int diff(int nfiles, char **files) const {
@@ -118,7 +45,7 @@ public:
     std::vector<char *> newfiles;
     if(nfiles == 0) {
       map<string,int> allFiles;
-      getFiles(allFiles);
+      enumerate(allFiles);
       for(map<string,int>::iterator it = allFiles.begin();
           it != allFiles.end();
           ++it) {
@@ -131,12 +58,11 @@ public:
       }
     } else {
       for(int n = 0; n < nfiles; ++n) {
-        if(exists(rcsfile(files[n]))) {
+        if(is_tracked(files[n])) {
           if(!writable(files[n]) || !exists(files[n]))
             continue;
           rcsdiff.push_back(files[n]);
-        } else if(exists(flagfile(files[n]))
-                  && exists(files[n])) {
+        } else if(is_flagged(files[n]) && exists(files[n])) {
           newfiles.push_back(files[n]);
         } else if(exists(files[n])) {
           fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
@@ -166,7 +92,7 @@ public:
     std::vector<char *> flags;
     for(int n = 0; n < nfiles; ++n) {
       if(isdir(files[n])) {
-        const std::string rcsdir = std::string(files[n]) + "/RCS";
+        const std::string rcsdir = std::string(files[n]) + "/" + tracking_directory();
         if(!exists(rcsdir)) {
           int rc = execute("mkdir",
                            EXE_STR, rcsdir.c_str(),
@@ -175,8 +101,8 @@ public:
             return rc;
         }
       } else if(isreg(files[n])) {
-        if(!exists(rcsfile(files[n])))
-          flags.push_back(xstrdup(flagfile(files[n]).c_str()));
+        if(!is_tracked(files[n]))
+          flags.push_back(xstrdup(flag_path(files[n]).c_str()));
       } else
         fatal("%s is not a regular file", files[n]);
     }
@@ -191,27 +117,21 @@ public:
   int remove(int force, int nfiles, char **files) const {
     // Use rm as a convenient way of making -n/-v work properly.
     for(int n = 0; n < nfiles; ++n) {
-      string rcsfile;
-      rcsfile = string(files[n]) + ",v";
-      if(exists(rcsfile) && execute("rm",
-                                    EXE_STR, "-f",
-                                    EXE_STR, "--",
-                                    EXE_STR, rcsfile.c_str(),
-                                    EXE_END))
+      if(is_tracked(files[n])) {
+        string tpath = tracking_path(files[n]);
+        if(execute("rm",
+                   EXE_STR, "-f",
+                   EXE_STR, "--",
+                   EXE_STR, tpath.c_str(),
+                   EXE_END))
           return 1;
-      rcsfile = parentdir(rcsfile) + "/RCS/" + basename_(rcsfile);
-      if(exists(rcsfile) && execute("rm",
-                                    EXE_STR, "-f",
-                                    EXE_STR, "--",
-                                    EXE_STR, rcsfile.c_str(),
-                                    EXE_END))
+        if(force && exists(files[n]) && execute("rm",
+                                                EXE_STR, "-f",
+                                                EXE_STR, "--",
+                                                EXE_STR, files[n],
+                                                EXE_END))
           return 1;
-      if(force && exists(files[n]) && execute("rm",
-                                              EXE_STR, "-f",
-                                              EXE_STR, "--",
-                                              EXE_STR, files[n],
-                                              EXE_END))
-        return 1;
+      }
     }
     return 0;
   }
@@ -220,7 +140,7 @@ public:
     vector<char *> newfiles;
     if(nfiles == 0) {
       map<string,int> allFiles;
-      getFiles(allFiles);
+      enumerate(allFiles);
       for(map<string,int>::iterator it = allFiles.begin();
           it != allFiles.end();
           ++it) {
@@ -273,8 +193,8 @@ public:
     // Clean up .#add# files
     std::vector<char *> cleanup;
     for(int n = 0; n < nfiles; ++n)
-      if(exists(rcsfile(files[n])) && exists(flagfile(files[n])))
-        cleanup.push_back(xstrdup(flagfile(files[n]).c_str()));
+      if(is_tracked(files[n]) && is_flagged(files[n]))
+        cleanup.push_back(xstrdup(flag_path(files[n]).c_str()));
     if(cleanup.size())
       execute("rm",
               EXE_STR, "-f", 
@@ -287,7 +207,7 @@ public:
     vector<char *> checkout, unadd;
     if(nfiles == 0) {
       map<string,int> allFiles;
-      getFiles(allFiles);
+      enumerate(allFiles);
       for(map<string,int>::iterator it = allFiles.begin();
           it != allFiles.end();
           ++it) {
@@ -301,19 +221,19 @@ public:
       }
     } else {
       for(int n = 0; n < nfiles; ++n) {
-        if(exists(rcsfile(files[n]))) {
+        if(is_tracked(files[n])) {
           // This file is tracked.  Restore to pristine state either if its
           // modifed or if the working file is missing.
           if(!exists(files[n]) || writable(files[n]))
             checkout.push_back(files[n]);
-        } else if(exists(flagfile(files[n])))
+        } else if(is_flagged(files[n]))
           unadd.push_back(files[n]);
       }
     }
     for(size_t n = 0; n < unadd.size(); ++n) {
       int rc = execute("rm",
                        EXE_STR, "-f",
-                       EXE_STR, flagfile(unadd[n]).c_str(),
+                       EXE_STR, flag_path(unadd[n]).c_str(),
                        EXE_END);
       if(rc)
         return rc;
@@ -328,7 +248,7 @@ public:
 
   int status() const {
     map<string,int> allFiles;
-    getFiles(allFiles);
+    enumerate(allFiles);
     for(map<string,int>::iterator it = allFiles.begin();
         it != allFiles.end();
         ++it) {
@@ -362,7 +282,7 @@ public:
     // But vcs has no idea what the base revision is, so this is not possible.
     std::vector<char *> missing;
     map<string,int> allFiles;
-    getFiles(allFiles);
+    enumerate(allFiles);
     for(map<string,int>::iterator it = allFiles.begin();
         it != allFiles.end();
         ++it) {
