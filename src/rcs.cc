@@ -160,7 +160,6 @@ public:
     return (rc & 2 ? 2 : rc);
   }
 
-
   int add(int binary, int nfiles, char **files) const {
     if(binary)
       fatal("--binary option not supported for RCS");
@@ -190,8 +189,7 @@ public:
   }
 
   int remove(int force, int nfiles, char **files) const {
-    // We do everything rm as a convenient way of making -n/-v work
-    // properly.
+    // Use rm as a convenient way of making -n/-v work properly.
     for(int n = 0; n < nfiles; ++n) {
       string rcsfile;
       rcsfile = string(files[n]) + ",v";
@@ -357,7 +355,11 @@ public:
   }
 
   int update() const {
-    // We treat 'update' as meaning 'ensure working files exist'
+    // 'update' is treated as meaning 'ensure working files exist'
+    //
+    // It would be nice to merge in changes made subsequent to the current
+    // version of the working file being checked out (i.e. what cvs up does).
+    // But vcs has no idea what the base revision is, so this is not possible.
     std::vector<char *> missing;
     map<string,int> allFiles;
     getFiles(allFiles);
