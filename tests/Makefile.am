@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 noinst_PROGRAMS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor
 dist_noinst_SCRIPTS=t-help t-errors \
-	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 \
+	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 t-rcs \
 	bzr-clone git-clone hg-clone \
 	dummy-editor
 t_version_SOURCES=t-version.cc
@@ -32,7 +32,7 @@ TESTS_ENVIRONMENT=TESTLOG=true \
 	top_srcdir=`cd ${top_srcdir} && pwd`
 TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor \
 	t-help t-errors \
-	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 \
+	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 t-rcs \
 	bzr-clone git-clone hg-clone
 EXTRA_DIST=utils.sh git.config
 
