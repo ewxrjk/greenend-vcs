@@ -71,47 +71,11 @@ public:
     return execute(command);
   }
 
-  int revert(int nfiles, char **files) const {
-    vector<char *> checkout, unadd;
-    if(nfiles == 0) {
-      map<string,int> allFiles;
-      enumerate(allFiles);
-      for(map<string,int>::iterator it = allFiles.begin();
-          it != allFiles.end();
-          ++it) {
-        int flags = it->second;
-        if((flags & fileTracked)
-           && ((flags & fileWritable)
-               || !(flags & fileExists)))
-          checkout.push_back(xstrdup(it->first.c_str()));
-        else if(flags & fileAdded)
-          unadd.push_back(xstrdup(it->first.c_str()));
-      }
-    } else {
-      for(int n = 0; n < nfiles; ++n) {
-        if(is_tracked(files[n])) {
-          // This file is tracked.  Restore to pristine state either if its
-          // modifed or if the working file is missing.
-          if(!exists(files[n]) || writable(files[n]))
-            checkout.push_back(files[n]);
-        } else if(is_flagged(files[n]))
-          unadd.push_back(files[n]);
-      }
-    }
-    for(size_t n = 0; n < unadd.size(); ++n) {
-      int rc = execute("rm",
-                       EXE_STR, "-f",
-                       EXE_STR, flag_path(unadd[n]).c_str(),
-                       EXE_END);
-      if(rc)
-        return rc;
-    }
-    if(checkout.size())
-      return execute("co",
-                     EXE_STR, "-f",
-                     EXE_STRS|EXE_DOTSTUFF, (int)checkout.size(), &checkout[0],
-                     EXE_END);
-    return 0;
+  int native_revert(int nfiles, char **files) const {
+    return execute("co",
+                   EXE_STR, "-f",
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_END);
   }
 
   int native_update(int nfiles, char **files) const {

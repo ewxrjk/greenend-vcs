@@ -56,6 +56,7 @@ public:
                             const string &msg) const = 0;
   virtual int native_edit(int nfiles, char **files) const = 0;
   virtual int native_update(int nfiles, char **files) const = 0;
+  virtual int native_revert(int nfiles, char **files) const = 0;
 
   int diff(int nfiles, char **files) const;
   virtual int add(int binary, int nfiles, char **files) const;
@@ -64,6 +65,7 @@ public:
   int status() const;
   int edit(int nfiles, char **files) const;
   int update() const;
+  int revert(int nfiles, char **files) const;
 
   bool detect(void) const;
 };
