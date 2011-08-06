@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009, 2010 Richard Kettlewell
+# Copyright (C) 2009-11 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 noinst_PROGRAMS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor
@@ -34,7 +34,7 @@ TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor \
 	t-help t-errors \
 	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 \
 	bzr-clone git-clone hg-clone
-EXTRA_DIST=utils.sh git.config
+EXTRA_DIST=utils.sh
 
 clean-local:
 	rm -rf test-root

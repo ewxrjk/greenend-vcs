@@ -16,9 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-# Use a private config file so we're not reliant on user configuration
-export GIT_CONFIG=${top_srcdir:-.}/tests/git.config
-
 . ${top_srcdir:-.}/tests/utils.sh
 
 t_init git http://www.greenend.org.uk/rjk/git/example
