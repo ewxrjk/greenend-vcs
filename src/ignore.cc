@@ -69,7 +69,7 @@ static string fullpath(const string &path, const string &file) {
 static void listfiles_recurse(string path,
                               list<string> &files,
                               set<string> &ignored,
-                              bool followrcs) {
+                              const string *followrcs) {
   DIR *dp;
   struct dirent *de;
   vector<string> dirs_here, files_here;
@@ -97,7 +97,7 @@ static void listfiles_recurse(string path,
     // Identify ignored files
     const int ignoreme = (is_ignored(ignores_here, name)
                           || is_ignored(global_ignores, name));
-    if(isdir(fullname, followrcs && name == "RCS")) {
+    if(isdir(fullname, followrcs && name == *followrcs)) {
       if(!ignoreme)
         dirs_here.push_back(fullname);
     } else if(isreg(fullname, 0)) {
@@ -132,7 +132,7 @@ static void listfiles_recurse(string path,
 void listfiles(string path,
                list<string> &files,
                set<string> &ignored,
-               bool followrcs) {
+               const string *followrcs) {
   files.clear();
   ignored.clear();
   init_global_ignores();

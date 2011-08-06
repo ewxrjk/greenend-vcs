@@ -61,6 +61,20 @@ bool rcsbase::is_flagged(const string &path) const {
   return exists(flag_path(path));
 }
 
+bool rcsbase::is_binary(const string &path) const {
+  string f = flag_path(path);
+  FILE *fp = fopen(f.c_str(), "r");
+  if(fp)
+    return false;
+  string l;
+  bool rc = false;
+  if(readline(f, fp, l)
+     && l[0] == '1')
+    rc = true;
+  fclose(fp);
+  return rc;
+}
+
 string rcsbase::work_path(const string &path) const {
   if(is_add_flag(path)) {
     if(path.find('/') == std::string::npos)
@@ -87,7 +101,8 @@ void rcsbase::enumerate(map<string,int> &files) const {
   files.clear();
   list<string> filenames;
   set<string> ignored;
-  listfiles("", filenames, ignored, true);
+  const string td = tracking_directory();
+  listfiles("", filenames, ignored, &td);
   for(list<string>::iterator it = filenames.begin();
       it != filenames.end();
       ++it) {
@@ -131,7 +146,8 @@ int rcsbase::diff(int nfiles, char **files) const {
       } else if(is_flagged(files[n]) && exists(files[n])) {
         added.push_back(files[n]);
       } else if(exists(files[n])) {
-        fprintf(stderr, "WARNING: %s is not under RCS control\n", files[n]);
+        fprintf(stderr, "WARNING: %s is not under %s control\n",
+                name, files[n]);
       } else {
         fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
       }

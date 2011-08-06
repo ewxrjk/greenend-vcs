@@ -86,6 +86,15 @@ int main(void) {
   assert(basename_("./") == ".");
   assert(basename_("/") == "/");
 
+  assert(dirname_("foo/bar") == "foo");
+  assert(dirname_("foo") == ".");
+  assert(dirname_("/foo/bar") == "/foo");
+  assert(dirname_("/foo") == "/");
+  assert(dirname_("./foo/bar") == "./foo");
+  assert(dirname_("./foo") == ".");
+  assert(dirname_("./") == ".");
+  assert(dirname_("/") == "/");
+
   assert(isroot("/"));
   assert(!isroot("/wibble"));
 

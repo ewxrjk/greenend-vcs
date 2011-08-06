@@ -124,6 +124,14 @@ private:
   std::string name;
 };
 
+class InDirectory {
+public:
+  InDirectory(const string &dir);
+  ~InDirectory();
+private:
+  int fd;
+};
+
 extern int verbose;
 extern int dryrun;
 extern int ipv;
@@ -141,6 +149,7 @@ bool writable(const string &path);
 string cwd();
 string parentdir(const string &d, bool allowDot = true);
 string basename_(const string &d);
+string dirname_(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) 
   attribute((noreturn))  
@@ -179,7 +188,7 @@ int is_ignored(const list<string> &ignores,
 void listfiles(string path,
                list<string> &files,
                set<string> &ignored,
-               bool followrcs = false);
+               const string *followrcs = NULL);
 int version_compare(const string &a, const string &b);
 void remove_directories(int &nfiles, char **files);
 int execute(const vector<string> &command,

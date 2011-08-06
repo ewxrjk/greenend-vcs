@@ -393,6 +393,20 @@ This might be changed in a future version.
 implemented for RCS.
 .PP
 \fI.vcsignore\fR files work as described above.
+.PP
+Binary files are not supported.
+.SS SCCS
+Web page: http://www.gnu.org/s/cssc/
+.PP
+SCCS support is similar to RCS support except:
+.TP
+.B o
+Binary files are supported.
+.TP
+.B o
+Files with "awkward" names do not work properly.
+.PP
+It has only been tested with GNU CSSC.
 .SH "DESIGN PRINCIPLES"
 .B vcs
 has a deliberately limited command set.

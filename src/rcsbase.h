@@ -36,6 +36,9 @@ public:
 
   // Return true if a working file path is flagged for add
   bool is_flagged(const string &path) const;
+
+  // Return true if a working file path is flagged for add as binary
+  bool is_binary(const string &path) const;
   
   // Return the working file path of a tracking file, add-flag file or the path
   // itself.

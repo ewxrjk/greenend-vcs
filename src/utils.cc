@@ -112,6 +112,20 @@ string basename_(const string &d) {
   return d.substr(n + 1, string::npos);
 }
 
+// Return the directory name of F
+string dirname_(const string &f) {
+  size_t n = f.rfind(PATHSEP);
+  if(n == string::npos)                 // no /
+    return ".";
+  if(n == 0)                            // /something
+    return "/";
+  if(n == f.size() - 1) {               // something/
+    // Strip the trailing / and try again
+    return dirname_(f.substr(0, n));
+  }
+  return f.substr(0, n);
+}
+
 // Return true if D is (a) root directory
 int isroot(const string &d) {
   return d == "/";
