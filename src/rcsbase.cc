@@ -294,6 +294,27 @@ int rcsbase::edit(int nfiles, char **files) const {
   return native_edit(filtered.size(), &filtered[0]);
 }
 
+int rcsbase::update() const {
+  // 'update' is treated as meaning 'ensure working files exist'
+  //
+  // It would be nice to merge in changes made subsequent to the current
+  // version of the working file being checked out (i.e. what cvs up does).
+  // But vcs has no idea what the base revision is, so this is not possible.
+  std::vector<char *> missing;
+  map<string,int> allFiles;
+  enumerate(allFiles);
+  for(map<string,int>::iterator it = allFiles.begin();
+      it != allFiles.end();
+      ++it) {
+    int flags = it->second;
+    if(!(flags & fileExists))
+      missing.push_back(xstrdup(it->first.c_str()));
+  }
+  if(missing.size() == 0)
+    return 0;
+  return native_update(missing.size(), &missing[0]);
+}
+
 /*
 Local Variables:
 mode:c++
