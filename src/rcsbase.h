@@ -54,12 +54,14 @@ public:
   virtual int native_diff(int nfiles, char **files) const = 0;
   virtual int native_commit(int nfiles, char **files, 
                             const string &msg) const = 0;
+  virtual int native_edit(int nfiles, char **files) const = 0;
 
   int diff(int nfiles, char **files) const;
   virtual int add(int binary, int nfiles, char **files) const;
   int commit(const char *msg, int nfiles, char **files) const;
   int remove(int force, int nfiles, char **files) const;
   int status() const;
+  int edit(int nfiles, char **files) const;
 
   bool detect(void) const;
 };

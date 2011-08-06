@@ -145,17 +145,10 @@ public:
                    EXE_END);
   }
 
-  int edit(int nfiles, char **files) const {
-    // Filter down to files not already edited
-    std::vector<char *> filtered;
-    for(int n = 0; n < nfiles; ++n)
-      if(!exists(files[n]) || !writable(files[n]))
-        filtered.push_back(files[n]);
-    if(!filtered.size())
-      return 0;
+  int native_edit(int nfiles, char **files) const {
     return execute("co",
                    EXE_STR, "-l", // make work file writable
-                   EXE_STRS|EXE_DOTSTUFF, (int)filtered.size(), &filtered[0],
+                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
                    EXE_END);
   }
 

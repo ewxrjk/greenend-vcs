@@ -283,6 +283,17 @@ int rcsbase::status() const {
   return 0;
 }
 
+int rcsbase::edit(int nfiles, char **files) const {
+  // Filter down to files not already edited
+  std::vector<char *> filtered;
+  for(int n = 0; n < nfiles; ++n)
+    if(!exists(files[n]) || !writable(files[n]))
+      filtered.push_back(files[n]);
+  if(!filtered.size())
+    return 0;
+  return native_edit(filtered.size(), &filtered[0]);
+}
+
 /*
 Local Variables:
 mode:c++
