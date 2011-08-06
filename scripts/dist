@@ -6,7 +6,9 @@ make ${DIST:-distcheck}
 p=`perl -ne '/^PACKAGE\s*=\s*(\S+)/ && print "$1";' Makefile`
 v=`perl -ne '/^VERSION\s*=\s*(\S+)/ && print "$1";' Makefile`
 
-web=$HOME/public_html/web/2009
+rm -rf products
+mkdir products
+
 d=$p-$v
 src=$p-$v.tar.gz
 
@@ -33,10 +35,13 @@ build() {
     remote $h "cd _builds/$d && scripts/setversion $v~$vs 'Backport to $vs' $dist"
   fi
   remote $h "cd _builds/$d && fakeroot debian/rules binary"
-  scp $h:_builds/*.deb $web/.
+  scp $h:_builds/*.deb products/.
 }
 
 build sandestin squeeze "" stable
 build araminta squeeze "" stable
-cp $src $web
-scripts/htmlman vcs.1 > $web/vcs.1.html
+cp $src products/
+cp README products/
+cp CHANGES.html products/
+scripts/htmlman vcs.1 > products/vcs.1.html
+ls -l products
