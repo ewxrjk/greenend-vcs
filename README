@@ -6,9 +6,9 @@ essentially uniform interface to the user, allowing 'muscle memory' to
 use vcs commands rather than adapt to the version control system
 currently in use.
 
-Bazaar, Git, CVS, Subversion, Mercurial, Darcs and Perforce are
-supported, with a small set of commands.  See the man page for more
-details.
+Bazaar, Git, CVS, Subversion, Mercurial, Darcs, Perforce, RCS and SCCS
+are supported, with a small set of commands.  See the man page for
+more details.
 
 Installation
 ============

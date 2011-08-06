@@ -90,7 +90,7 @@ const vcs *vcs::guess() {
         return it->second;
     if(isroot(d))
       break;
-    d = parentdir(d);
+    d = parentdir(d, false);
   }
   fatal("cannot identify native version control system");
 }
@@ -161,6 +161,10 @@ void vcs::rename_one(const string &, const string &) const {
 
 int vcs::show(const char *) const {
   fatal("%s does not support 'vcs show'.", name);
+}
+
+int vcs::annotate(const char */*path*/) const {
+  fatal("%s does not support 'vcs annotate'.", name);
 }
 
 /*
