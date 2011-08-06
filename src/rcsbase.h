@@ -10,7 +10,7 @@ public:
   // Return the name of the tracking directory (i.e. "RCS" or "SCCS")
   virtual string tracking_directory() const = 0;
 
-  // Return true if this is a tracking file (i.e. is a ,v or s. file)
+  // Return true if this path is a tracking file (i.e. is a ,v or s. file)
   virtual bool is_tracking_file(const string &path) const = 0;
 
   // Convert a working file basename to tracking file basename
@@ -52,8 +52,12 @@ public:
   void enumerate(map<string,int> &files) const;
 
   virtual int native_diff(int nfiles, char **files) const = 0;
+  virtual int native_commit(int nfiles, char **files, 
+                            const string &msg) const = 0;
+
   int diff(int nfiles, char **files) const;
   virtual int add(int binary, int nfiles, char **files) const;
+  int commit(const char *msg, int nfiles, char **files) const;
   int remove(int force, int nfiles, char **files) const;
   int status() const;
 

@@ -53,45 +53,7 @@ public:
     return rcsbase::add(binary, nfiles, files);
   }
 
-  int commit(const char *msg, int nfiles, char **files) const {
-    vector<char *> newfiles;
-    if(nfiles == 0) {
-      map<string,int> allFiles;
-      enumerate(allFiles);
-      for(map<string,int>::iterator it = allFiles.begin();
-          it != allFiles.end();
-          ++it) {
-        int flags = it->second;
-        if(flags & fileAdded)
-          newfiles.push_back(xstrdup(it->first.c_str()));
-        else if(flags & fileTracked)
-          if(flags & fileWritable)
-            newfiles.push_back(xstrdup(it->first.c_str()));            
-      }
-      files = &newfiles[0];
-      nfiles = newfiles.size();
-    }
-    if(!msg) {
-      // Gather one commit message for all the files
-      vector<string> message;
-      message.push_back("# Committing:");
-      for(int n = 0; n < nfiles; ++n)
-        message.push_back(string("#  ") + files[n]);
-      int rc = editor(message);
-      if(rc)
-        return rc;
-      string s;
-      for(size_t n = 0; n < message.size(); ++n) {
-        if(message[n].size() && message[n][0] == '#')
-          continue;             // Exclude comments
-        s += message[n];
-        s += "\n";
-      }
-      // Zap trailing newlines
-      while(s.size() && s[s.size()-1] == '\n')
-        s.erase(s.size()-1);
-      msg = xstrdup(s.c_str());
-    }
+  int native_commit(int nfiles, char **files, const string &msg) const {
     vector<string> command;
     command.push_back("ci");
     command.push_back("-u");    // don't delete work file
@@ -106,18 +68,7 @@ public:
       display_command(command);
     if(dryrun)
       return 0;
-    int rc = execute(command);
-    // Clean up .#add# files
-    std::vector<char *> cleanup;
-    for(int n = 0; n < nfiles; ++n)
-      if(is_tracked(files[n]) && is_flagged(files[n]))
-        cleanup.push_back(xstrdup(flag_path(files[n]).c_str()));
-    if(cleanup.size())
-      execute("rm",
-              EXE_STR, "-f", 
-              EXE_STRS, (int)cleanup.size(), &cleanup[0],
-              EXE_END);
-    return rc;    
+    return execute(command);
   }
 
   int revert(int nfiles, char **files) const {
