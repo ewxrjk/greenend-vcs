@@ -32,6 +32,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <stdexcept>
 
@@ -58,7 +59,7 @@ public:
   virtual int update() const = 0;
   virtual int log(const char *file) const = 0;
   virtual int edit(int nfiles, char **files) const; // optional
-  virtual int annotate(const char *file) const = 0;
+  virtual int annotate(const char *file) const;     // optional
   virtual int clone(const char *uri, const char *dir) const; // optional
   virtual int rename(int nsources, char **sources, const char *destination) const;
 
@@ -123,6 +124,14 @@ private:
   std::string name;
 };
 
+class InDirectory {
+public:
+  InDirectory(const string &dir);
+  ~InDirectory();
+private:
+  int fd;
+};
+
 extern int verbose;
 extern int dryrun;
 extern int ipv;
@@ -136,9 +145,11 @@ int isdir(const string &s,
 int isreg(const string &s,
           int links_count = 1);
 int exists(const string &path);
+bool writable(const string &path);
 string cwd();
-string parentdir(const string &d);
+string parentdir(const string &d, bool allowDot = true);
 string basename_(const string &d);
+string dirname_(const string &d);
 int isroot(const string &d);
 void fatal(const char *msg, ...) 
   attribute((noreturn))  
@@ -176,7 +187,8 @@ int is_ignored(const list<string> &ignores,
                const string &file);
 void listfiles(string path,
                list<string> &files,
-               set<string> &ignored);
+               set<string> &ignored,
+               const string *followrcs = NULL);
 int version_compare(const string &a, const string &b);
 void remove_directories(int &nfiles, char **files);
 int execute(const vector<string> &command,
@@ -185,6 +197,7 @@ int execute(const vector<string> &command,
             vector<string> *errors = NULL,
             const char *outputPath = NULL,
             unsigned flags = 0);
+void display_command(const vector<string> &vs);
 #define EXE_RAW 0x0001
 vector<string> &makevs(vector<string> &command,
                        const char *prog,

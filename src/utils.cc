@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <cerrno>
 #include <fcntl.h>
@@ -72,6 +71,11 @@ int exists(const string &path) {
   return 1;
 }
 
+// Return true if the file is writable
+bool writable(const std::string &path) {
+  return access(path.c_str(), W_OK) == 0;
+}
+
 // Return the current working directory
 string cwd() {
   char b[8192];
@@ -81,10 +85,14 @@ string cwd() {
 }
 
 // Return the (lexical) parent of directory D
-string parentdir(const string &d) {
+string parentdir(const string &d,
+                 bool allowDot) {
   size_t n = d.rfind(PATHSEP);
-  if(n == string::npos)
+  if(n == string::npos) {
+    if(allowDot)
+      return ".";
     fatal("invalid directory name: %s", d.c_str());
+  }
   if(n == 0)                         // it's the root or a subdirectory thereof
     return "/";
   return d.substr(0, n);
@@ -102,6 +110,20 @@ string basename_(const string &d) {
     return basename_(d.substr(0, n));
   }
   return d.substr(n + 1, string::npos);
+}
+
+// Return the directory name of F
+string dirname_(const string &f) {
+  size_t n = f.rfind(PATHSEP);
+  if(n == string::npos)                 // no /
+    return ".";
+  if(n == 0)                            // /something
+    return "/";
+  if(n == f.size() - 1) {               // something/
+    // Strip the trailing / and try again
+    return dirname_(f.substr(0, n));
+  }
+  return f.substr(0, n);
 }
 
 // Return true if D is (a) root directory

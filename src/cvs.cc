@@ -28,6 +28,7 @@ public:
   int diff(int nfiles, char **files) const {
     return execute("cvs",
                    EXE_STR, "diff",
+                   EXE_STR, "-Nu",
                    EXE_STR, "--",
                    EXE_STRS, nfiles, files,
                    EXE_END);

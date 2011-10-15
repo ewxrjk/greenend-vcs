@@ -223,7 +223,6 @@ public:
   int show(const char *change) const {
     return execute("git",
                    EXE_STR, "show",
-                   EXE_STR, "--",
                    EXE_STR, change,
                    EXE_END);
   }

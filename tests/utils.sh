@@ -22,6 +22,7 @@
 # cannot be satisifed then the test is skipped (exit 77).
 t_init() {
 
+    echo "--- t_init"
     # Check all dependencies are present
     for dep; do
         case $dep in
@@ -60,6 +61,7 @@ t_init() {
 # In fact at present, not cleanup is done; it's convenine to see what
 # is left behind, for further testing.
 t_done() {
+    echo "--- t_done"
     cd /
 #    rm -rf $testdir
 }
@@ -76,6 +78,7 @@ t_done() {
 #    project/subdir/subtwo
 # Each file's contents will be its name (plus a newline).
 t_populate() {
+    echo "--- t_populate"
     cd project
     echo one > one
     echo two > two
@@ -144,6 +147,7 @@ t_populate() {
 # examining differences rather than making changes.
 # 
 t_modify() {
+    echo "--- t_modify"
     cd project
     if [ -w one ]; then
         writable=true
@@ -211,6 +215,7 @@ t_modify() {
 # in a separate client.  'copy' is updated, presumably to match 'project',
 # though this is not verified.
 t_update() {
+    echo "--- t_update"
     cd copy
     if [ `wc -l < one` != 1 ]; then
         echo "'one' has unexpected length"
@@ -232,6 +237,7 @@ t_update() {
 # Checks that .../one and .../two match in 'project' and 'copy'.  Used
 # by t_revert.
 t_verify() {
+    echo "--- t_verify"
     if diff -u project/one copy/one; then :; else exit 1; fi
     if diff -u project/two copy/two; then :; else exit 1; fi
 }
@@ -250,6 +256,7 @@ t_verify() {
 # This is done more than one, to test global revert and file-specific
 # revert.
 t_revert() {
+    echo "--- t_revert"
     cd copy
     x vcs -v edit one
     echo extra >> one
@@ -327,6 +334,7 @@ t_revert() {
 # Tests renaming within 'project'.  Currently discards eventual changes,
 # which is not a very good test!  TODO
 t_rename() {
+    echo "--- t_rename"
     cd project
     x vcs -v rename one two subdir
     for x in one two; do
@@ -358,6 +366,7 @@ t_rename() {
 #
 # Tries to add various awkward filenames and verifies that it all works
 t_awkward() {
+  echo "--- t_awkward"
   cd project
   echo > foo@bar
   echo > foo\#bar%wibble\*spong
@@ -416,6 +425,7 @@ fatal() {
 #
 # Create a p4 client called NAME rooted at ROOT.
 makep4client() {
+  echo "--- makep4client"
   local NAME="$1"
   local ROOT="$2"
   local LOGNAME=${LOGNAME:-`whoami`}

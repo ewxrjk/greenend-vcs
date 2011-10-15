@@ -265,7 +265,7 @@ static string shellquote(const string &s) {
   return r;
 }
 
-static void display_command(const vector<string> &vs) {
+void display_command(const vector<string> &vs) {
   for(size_t n = 0; n < vs.size(); ++n)
     fprintf(stderr, "%s%s", 
             n ? " " : "",
