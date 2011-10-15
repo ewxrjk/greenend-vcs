@@ -1,3 +1,11 @@
+vcs (0.8) unstable; urgency=low
+
+  * RCS and SCCS support
+  * git: vcs show fixed
+  * cvs: vcs diff asks for '-Nu' flags.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 15 Oct 2011 13:51:40 +0100
+
 vcs (0.7) unstable; urgency=low
 
   * New 'vcs show' and 'vcs rename' commands.
