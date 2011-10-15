@@ -41,7 +41,7 @@ build() {
 build sandestin squeeze "" stable
 build araminta squeeze "" stable
 cp $src products/
-cp README products/
-cp CHANGES.html products/
+cp README products/vcs-README.txt
+cp CHANGES.html products/vcs-CHANGES.html
 scripts/htmlman vcs.1 > products/vcs.1.html
 ls -l products
