@@ -1,47 +1,97 @@
 #! /bin/bash
+#
+# This file is part of vcs
+# Copyright (C) 2010, 11 Richard Kettlewell
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+# USA
 set -e
 
-make ${DIST:-distcheck}
+# s COMMAND...
+#
+# Echo a command then execute it.
+s() {
+  echo "$@" >&2
+  "$@"
+}
 
-p=`perl -ne '/^PACKAGE\s*=\s*(\S+)/ && print "$1";' Makefile`
-v=`perl -ne '/^VERSION\s*=\s*(\S+)/ && print "$1";' Makefile`
+# r HOST COMMAND...
+#
+# Echo a command then execute it remotely.
+r() {
+  local host=$1
+  shift
+  echo "$host:" "$@" >&2
+  case $host in
+  schroot:* )
+    schroot -c${host#schroot:} -- bash -c "$@"
+    ;;
+  * )
+    ssh $host "$@"
+    ;;
+  esac
+}
+
+# build HOST ARCH
+#
+# Create a .deb on HOST for architecture ARCH, then copy it back here
+# and add it to the list of build products.
+build() {
+  local host=$1
+  local arch=$2
+  local debs
+
+  for b in $binpkgs; do
+    debs="$debs ${b}_${version}_${arch}.deb"
+  done
+  echo
+  echo "Build on $host for $arch"
+  echo
+  r $host "mkdir -p _builds"
+  r $host "cd _builds && rm -rf ${source} ${archive} ${debs}"
+  r $host "cat > _builds/${archive}" < ${archive}
+  r $host "cd _builds && tar xfz ${archive}"
+  r $host "cd _builds/${source} && debian/rules build"
+  r $host "cd _builds/${source} && fakeroot debian/rules binary"
+  for deb in $debs; do
+    r $host "cat _builds/$deb" > products/$deb
+  done
+  r $host "cd _builds && rm -rf ${source} ${archive} ${debs}"
+  r $host "rmdir _builds" || true
+  echo
+  echo "Built $debs"
+  echo
+}
 
 rm -rf products
 mkdir products
 
-d=$p-$v
-src=$p-$v.tar.gz
+s make distcheck
 
-# Report and execute a command remotely
-remote() {
-  local h=$1
-  shift
-  echo "$h:" "$@"
-  ssh $h "$@"
-}
+srcpkg=vcs                              # source package name
+binpkgs="vcs"                           # binary packages
+version=$(make echo-version)    # get version number
+source=${srcpkg}-${version}     # source directory
+archive=${srcpkg}-${version}.tar.gz # tarball
 
-# Build .debs and copy to the right place
-build() {
-  local h=$1			# build host
-  local f=$2
-  local vs=$3
-  local dist=$4
+s cp ${archive} products/
+s cp README products/vcs-README.txt
+s cp CHANGES.html products/vcs-CHANGES.html
+s scripts/htmlman vcs.1 > products/vcs.1.html
 
-  remote $h "mkdir -p _builds"
-  remote $h "rm -rf _builds/*.deb _builds/$d"
-  scp $src $h:_builds/$src
-  remote $h "cd _builds && tar xf $src"
-  if [ "$vs" != "" ]; then
-    remote $h "cd _builds/$d && scripts/setversion $v~$vs 'Backport to $vs' $dist"
-  fi
-  remote $h "cd _builds/$d && fakeroot debian/rules binary"
-  scp $h:_builds/*.deb products/.
-}
+build leucomorph i386
+build schroot:lenny64 amd64
 
-build sandestin squeeze "" stable
-build araminta squeeze "" stable
-cp $src products/
-cp README products/vcs-README.txt
-cp CHANGES.html products/vcs-CHANGES.html
-scripts/htmlman vcs.1 > products/vcs.1.html
 ls -l products

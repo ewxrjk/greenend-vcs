@@ -31,3 +31,9 @@ coverage: all
 	rm -f *.gcda */*.gcda
 	$(MAKE) check
 	(cd src && ${GCOV} *.cc) | ${srcdir}/scripts/coverage
+
+echo-distdir:
+	@echo $(distdir)
+
+echo-version:
+	@echo $(VERSION)
