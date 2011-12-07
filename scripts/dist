@@ -20,31 +20,6 @@
 set -e
 set -x
 
-# s COMMAND...
-#
-# Echo a command then execute it.
-s() {
-  echo "$@" >&2
-  "$@"
-}
-
-# r HOST COMMAND...
-#
-# Echo a command then execute it remotely.
-r() {
-  local host=$1
-  shift
-  echo "$host:" "$@" >&2
-  case $host in
-  schroot:* )
-    schroot -c${host#schroot:} -- bash -c "$@"
-    ;;
-  * )
-    ssh $host "$@"
-    ;;
-  esac
-}
-
 build() {
     local arch=$1
     local chroot=$2
