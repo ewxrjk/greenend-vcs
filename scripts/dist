@@ -18,6 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 set -e
+set -x
 
 # s COMMAND...
 #
@@ -44,54 +45,32 @@ r() {
   esac
 }
 
-# build HOST ARCH
-#
-# Create a .deb on HOST for architecture ARCH, then copy it back here
-# and add it to the list of build products.
 build() {
-  local host=$1
-  local arch=$2
-  local debs
+    local arch=$1
+    local chroot=$2
 
-  for b in $binpkgs; do
-    debs="$debs ${b}_${version}_${arch}.deb"
-  done
-  echo
-  echo "Build on $host for $arch"
-  echo
-  r $host "mkdir -p _builds"
-  r $host "cd _builds && rm -rf ${source} ${archive} ${debs}"
-  r $host "cat > _builds/${archive}" < ${archive}
-  r $host "cd _builds && tar xfz ${archive}"
-  r $host "cd _builds/${source} && debian/rules build"
-  r $host "cd _builds/${source} && fakeroot debian/rules binary"
-  for deb in $debs; do
-    r $host "cat _builds/$deb" > products/$deb
-  done
-  r $host "cd _builds && rm -rf ${source} ${archive} ${debs}"
-  r $host "rmdir _builds" || true
-  echo
-  echo "Built $debs"
-  echo
+    tar xf ${archive}
+    cd ${dir}
+    schroot -pc${chroot} fakeroot debian/rules build binary
+    cd ..
+    mv ${package}_${version}_${arch}.deb products/.
+    rm -rf ${dir}
 }
 
-rm -rf products
+make distcheck
+
+package=$(awk '/^PACKAGE_NAME =/ { print $3 }' < Makefile)
+version=$(awk '/^PACKAGE_VERSION =/ { print $3 }' < Makefile)
+dir=${package}-${version}
+archive=${package}-${version}.tar.gz
+
+rm -rf products ${dir}
 mkdir products
+cp ${archive} products/.
+cp README products/vcs-README.txt
+cp CHANGES.html products/vcs-CHANGES.html
+scripts/htmlman vcs.1 > products/vcs.1.html
 
-s make distcheck
-
-srcpkg=vcs                              # source package name
-binpkgs="vcs"                           # binary packages
-version=$(make echo-version)    # get version number
-source=${srcpkg}-${version}     # source directory
-archive=${srcpkg}-${version}.tar.gz # tarball
-
-s cp ${archive} products/
-s cp README products/vcs-README.txt
-s cp CHANGES.html products/vcs-CHANGES.html
-s scripts/htmlman vcs.1 > products/vcs.1.html
-
-build leucomorph i386
-build schroot:lenny64 amd64
-
+build i386 lenny32
+build amd64 lenny64
 ls -l products
