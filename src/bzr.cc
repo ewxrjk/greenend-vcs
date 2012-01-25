@@ -108,7 +108,7 @@ public:
   
   int clone(const char *uri, const char *dir) const {
     return execute("bzr",
-                   EXE_STR, "clone",
+                   EXE_STR, "branch",
                    EXE_STR, "--",
                    EXE_STR, uri,
                    EXE_IFSTR(dir, dir),
