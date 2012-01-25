@@ -102,7 +102,7 @@ static int Main(int argc, char **argv) {
   if(rc)
     fatal("curl_global_init: %d (%s)", rc, curl_easy_strerror(rc));
 #endif
-  const struct command *c = command::find(argv[optind]);
+  const class command *c = command::find(argv[optind]);
   const int status = c->execute(argc - optind, argv + optind);
   return status;
 }
