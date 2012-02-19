@@ -4,7 +4,7 @@ Section: devel
 Priority: extra
 Standards-Version: 3.7.2.2
 Vcs-Git: http://www.chiark.greenend.org.uk/ucgi/~richardk/git/vcs.git/
-Homepage: http://www.greenend.org.uk/rjk/2009/vcs.html
+Homepage: http://www.greenend.org.uk/rjk/vcs/
 Build-Depends: libcurl-dev,libexpat-dev
 
 Package: vcs
