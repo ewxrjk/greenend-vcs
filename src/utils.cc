@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2012 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <cerrno>
 #include <fcntl.h>
 #include <signal.h>
+#include <unistd.h>
 #include <sstream>
 
 // Global debug level
