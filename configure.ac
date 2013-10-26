@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 AC_INIT([vcs], [0.DEV], [richard+vcs@sfere.greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
-AM_INIT_AUTOMAKE(vcs, [0.DEV])
+AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
