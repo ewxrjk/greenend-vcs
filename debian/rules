@@ -56,13 +56,7 @@ build:
 	  echo ./autogen.sh;\
 	  ./autogen.sh;\
 	fi
-	@set -e;if test ! -f config.status; then \
-	  echo ./configure ${CONFIGURE} ${CONFIGURE_EXTRA};\
-	  ./configure ${CONFIGURE} ${CONFIGURE_EXTRA};\
-	else\
-	  echo ./config.status;\
-	  ./config.status;\
-	fi
+	./configure ${CONFIGURE} ${CONFIGURE_EXTRA}
 	$(MAKE) ${PARALLEL}
 
 pkg-vcs: build
