@@ -1,7 +1,7 @@
-#! /bin/bash
+#! /bin/sh
 #
 # This file is part of VCS
-# Copyright (C) 2009, 2010 Richard Kettlewell
+# Copyright (C) 2013 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,34 +18,5 @@
 #
 
 set -e
-
-# Find an automake
-if [ -z "$AUTOMAKE" ]; then
-  for prog in automake automake-1.10 automake-1.9 automake-1.8 automake-1.7; do
-    if type $prog >/dev/null 2>&1; then
-      AUTOMAKE=$prog
-      break
-    fi
-  done
-  if [ -s "$AUTOMAKE" ]; then
-    echo "ERROR: no automake found" >&2
-    exit 1
-  fi
-fi
-ACLOCAL=${AUTOMAKE/automake/aclocal}
-
-srcdir=$(dirname $0)
-here=$(pwd)
-cd $srcdir
-mkdir -p config.aux
-if test -d $HOME/share/aclocal; then
-  ${ACLOCAL} --acdir=$HOME/share/aclocal
-else
-  ${ACLOCAL}
-fi
-#libtoolize
-autoconf
-autoheader
-${AUTOMAKE} -a || true		# for INSTALL
-${AUTOMAKE} --foreign -a
-
+cd $(dirname $0)
+autoreconf -si
