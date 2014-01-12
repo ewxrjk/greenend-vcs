@@ -15,7 +15,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_INIT([vcs], [0.DEV], [richard+vcs@sfere.greenend.org.uk])
+AC_INIT([vcs], [0.8], [richard+vcs@sfere.greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/vcs.cc])
