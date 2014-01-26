@@ -68,12 +68,15 @@ build:
 pkg-vcs: build
 	 rm -rf debian/vcs
 	 $(MKDIR) debian/vcs/DEBIAN
-	 $(MKDIR) debian/vcs/usr/share/doc/vcs
+	 $(MKDIR) debian/vcs/usr/share/doc/vcs \
+		 debian/vcs/usr/share/lintian/overrides
 	 $(INSTALL_DATA) debian/copyright CHANGES.html \
 		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
 		debian/vcs/usr/share/doc/vcs/changelog
 	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
+	$(INSTALL_DATA) debian/override.vcs \
+		debian/vcs/usr/share/lintian/overrides/vcs
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
 	strip --remove-section=.comment debian/vcs/usr/bin/vcs
 	gzip -9f debian/vcs/usr/share/man/man*/*
