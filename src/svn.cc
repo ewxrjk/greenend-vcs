@@ -18,6 +18,7 @@
 #include "vcs.h"
 #include "xml.h"
 #include "svnutils.h"
+#include <algorithm>
 
 class svn: public vcs {
 public:
@@ -142,10 +143,28 @@ public:
                      EXE_END);
   }
 
+  static bool status_compare(const string &a, const string &b) {
+    if(a.size() > 8 
+       && a.compare(1, 7, "       ") == 0
+       && b.size() > 8
+       && b.compare(1, 7, "       ") == 0)
+      return a.compare(8, string::npos,
+                       b, 8, string::npos) < 0;
+    else
+      return false;
+  }
+
   int status() const {
-    return execute("svn",
-                   EXE_STR, "status",
-                   EXE_END);
+    // svn status output has unpredictable order in some versions, so sort it
+    vector<string> status;
+    int rc;
+    if((rc = capture(status, "svn", "status", (char *)0)))
+      fatal("svn status exited with status %d", rc);
+    stable_sort(status.begin(), status.end(),
+                status_compare);
+    for(size_t n = 0; n < status.size(); ++n)
+      writef(stdout, "stdout", "%s\n", status[n].c_str());
+    return 0;
   }
 
   int update() const {
