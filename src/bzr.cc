@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,20 @@ public:
   }
 
   int remove(int force, int nfiles, char **files) const {
+    /* bzr rm --force used to be required to guarantee deletion; since bzr 2.7
+     * it is prohibited and raises an error.   */
+    if(force) {
+      vector<string> help;
+      int rc;
+      if((rc = capture(help, "bzr", "rm", "--help", (char *)NULL)))
+        fatal("'bzr rm --help' exited with status %d", rc);
+      bool force_available = false;
+      for(size_t n = 0; n < help.size(); ++n)
+        if(help[n].find("--force") != std::string::npos)
+          force_available = true;
+      if(!force_available)
+        force = false;
+    }
     return execute("bzr",
                    EXE_STR, "remove",
                    EXE_IFSTR(force, "--force"),
