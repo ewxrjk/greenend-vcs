@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,13 +114,19 @@ public:
       set<string> newfiles;
       for(size_t n = 0; n < status.size(); ++n) {
         const string &line = status[n];
-        static const char prefix[] = "#\tnew file:";
-        if(line.compare(0, (sizeof prefix)-1, prefix) == 0) {
+        size_t pos = 0;
+        // Old versions of git put a # at the start, new ones don't
+        if(pos < line.size() && line[pos] == '#')
+           ++pos;
+        while(pos < line.size() && isspace(line[pos]))
+          ++pos;
+        static const char prefix[] = "new file:";
+        if(line.compare(pos, (sizeof prefix)-1, prefix) == 0) {
           // It's a new file; parse out the filename
-          size_t i = sizeof prefix;
-          while(i < line.size() && line[i] == ' ')
-            ++i;
-          const string path = line.substr(i, string::npos);
+          pos += sizeof prefix - 1;
+          while(pos < line.size() && isspace(line[pos]))
+            ++pos;
+          const string path = line.substr(pos, string::npos);
           // If it's one of the targets, add it to the set to remove and remove
           // from the set to checkout.
           if(revertfiles.find(path) != revertfiles.end()) {
