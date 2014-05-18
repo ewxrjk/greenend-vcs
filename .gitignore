@@ -25,6 +25,7 @@ test-root
 *.gcov
 tests/t-version
 tests/*.log
+tests/*.trs
 tests/t-execute
 tests/t-ltfilename
 tests/t-utils
