@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 #include "vcs.h"
 #include "xml.h"
+#include "svnutils.h"
 
 class svn: public vcs {
 public:
@@ -31,7 +32,7 @@ public:
     return execute("svn",
                    EXE_STR, "diff",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, svn_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -39,7 +40,7 @@ public:
     return execute("svn",
                    EXE_STR, "add",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, svn_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -48,7 +49,7 @@ public:
                    EXE_STR, "delete",
                    EXE_IFSTR(force, "--force"),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, svn_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -58,7 +59,7 @@ public:
                    EXE_IFSTR(msg, "-m"),
                    EXE_IFSTR(msg, msg),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_STRS, nfiles, svn_encode(nfiles, files),
                    EXE_END);
   }
 
@@ -137,7 +138,7 @@ public:
       return execute("svn",
                      EXE_STR, "revert",
                      EXE_STR, "--",
-                     EXE_STRS, nfiles, files,
+                     EXE_STRS, nfiles, svn_encode(nfiles, files),
                      EXE_END);
   }
 
