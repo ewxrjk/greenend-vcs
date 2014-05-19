@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <cstring>
 #include <cassert>
 #include <cstdarg>
+#include <clocale>
 #include <getopt.h>
 #include <errno.h>
 #include <sys/types.h>
