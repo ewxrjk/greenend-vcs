@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009 Richard Kettlewell
+ * Copyright (C) 2009, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ int main(void) {
         }
       }
       // ..and again for relative paths
-      if(names[i][0] != '/' && names[j][0] != '/') {
+      if(names[i][0] == '/' && names[j][0] == '/') {
         const bool expect = (i < j);
         const bool got = lt(names[i] + 1, names[j] + 1);
         if(got != expect) {
