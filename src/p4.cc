@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2009-2011 Richard Kettlewell
+ * Copyright (C) 2009-2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public:
     // Only attempt to detect Perforce if some Perforce-specific environment
     // variable is set.
     //
-    // detect() is rung _before_ searching parent directories for a VC-specific
+    // detect() is run _before_ searching parent directories for a VC-specific
     // subdirectory, so that Perforce checkouts that are below (e.g.) Bazaar
     // checkouts are correctly matched.  Our own test scripts are the
     // motivating (and perhaps only) example.
