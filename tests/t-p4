@@ -139,6 +139,13 @@ else
   exit 1
 fi
 
+for rev in 1 2 3 4 5 6; do
+  x vcs show $rev > got.p4.log.$rev
+  sed < got.p4.log.$rev > got.p4.log.$rev.fixed 's/on .*/on <date>/'
+  diff -u ${top_srcdir:-.}/tests/p4.log.$rev got.p4.log.$rev.fixed
+  rm -f got.p4.log.$rev got.p4.log.$rev.fixed
+done
+
 cd ..
 
 # Test rename

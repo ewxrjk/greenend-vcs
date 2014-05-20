@@ -34,7 +34,7 @@ TESTS=t-version t-execute t-ltfilename t-utils t-xml t-pager t-editor \
 	t-help t-errors \
 	t-bzr t-cvs t-svn t-git t-hg t-darcs t-p4 t-rcs t-sccs \
 	bzr-clone git-clone hg-clone
-EXTRA_DIST=utils.sh
+EXTRA_DIST=utils.sh p4.log.1 p4.log.2 p4.log.3 p4.log.4 p4.log.5 p4.log.6
 
 clean-local:
 	rm -rf test-root
