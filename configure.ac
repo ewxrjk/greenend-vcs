@@ -44,14 +44,14 @@ AC_CACHE_CHECK([for type of iconv inbuf argument],[rjk_cv_iconv_inbuf],
                                [char *inbuf;
                                 char *outbuf;
                                 size_t left;
-                                iconv_t cd;
+                                iconv_t cd = 0;
                                 iconv(cd, &inbuf, &left, &outbuf, &left);],
                                [rjk_cv_iconv_inbuf="char **"],
                 [AC_TRY_COMPILE([#include <iconv.h>],
                                 [const char *inbuf;
                                  char *outbuf;
                                  size_t left;
-                                 iconv_t cd;
+                                 iconv_t cd = 0;
                                  iconv(cd, &inbuf, &left, &outbuf, &left);],
                                 [rjk_cv_iconv_inbuf="const char **"],
                                 [rjk_cv_iconv_inbuf="unknown"])])])
