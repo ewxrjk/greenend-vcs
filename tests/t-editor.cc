@@ -1,6 +1,6 @@
 /*
  * This file is part of VCS
- * Copyright (C) 2011 Richard Kettlewell
+ * Copyright (C) 2011, 2014 Richard Kettlewell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,14 @@
 #include "vcs.h"
 
 int main(void) {
-  putenv(xstrdup("EDITOR=dummy-editor"));
-  putenv(xstrdup("VISUAL=dummy-editor"));
+  char *env_editor, *env_visual;
+  const char *srcdir = getenv("srcdir");
+  if(!srcdir)
+    srcdir = ".";
+  assert(asprintf(&env_editor, "EDITOR=%s/dummy-editor", srcdir) >= 0);
+  assert(asprintf(&env_visual, "VISUAL=%s/dummy-editor", srcdir) >= 0);
+  putenv(env_editor);
+  putenv(env_visual);
   vector<string> f;
   f.push_back("abra");
   assert(editor(f) == 0);

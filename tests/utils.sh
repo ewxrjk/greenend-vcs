@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009-2011 Richard Kettlewell
+# Copyright (C) 2009-2011, 2014 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,10 +46,7 @@ t_init() {
         esac
     done
 
-    testdir=$builddir/test-root/$1
-
-    # Clean up droppings
-    rm -rf $testdir
+    testdir=$workdir/test-root/$1
 
     # Enter the test directory
     mkdir -p $testdir
@@ -63,7 +60,6 @@ t_init() {
 t_done() {
     echo "--- t_done"
     cd /
-#    rm -rf $testdir
 }
 
 # Create an initial test project.
@@ -457,11 +453,22 @@ unset P4ROOT || true
 unset P4TICKETS || true
 unset P4USER || true
 
+# Make srcdir absolute
+srcdir=${srcdir:-.}
+case "$srcdir" in
+/* )
+  ;;
+* )
+  srcdir=`cd $srcdir && pwd`
+  ;;
+esac
+
 # Make sure vcs is on the path
 builddir=`pwd`
-PATH=$builddir/src:$PATH
+PATH=$builddir/../src:$PATH
 
-# Save output to a logfile rather than standard output
-if ${TESTLOG:-false}; then
-  exec > ${0##*/}.log 2>&1
-fi
+# Run in a private directory
+workdir=`mktemp -d $builddir/tmp.XXXXXX`
+trap "rm -rf $workdir" EXIT INT HUP TERM
+cd $workdir
+pwd
