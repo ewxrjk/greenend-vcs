@@ -95,12 +95,12 @@ t_populate() {
       # git cannot diff the initial commit!
       ;;
     * )
-      # global diff should show all new files
+      echo Global diff should show all new files
       x vcs -v diff > delta || true
       cat delta
       grep '^+one' delta > /dev/null
       grep '^+two' delta > /dev/null
-      # single-file diff should only show that file's changes
+      echo Single-file diff should only show that file\'s changes
       x vcs -v diff one > delta || true
       cat delta
       grep '^+one' delta > /dev/null
@@ -185,12 +185,12 @@ t_modify() {
         exit 1
     fi
     x vcs -v commit -m 'oneone' one
-    # Should only have commited 'one'
+    echo Should only have commited \'one\'
     x vcs -v diff > delta || true
     cat delta
     grep '^+twotwo' delta
     x vcs -v revert two
-    # Should be nothing left
+    echo Should be nothing left
     x vcs -v diff > diff-output-3 || true
     # Stupid darcs appends a blank line to diff output even if it
     # would otherwise be empty.  As a hack we only consider nonblank
@@ -290,11 +290,11 @@ t_revert() {
     x vcs -v status
     cd ..
 
-    # 'one' and 'two' should be back to normal; we already have a
-    # check for that
+    echo 'one' and 'two' should be back to normal
+    # we already have a check for that
     t_verify
 
-    # Explicit paths 1: modified file
+    echo Explicit paths 1: modified file
     cd copy
     x vcs edit one
     echo extra >> one
@@ -303,7 +303,7 @@ t_revert() {
     cd ..
     t_verify
 
-    # Explicit paths 2: deleted file
+    echo Explicit paths 2: deleted file
     cd copy
     x vcs -v rm two
     x vcs -v revert two
@@ -311,7 +311,7 @@ t_revert() {
     cd ..
     t_verify
 
-    # Explicit paths 3: added file
+    echo Explicit paths 3: added file
     cd copy
     echo three > three
     x vcs -v add three
