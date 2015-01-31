@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 #
 # This file is part of VCS
-# Copyright (C) 2009-2011 Richard Kettlewell
+# Copyright (C) 2009-2011, 2015 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ AC_PROG_CXX
 AC_LANG([C++])
 AC_SET_MAKE
 AC_PROG_RANLIB
+AM_PROG_AR
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions if available])
 AC_DEFINE([PATHSEP], ['/'], [define to path separator character])
 AC_DEFINE([PATHSEPSTR], ["/"], [define to path separator as a string])
