@@ -1,6 +1,6 @@
 #! /usr/bin/make -f
 #
-# Copyright (C) 2009, 2010 Richard Kettlewell
+# Copyright (C) 2009, 2010, 2015 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,12 +74,12 @@ pkg-vcs: build
 		debian/vcs/usr/share/doc/vcs/.
 	$(INSTALL_DATA) debian/changelog \
 		debian/vcs/usr/share/doc/vcs/changelog
-	gzip -9 debian/vcs/usr/share/doc/vcs/changelog*
+	gzip -9n debian/vcs/usr/share/doc/vcs/changelog*
 	$(INSTALL_DATA) debian/override.vcs \
 		debian/vcs/usr/share/lintian/overrides/vcs
 	$(MAKE) DESTDIR=`pwd`/debian/vcs installdirs install
 	strip --remove-section=.comment debian/vcs/usr/bin/vcs
-	gzip -9f debian/vcs/usr/share/man/man*/*
+	gzip -9nf debian/vcs/usr/share/man/man*/*
 	dpkg-shlibdeps -Tdebian/substvars.vcs \
 		debian/vcs/usr/bin/*
 	cd debian/vcs && \
