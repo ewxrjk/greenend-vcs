@@ -48,7 +48,7 @@ static void help(FILE *fp = stdout) {
 
 // Display list of commands
 static void commandlist() {
-  writef(stdout, "stdout", "vcs commmands:\n\n");
+  writef(stdout, "stdout", "vcs commands:\n\n");
   command::list();
   writef(stdout, "stdout", "\nUse 'vcs COMMAND --help' for per-command help.\n");
 }
