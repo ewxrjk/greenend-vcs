@@ -65,7 +65,7 @@ static int Main(int argc, char **argv) {
       help();
       return 0;
     case 'V':
-      puts("vcs "VERSION);
+      puts("vcs " VERSION);
       return 0;
     case 'H':
       commandlist();

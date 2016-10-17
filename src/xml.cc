@@ -124,7 +124,7 @@ private:
         outused = out.size() - outbufleft;
         if(rc == (size_t)-1) {
           if(errno != E2BIG)
-            fatal("converting "EXPAT_ENCODING" string: %s", strerror(errno));
+            fatal("converting " EXPAT_ENCODING " string: %s", strerror(errno));
         } else {
           // Success!
           return string(&out[0], outused);
