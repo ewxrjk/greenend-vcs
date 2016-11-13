@@ -37,14 +37,14 @@ static int alpha(int c) {
 // Return the scheme part of a URI, or "" if none could be found
 const string uri_scheme(const string &uri) {
   int c;
-  string::size_type n;
+  string::size_type n, len = uri.size();
 
-  if(!uri.size())
+  if(!len)
     return "";
   if(!alpha(uri.at(0)))
     return "";
   for(n = 0;
-      (n < uri.size()
+      (n < len
        && (c = uri.at(n)) != ':'
        && (alpha(c) || isdigit(c) || c == '+' || c =='-' || c == '.'));
       ++n)
