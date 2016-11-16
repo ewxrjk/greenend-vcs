@@ -90,7 +90,7 @@ if test "$GXX" = yes; then
       ;;
     esac
   ])
-  CXX="${CXX} ${rjk_cv_warnings}"
+  CXXFLAGS="${CXXFLAGS} ${rjk_cv_warnings}"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
