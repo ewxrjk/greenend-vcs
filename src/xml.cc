@@ -43,6 +43,8 @@ XMLNodeType XMLElement::type() const {
 }
 
 XMLElement::~XMLElement() {
+  for(size_t i = 0; i < contents.size(); ++i)
+    delete contents[i];
 }
 
 // XMLString -------------------------------------------------------------------

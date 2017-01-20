@@ -63,6 +63,7 @@ int main(void) {
                            "</status>\n",
                            false);
   report(root);
+  delete root;
   return 0;
 }
 
