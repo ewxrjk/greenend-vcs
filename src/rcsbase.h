@@ -39,7 +39,7 @@ public:
 
   // Return true if a working file path is flagged for add as binary
   bool is_binary(const string &path) const;
-  
+
   // Return the working file path of a tracking file, add-flag file or the path
   // itself.
   string work_path(const string &path) const;
@@ -55,7 +55,7 @@ public:
   void enumerate(map<string,int> &files) const;
 
   virtual int native_diff(int nfiles, char **files) const = 0;
-  virtual int native_commit(int nfiles, char **files, 
+  virtual int native_commit(int nfiles, char **files,
                             const string &msg) const = 0;
   virtual int native_edit(int nfiles, char **files) const = 0;
   virtual int native_update(int nfiles, char **files) const = 0;

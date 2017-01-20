@@ -19,7 +19,7 @@ void Dir::open(const std::string &path_) {
 }
 
 Dir::~Dir() {
-  if(dp) 
+  if(dp)
     closedir(dp);
 }
 
@@ -44,7 +44,7 @@ void Dir::getFiles(std::vector<std::string> &files,
   while(d.get(name))
     files.push_back(name);
 }
-  
+
 /*
 Local Variables:
 mode:c++

@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -317,7 +317,7 @@ string get_relative_path(const string &s) {
       it != pwds.end();
       ++it) {
     const string &dir = *it;
-    
+
     if(s == dir)
       return ".";
     if(is_prefix(dir, s)) {
@@ -332,7 +332,7 @@ string get_relative_path(const string &s) {
     fatal("stat .: %s", strerror(errno));
   for(string::size_type pos = 0; pos < s.size();) {
     const string::size_type sl = s.find('/', pos);
-    
+
     if(sl == string::npos)
       break;
     // We INCLUDE the trailing slash in d

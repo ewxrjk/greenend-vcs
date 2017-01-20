@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -126,7 +126,7 @@ public:
     if((rc = capture(change, "p4", "change", "-o", (char *)NULL)))
       fatal("'p4 change -o' exited with status %d", rc);
     n = 0;
-    // Find the default description 
+    // Find the default description
     while(n < change.size() && change[n] != "Description:")
       ++n;
     if(msg) {
@@ -218,7 +218,7 @@ public:
     list<string> files;
     set<string> ignored;
     listfiles("", files, ignored);
-  
+
     // We'll accumulate the status info here
     typedef map<string,char,ltfilename> status_type;
     status_type status;
@@ -337,7 +337,7 @@ public:
     P4Describe description(change);
     for(size_t n = 0;
         (n < description.lines.size()
-         && description.lines[n] != diffs); 
+         && description.lines[n] != diffs);
         ++n)
       writef(stdout, "stdout", "%s\n", description.lines[n].c_str());
     writef(stdout, "stdout", "%s\n", diffs);

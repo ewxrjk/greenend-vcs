@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -36,7 +36,7 @@ string p4_encode(const string &s) {
    * (%%) in either the file name or any directory component, use the ASCII
    * expression of the character's hexadecimal value. ASCII expansion applies
    * only to the following four characters" - and it mentions @, #, *, %.  What
-   * you're supposed to do for spaces in filenames I do not know! 
+   * you're supposed to do for spaces in filenames I do not know!
    */
   r << hex;
   for(n = 0; n < s.size(); ++n)
@@ -95,7 +95,7 @@ static int fromhex(int c) {
 static string p4_decode_raw(const string &s) {
   string r;
   string::size_type n;
-  
+
   for(n = 0; n < s.size(); ++n) {
     if(s[n] == '%') {
       r += 16 * fromhex(s.at(n + 1)) + fromhex(s.at(n + 2));
@@ -159,7 +159,7 @@ void p4__where(vector<string> &where, const list<string> &files) {
   // 'p4 where'.  We subtract the size of the current environment too.
   //
   // http://www.in-ulm.de/~mascheck/various/argmax/
-  
+
   list<string>::const_iterator it = files.begin();
   while(it != files.end()) {
     // Find the next few kilobytes worth of filenames
@@ -211,7 +211,7 @@ void p4__where(const list<string> &files,
                map<string,P4Where> &view,
                map<string,P4Where> &local) {
   vector<string> where;
-  
+
   p4__where(where, files);
   depot.clear();
   view.clear();
@@ -228,7 +228,7 @@ void p4__where(const list<string> &files,
 
 // P4FileInfo ------------------------------------------------------------------
 
-P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false), 
+P4FileInfo::P4FileInfo(): rev(-1), chnum(0), locked(false),
                           resolvable(false), changed(true) {
 }
 
@@ -340,7 +340,7 @@ bool P4Info::depot_find(const string &depot_path, P4FileInfo &fi) const {
 
 bool P4Info::local_find(const string &local_path, P4FileInfo &fi) const {
   const filemap_type::const_iterator it = by_local.find(local_path);
-  
+
   if(it == by_local.end())
     return false;
   return depot_find(it->second, fi);
@@ -348,7 +348,7 @@ bool P4Info::local_find(const string &local_path, P4FileInfo &fi) const {
 
 bool P4Info::relative_find(const string &relative_path, P4FileInfo &fi) const {
   const filemap_type::const_iterator it = by_relative.find(relative_path);
-  
+
   if(it == by_relative.end())
     return false;
   return depot_find(it->second, fi);
@@ -385,7 +385,7 @@ void P4Info::gather() {
   info.clear();
   by_local.clear();
   by_relative.clear();
-  
+
   P4FileInfo::get(info, "...");
 
   // 'p4 have' gives all files, in the form:
@@ -440,7 +440,7 @@ void P4Info::gather() {
       ++it)
     if(it->second.local_path.size() == 0)
       files.push_back(it->first);
-  
+
   if(files.size()) {
     // Use 'p4 where' to map depot paths to local paths
     vector<string> where;

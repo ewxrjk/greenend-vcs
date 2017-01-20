@@ -1,6 +1,6 @@
 * Before You Start, And After You Finish
 
-** Availability Of Dependencies 
+** Availability Of Dependencies
 
 I need to be able to test any changes you submit.  This means I need
 to be able to get and run any new version control systems that are
@@ -109,7 +109,7 @@ The constructor should:
    - Call register_alias() with an aliases for the command.
 
 > void help(FILE *fp = stdout) const {
->   fprintf(fp, 
+>   fprintf(fp,
 >           "Usage:\n"
 >           "  vcs commit [OPTIONS] [FILENAME ...]\n"
 >           "Options:\n"

@@ -32,12 +32,12 @@ public:
 
   // Calle after the fork
   virtual void afterfork() = 0;
-  
+
   // Called before select()
   virtual void beforeselect(fd_set *rfds, fd_set *wfds, int &max) = 0;
 
   // Called after select()
-  virtual void afterselect(fd_set *rfds, fd_set *wfds) = 0; 
+  virtual void afterselect(fd_set *rfds, fd_set *wfds) = 0;
 
   // Test whether this monitor is still active
   virtual bool active() = 0;
@@ -60,7 +60,7 @@ public:
   }
 protected:
   int fd;
-  
+
   void update_fd_set(fd_set *fds, int &max) {
     if(fd != -1) {
       FD_SET(fd, fds);
@@ -115,12 +115,12 @@ private:
       _exit(1);
     }
   }
-  
+
   void afterfork() {
     if(::close(parentfd) < 0)
       fatal("error calling close: %s", strerror(errno));
   }
-  
+
   void make_pipe(int &rfd, int &wfd) {
     int p[2];
 
@@ -148,7 +148,7 @@ public:
       const void *ptr = available(nbytes);
       if(nbytes) {
         const int written = write(fd, ptr, nbytes);
-        
+
         if(written < 0)
           fatal("write error: %s", strerror(errno));
         wrote(written);
@@ -178,7 +178,7 @@ public:
 private:
   // string to write
   string s;
-  
+
   // bytes written so far
   size_t written;
 
@@ -202,12 +202,12 @@ public:
   void beforeselect(fd_set *rfds, fd_set *, int &max) {
     update_fd_set(rfds, max);
   }
-  
+
   void afterselect(fd_set *rfds, fd_set *) {
     if(fd >= 0 && FD_ISSET(fd, rfds)) {
       char buffer[4096];
       int n = ::read(fd, buffer, sizeof buffer);
-      
+
       if(n < 0)
         fatal("read error: %s", strerror(errno));
       if(n == 0) {
@@ -217,10 +217,10 @@ public:
         read(buffer, n);
     }
   }
-  
+
   // Called when bytes have been read
   virtual void read(void *ptr, size_t nbytes) = 0;
-  
+
   // Called at EOF
   virtual void eof() {
     // Default does nothing
@@ -268,7 +268,7 @@ static string shellquote(const string &s) {
 
 void display_command(const vector<string> &vs) {
   for(size_t n = 0; n < vs.size(); ++n)
-    fprintf(stderr, "%s%s", 
+    fprintf(stderr, "%s%s",
             n ? " " : "",
             shellquote(vs[n]).c_str());
   fputc('\n',  stderr);
@@ -306,7 +306,7 @@ static int exec(const vector<string> &args,
   if(pid == 0) {
     for(it = monitors.begin();
         it != monitors.end();
-        ++it) 
+        ++it)
       (*it)->insidefork();
     if(killfds) {
       const int nullfd = open("/dev/null", O_RDWR);
@@ -340,7 +340,7 @@ static int exec(const vector<string> &args,
   }
   for(it = monitors.begin();
       it != monitors.end();
-      ++it) 
+      ++it)
     (*it)->afterfork();
   /* Feed in input and gather output */
   for(;;) {
@@ -379,7 +379,7 @@ static int exec(const vector<string> &args,
     fatal("error calling waitpid: %s", strerror(errno));
   // Signals are always fatal
   if(WIFSIGNALED(w))
-    fatal("%s received fatal signal %d (%s)", cargs[0], 
+    fatal("%s received fatal signal %d (%s)", cargs[0],
           WTERMSIG(w), strsignal(WTERMSIG(w)));
   if(WIFEXITED(w))
     return WEXITSTATUS(w);
@@ -440,7 +440,7 @@ static void assemble(vector<string> &cmd,
 static void split(vector<string> &lines, const string &s, int stripNewlines = 1) {
   string::size_type pos = 0, n;
   const string::size_type limit = s.size();
-  
+
   lines.clear();
   while(pos < limit && (n = s.find('\n', pos)) != string::npos) {
     lines.push_back(s.substr(pos, n - pos + !stripNewlines));
@@ -473,7 +473,7 @@ vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...) {
   va_list ap;
-  
+
   va_start(ap, prog);
   vmakevs(command, prog, ap);
   va_end(ap);
@@ -538,9 +538,9 @@ int inject(const vector<string> &input,
   return execute(command, &input, NULL, NULL);
 }
 
-void report_lines(const vector<string> &l, 
-                  const char *what, 
-                  const char *prefix, 
+void report_lines(const vector<string> &l,
+                  const char *what,
+                  const char *prefix,
                   FILE *fp) {
   if(what)
     fprintf(fp, "%s:\n", what);

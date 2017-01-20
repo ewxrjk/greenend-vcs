@@ -14,7 +14,7 @@ public:
 
   void open(const std::string &path_);
   bool get(std::string &name) const;
-  
+
   static void getFiles(std::vector<std::string> &files,
                        const std::string &dir);
 

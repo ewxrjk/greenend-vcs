@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -35,7 +35,7 @@ void command::register_alias(const char *alias) {
 void command::list() {
   int maxlen = 0;
 
-  for(commands_t::iterator it = commands->begin(); 
+  for(commands_t::iterator it = commands->begin();
       it != commands->end();
       ++it) {
     command *c = it->second;
@@ -45,7 +45,7 @@ void command::list() {
         maxlen = l;
     }
   }
-  for(commands_t::iterator it = commands->begin(); 
+  for(commands_t::iterator it = commands->begin();
       it != commands->end();
       ++it) {
     command *c = it->second;
@@ -82,7 +82,7 @@ const command *command::find(const string &cmd) {
   case 1:
     return (*commands)[prefixes.front()];
   default:
-    fatal("'%s' is not a unique prefix (try vcs -H or a longer prefix)", 
+    fatal("'%s' is not a unique prefix (try vcs -H or a longer prefix)",
           cmd.c_str());
   }
 }

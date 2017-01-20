@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -209,7 +209,7 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
         newfiles.push_back(xstrdup(it->first.c_str()));
       else if(flags & fileTracked)
         if(flags & fileWritable)
-          newfiles.push_back(xstrdup(it->first.c_str()));            
+          newfiles.push_back(xstrdup(it->first.c_str()));
     }
     files = &newfiles[0];
     nfiles = newfiles.size();
@@ -243,7 +243,7 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
       cleanup.push_back(xstrdup(flag_path(files[n]).c_str()));
   if(cleanup.size())
     execute("rm",
-            EXE_STR, "-f", 
+            EXE_STR, "-f",
             EXE_STRS, (int)cleanup.size(), &cleanup[0],
             EXE_END);
   return rc;
@@ -279,7 +279,7 @@ int rcsbase::status() const {
       ++it) {
     int flags = it->second;
     int state;
-      
+
     if(!(flags & fileExists))
       state = 'U';                    // update required
     else if(flags & fileTracked) {

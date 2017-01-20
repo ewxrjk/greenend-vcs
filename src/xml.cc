@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -78,7 +78,7 @@ public:
     if(XML_Parse(expat, s.data(), s.size(), 0) != XML_STATUS_OK)
       fatal("XML_Parse failed");
   }
-  
+
   void done() {
     if(XML_Parse(expat, "", 0, 1) != XML_STATUS_OK)
       fatal("XML_Parse failed");
@@ -157,15 +157,15 @@ private:
       p->root = n;
     p->current = n;
   }
-  
+
   // Called at the end of an element
   static void XMLCALL end_element(void *userData,
                                   const XML_Char *) {
     Parser *p = (Parser *)userData;
-    
+
     p->current = p->current->parent;
   }
-  
+
   // Called with character data
   static void XMLCALL character_data(void *userData,
                                      const XML_Char *s,
@@ -174,7 +174,7 @@ private:
     if(p->want_character_data) {
       XMLString *n = new XMLString(p->current);
       n->value = expat_to_native(s, len);
-      if(p->current) 
+      if(p->current)
         p->current->contents.push_back(n);
       else
         p->root = n;

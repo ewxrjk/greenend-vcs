@@ -10,7 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -141,7 +141,7 @@ t_populate() {
 # On entry, 'project' should be as per the result of t_populate.
 # project/one will have 'oneone' appended.  Most of the work is
 # examining differences rather than making changes.
-# 
+#
 t_modify() {
     echo "--- t_modify"
     cd project
@@ -263,8 +263,8 @@ t_revert() {
     fi
     x vcs -v rm -f two
     if [ -e two ]; then
-	echo "removed 'two' but it's still there" >&2
-	exit 1
+        echo "removed 'two' but it's still there" >&2
+        exit 1
     fi
     echo three > three
     x vcs -v add three
@@ -408,7 +408,7 @@ xfail() {
       exit 1
     fi
 }
-  
+
 # fatal MESSAGE...
 #
 # Exit with a fatal error
@@ -436,7 +436,7 @@ Options: noallwrite noclobber nocompress unlocked nomodtime normdir
 SubmitOptions:	submitunchanged
 LineEnd: local
 View:
-	//depot/... //$NAME/...
+        //depot/... //$NAME/...
 EOF
 }
 

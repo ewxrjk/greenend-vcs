@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -106,7 +106,7 @@ public:
       // index.
       set<string> revertfiles;
       for(int n = 0; n < nfiles; ++n)
-        revertfiles.insert(string(files[n])); 
+        revertfiles.insert(string(files[n]));
       // Get the current tree status
       vector<string> status;
       capture(status, "git", "status", (char *)NULL);

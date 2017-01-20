@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -152,8 +152,8 @@ string parentdir(const string &d, bool allowDot = true);
 string basename_(const string &d);
 string dirname_(const string &d);
 int isroot(const string &d);
-void fatal(const char *msg, ...) 
-  attribute((noreturn))  
+void fatal(const char *msg, ...)
+  attribute((noreturn))
   attribute((format (printf, 1, 2)));
 int erase(const char *s);
 string tempfile();
@@ -203,15 +203,15 @@ void display_command(const vector<string> &vs);
 vector<string> &makevs(vector<string> &command,
                        const char *prog,
                        ...);
-void report_lines(const vector<string> &l, 
-                  const char *what = NULL, 
-                  const char *prefix = NULL, 
+void report_lines(const vector<string> &l,
+                  const char *what = NULL,
+                  const char *prefix = NULL,
                   FILE *fp = stderr);
 string get_relative_path(const string &s);
 int editor(vector<string> &file);
 int generic_rename(int nsources, char **sources, const char *destination,
-		   void (*rename_one)(const string &source,
-				      const string &destination));
+                   void (*rename_one)(const string &source,
+                                      const string &destination));
 
 // like printf but throws and knows what file it's writing to
 int writef(FILE *fp, const char *what, const char *fmt, ...);

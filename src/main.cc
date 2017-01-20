@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -61,7 +61,7 @@ static int Main(int argc, char **argv) {
   // Parse global options
   while((n = getopt_long(argc, argv, "+hVHgvn46d", options, 0)) >= 0) {
     switch(n) {
-    case 'h': 
+    case 'h':
       help();
       return 0;
     case 'V':
@@ -81,7 +81,7 @@ static int Main(int argc, char **argv) {
     case 'n':
       dryrun = 1;
       break;
-    case '4': 
+    case '4':
     case '6':
       ipv = n - '0';
       break;

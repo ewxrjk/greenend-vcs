@@ -61,16 +61,16 @@ span.command {
     <h3>Changes to Bazaar support</h3>
 
     <div class=section>
-   
+
     <p><code>vcs remove --force</code> updated to work with Bazaar 2.7, which
     removes the <code>--force</code> option.</p>
- 
+
     </div>
 
     <h3>Changes to Git support</h3>
 
     <div class=section>
-    
+
     <p><code>vcs revert</code> updated to work with new versions of Git, which
     change the format of <code>git status</code>.</p>
 
@@ -79,7 +79,7 @@ span.command {
     <h3>Changes to Subversion support</h3>
 
     <div class=section>
-    
+
     <p>All commands updated to encode filenames so that they aren&#8217;t
     mis-recognized as containing peg revisions.</p>
 
@@ -95,9 +95,9 @@ span.command {
   <div>
 
     <h3>New Backends</h3>
-   
+
     <div>
-     
+
      <p>RCS and SCCS are now supported (with some limitations).</p>
 
     </div>
@@ -105,7 +105,7 @@ span.command {
     <h3>CVS Support</h3>
 
     <div>
-     
+
      <p><tt>vcs diff</tt> now asks for <tt>cvs diff -Nu</tt>.</p>
 
     </div>
@@ -125,9 +125,9 @@ span.command {
   <div>
 
    <h3>General</h3>
-   
+
    <div>
-    
+
     <p>There is a new <tt>vcs rename</tt> command, which renames files under
     version control.  This works with all the version control systems except
     CVS.</p>
@@ -205,7 +205,7 @@ span.command {
    <h3>General</h3>
 
    <div>
-   
+
     <p><a href="http://expat.sourceforge.net/">Expat</a> is now required to
     build <tt>vcs</tt>.</p>
 
@@ -216,13 +216,13 @@ span.command {
     before some slow underlying command has finished executing, <tt>vcs</tt>
     should now exit immediately rather than waiting for the subprocess to
     complete.</p>
- 
+
    </div>
 
    <h3>Changes to Perforce support</h3>
-   
+
    <div>
-    
+
     <p>Filenames containing <tt>@</tt>, <tt>%</tt>, <tt>#</tt> and
     <tt>*</tt> should now be properly encoded and decoded.</p>
 
@@ -238,7 +238,7 @@ span.command {
     href="http://code.google.com/p/greenend-vcs/issues/detail?id=2">issue
     #2</a>).</p>
 
-   </div>   
+   </div>
 
    <h3>Changes to Bazaar support</h3>
 
@@ -252,7 +252,7 @@ span.command {
    <h3>Changes to Subversion support</h3>
 
    <div>
-    
+
     <p><tt>vcs revert</tt> now supports Subversion back to 1.3 (previously it
     would misparse output from 1.3 and 1.4).  A possible hang was also
     removed.</p>
@@ -260,7 +260,7 @@ span.command {
    </div>
 
    <h3>Changes to Git support</h3>
-   
+
    <div>
 
     <p>Improved support for older versions of Git and fixed <tt>vcs
@@ -269,7 +269,7 @@ span.command {
    </div>
 
    <h3>Changes to Darcs support</h3>
-   
+
    <div>
 
     <p>Tests now set <tt>$EMAIL</tt> to avoid a interaction (or a hang!)</p>
@@ -277,7 +277,7 @@ span.command {
    </div>
 
    <h3>Changes to Mercurial support</h3>
-   
+
    <div>
 
     <p><tt>vcs clone</tt> now recognises the <tt>static-http:</tt> scheme.</p>
@@ -287,7 +287,7 @@ span.command {
    </div>
 
    <h3>Changes to CVS support</h3>
-   
+
    <div>
 
     <p>Cope better with conflicts.</p>
@@ -295,7 +295,7 @@ span.command {
    </div>
 
   </div>
-  
+
   <h2>Changes in VCS 0.5</h2>
 
   <div>
@@ -307,7 +307,7 @@ span.command {
    <h3>Changes to Perforce support</h3>
 
    <div>
-    
+
     <p>Perforce support is now more self-consistent.  In particular <tt>vcs
     diff</tt> and <tt>vcs commit</tt> now have a default of <tt>...</tt>,
     applying them to just the current directory and its children rather than
@@ -321,7 +321,7 @@ span.command {
   </div>
 
   <h2>Changes in VCS 0.4</h2>
-  
+
   <div>
 
    <p>New version control systems supported:</p>
@@ -344,9 +344,9 @@ span.command {
    could go into an infinite loop.</p>
 
   </div>
-  
+
   <h2>Changes in VCS 0.3</h2>
-  
+
   <div>
 
    <p><a href="http://git-scm.com/">Git</a> is now supported.</p>
@@ -356,7 +356,7 @@ span.command {
   </div>
 
   <h2>Changes in VCS 0.2</h2>
-  
+
   <div>
 
    <p>New commands:</p>
@@ -365,11 +365,11 @@ span.command {
     <li><tt>vcs update</tt> - update to head revision</li>
     <li><tt>vcs log</tt> - display change history</li>
    </ul>
-   
+
   </div>
-  
+
   <hr>
-  
+
   <p>Other sources of change information:</p>
   <ul>
    <li><a href="http://www.chiark.greenend.org.uk/ucgi/~richardk/git/vcs.git/">gitweb for vcs</a>

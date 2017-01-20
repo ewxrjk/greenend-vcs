@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -90,7 +90,7 @@ public:
     for(size_t n = 0; n < status.size(); ++n) {
       switch(status[n][0]) {
       case 'M':
-        modified.insert(status[n].substr(2)); 
+        modified.insert(status[n].substr(2));
         break;
       case 'A':
         added.insert(status[n].substr(2));
@@ -173,9 +173,9 @@ public:
         s << *it << ".save." << rand();
       } while(exists(s.str()));
       const string save = s.str();
-      if(execute("mv", 
+      if(execute("mv",
                  EXE_STR, "--",
-                 EXE_STR, it->c_str(), 
+                 EXE_STR, it->c_str(),
                  EXE_STR, save.c_str(),
                  EXE_END))
         return 1;
@@ -185,10 +185,10 @@ public:
                  EXE_STR, it->c_str(),
                  EXE_END))
         failed = 1;
-      if(execute("mv", 
+      if(execute("mv",
                  EXE_STR, "--",
                  EXE_STR, save.c_str(),
-                 EXE_STR, it->c_str(), 
+                 EXE_STR, it->c_str(),
                  EXE_END))
         return 1;
       if(failed)

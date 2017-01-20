@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -81,7 +81,7 @@ public:
                    EXE_STRS, nfiles, files,
                    EXE_END);
   }
-  
+
   int status() const {
     return execute("bzr",
                    EXE_STR, "status",
@@ -111,7 +111,7 @@ public:
                    EXE_IFSTR(path, path),
                    EXE_END);
   }
-  
+
   int annotate(const char *path) const {
     return execute("bzr",
                    EXE_STR, "annotate",
@@ -119,7 +119,7 @@ public:
                    EXE_STR, path,
                    EXE_END);
   }
-  
+
   int clone(const char *uri, const char *dir) const {
     return execute("bzr",
                    EXE_STR, "branch",

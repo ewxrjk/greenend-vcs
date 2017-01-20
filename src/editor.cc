@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -48,7 +48,7 @@ int editor(vector<string> &file) {
   } else if(WIFEXITED(rc))
     rc = WEXITSTATUS(rc);
   else if(WIFSIGNALED(rc)) {
-    fprintf(stderr, "%s received fatal signal %d (%s)", editor, 
+    fprintf(stderr, "%s received fatal signal %d (%s)", editor,
             WTERMSIG(rc), strsignal(WTERMSIG(rc)));
     rc = 128 + WTERMSIG(rc);
   }

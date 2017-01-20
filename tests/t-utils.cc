@@ -52,7 +52,7 @@ int main(void) {
   assert(!isreg(",dir.tmp", false));
   assert(isdir(",dir.tmp"));
   assert(isdir(",dir.tmp", false));
-  
+
   assert(!isreg(",symdir.tmp"));
   assert(!isreg(",symdir.tmp", false));
   assert(isdir(",symdir.tmp"));
@@ -67,7 +67,7 @@ int main(void) {
   assert(!isreg(",dangling.tmp", false));
   assert(!isdir(",dangling.tmp"));
   assert(!isdir(",dangling.tmp", false));
-  
+
   erase(",reg.tmp");
   erase(",symreg.tmp");
   erase(",dir.tmp");

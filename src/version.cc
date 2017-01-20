@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,7 +21,7 @@ static long extract_number(const string &s,
                            size_t &an) {
   const char *start = s.c_str() + an;
   const char *end;
-  
+
   errno = 0;
   const long n = strtol(start, (char **)&end, 10);
   if(errno)
@@ -40,13 +40,13 @@ int version_compare(const string &a, const string &b) {
       const long aa = extract_number(a, an);
       const long bb = extract_number(b, bn);
       // ...an/nb updated by these calls
-      
+
       if(aa != bb)
         return aa < bb ? -1 : 1;
     } else {
       const int aa = an < a.size() ? a[an] : -1;
       const int bb = bn < b.size() ? b[bn] : -1;
-      
+
       if(aa != bb)
         return aa < bb ? -1 : 1;
       ++an;

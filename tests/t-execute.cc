@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,7 +21,7 @@ static vector<string> makevs(const char *first, ...) {
   vector<string> vs;
   const char *s;
   va_list ap;
-  
+
   vs.push_back(first);
   va_start(ap, first);
   while((s = va_arg(ap, const char *)))
@@ -71,7 +71,7 @@ int main(int argc, char **) {
                  &i, &o, NULL) == 0);
   assert(o.size() == 1);
   assert(o[0] == "wibble");
-  
+
   return 0;
 }
 

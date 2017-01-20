@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -70,12 +70,12 @@ class P4Info {
 public:
   P4Info();
   ~P4Info();
-  
+
   // Look up one file by various kinds of filename
   bool depot_find(const string &depot_path, P4FileInfo &fi) const;
   bool local_find(const string &local_path, P4FileInfo &fi) const;
   bool relative_find(const string &relative_path, P4FileInfo &fi) const;
-  
+
   // Look up a list of known filenames of whichever kind
   void depot_list(list<string> &depot_paths) const;
   void local_list(list<string> &local_paths) const;
