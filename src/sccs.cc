@@ -55,18 +55,18 @@ public:
     return name.substr(2);
   }
 
-  int native_diff(int nfiles, char **files) const {
+  int native_diff(const vector<string> &files) const {
     // sccs diffs works OK on nontrivial paths
     return execute("sccs",
                    EXE_STR, "diffs",
                    EXE_STR, "-u",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
 
-  int native_commit(int nfiles, char **files, const string &msg) const {
+  int native_commit(const vector<string> &files, const string &msg) const {
     int rc = 0;
-    for(int n = 0; n < nfiles && !rc; ++n) {
+    for(size_t n = 0; n < files.size() && !rc; ++n) {
       InDirectory id(dirname_(files[n]));
       string base = basename_(files[n]);
       if(is_tracked(base)) {

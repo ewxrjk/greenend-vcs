@@ -19,7 +19,6 @@
 #define SVNUTILS_H
 
 string svn_encode(const string &s);
-char **svn_encode(int nfiles, char **files);
 
 #endif /* SVNUTILS_H */
 

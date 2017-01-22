@@ -54,8 +54,8 @@ public:
   // Enumerate all files below here
   void enumerate(map<string,int> &files) const;
 
-  virtual int native_diff(int nfiles, char **files) const = 0;
-  virtual int native_commit(int nfiles, char **files,
+  virtual int native_diff(const vector<string> &files) const = 0;
+  virtual int native_commit(const vector<string> &files,
                             const string &msg) const = 0;
   virtual int native_edit(int nfiles, char **files) const = 0;
   virtual int native_update(int nfiles, char **files) const = 0;

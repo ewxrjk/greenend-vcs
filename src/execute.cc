@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "vcs.h"
+#include "svnutils.h"
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -406,17 +407,42 @@ static void assemble(vector<string> &cmd,
         cmd.push_back(str);
       break;
     }
+    case EXE_STR|EXE_SVN:
+      cmd.push_back(svn_encode(va_arg(ap, const char *)));
+      break;
     case EXE_SKIPSTR:
     case EXE_SKIPSTR|EXE_DOTSTUFF:
+    case EXE_SKIPSTR|EXE_SVN:
       va_arg(ap, char *);
       break;
     case EXE_STRS:
-    case EXE_STRS|EXE_DOTSTUFF: {
+    case EXE_STRS|EXE_DOTSTUFF:
+    case EXE_STRS|EXE_SVN: {
       int count = va_arg(ap, int);
       char **strs = va_arg(ap, char **);
       while(count-- > 0) {
         const char *s = *strs++;
-        string t;
+        if(op & EXE_SVN)
+          cmd.push_back(svn_encode(s));
+        else if(s[0] == '-' && (op & EXE_DOTSTUFF))
+          cmd.push_back(string("./") + s);
+        else
+          cmd.push_back(s);
+      }
+      break;
+    }
+    case EXE_SET: {
+      const set<string> *ss = va_arg(ap, const set<string> *);
+      for(set<string>::const_iterator it = ss->begin(); it != ss->end(); ++it)
+        cmd.push_back(*it);
+      break;
+    }
+    case EXE_VECTOR:
+    case EXE_VECTOR|EXE_DOTSTUFF: {
+      const vector<string> *ss = va_arg(ap, const vector<string> *);
+      for(vector<string>::const_iterator it = ss->begin(); it != ss->end();
+          ++it) {
+        const string &s = *it;
         if(s[0] == '-' && (op & EXE_DOTSTUFF))
           cmd.push_back(string("./") + s);
         else

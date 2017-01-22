@@ -40,10 +40,10 @@ public:
     return name.substr(0, name.size() - 2);
   }
 
-  int native_diff(int nfiles, char **files) const {
+  int native_diff(const vector<string> &files) const {
     return execute("rcsdiff",
                    EXE_STR, "-u",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
 
@@ -53,13 +53,13 @@ public:
     return rcsbase::add(binary, nfiles, files);
   }
 
-  int native_commit(int nfiles, char **files, const string &msg) const {
+  int native_commit(const vector<string> &files, const string &msg) const {
     vector<string> command;
     command.push_back("ci");
     command.push_back("-u");    // don't delete work file
     command.push_back("-t-" + string(msg));
     command.push_back("-m" + string(msg));
-    for(int n = 0; n < nfiles; ++n)
+    for(size_t n = 0; n < files.size(); ++n)
       if(n == 0 && files[n][0] == '-')
         command.push_back("./" + std::string(files[n]));
       else

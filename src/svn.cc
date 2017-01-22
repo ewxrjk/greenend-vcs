@@ -17,7 +17,6 @@
  */
 #include "vcs.h"
 #include "xml.h"
-#include "svnutils.h"
 #include <algorithm>
 
 class svn: public vcs {
@@ -33,7 +32,7 @@ public:
     return execute("svn",
                    EXE_STR, "diff",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, svn_encode(nfiles, files),
+                   EXE_STRS|EXE_SVN, nfiles, files,
                    EXE_END);
   }
 
@@ -41,7 +40,7 @@ public:
     return execute("svn",
                    EXE_STR, "add",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, svn_encode(nfiles, files),
+                   EXE_STRS|EXE_SVN, nfiles, files,
                    EXE_END);
   }
 
@@ -50,7 +49,7 @@ public:
                    EXE_STR, "delete",
                    EXE_IFSTR(force, "--force"),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, svn_encode(nfiles, files),
+                   EXE_STRS|EXE_SVN, nfiles, files,
                    EXE_END);
   }
 
@@ -60,7 +59,7 @@ public:
                    EXE_IFSTR(msg, "-m"),
                    EXE_IFSTR(msg, msg),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, svn_encode(nfiles, files),
+                   EXE_STRS|EXE_SVN, nfiles, files,
                    EXE_END);
   }
 
@@ -139,7 +138,7 @@ public:
       return execute("svn",
                      EXE_STR, "revert",
                      EXE_STR, "--",
-                     EXE_STRS, nfiles, svn_encode(nfiles, files),
+                     EXE_STRS|EXE_SVN, nfiles, files,
                      EXE_END);
   }
 

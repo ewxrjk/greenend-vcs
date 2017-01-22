@@ -83,19 +83,6 @@ public:
     }
   }
 
-  static char **git_set_to_file_list(int *nfilesp,
-                                     set<string> &files) {
-    vector<char *> v;
-    for(set<string>::iterator it = files.begin();
-        it != files.end();
-        ++it)
-      v.push_back((char *)it->c_str());
-    *nfilesp = v.size();
-    char **filelist = (char **)calloc(v.size(), sizeof (char *));
-    memcpy(filelist, &v[0], v.size() * sizeof (char *));
-    return filelist;
-  }
-
   int revert(int nfiles, char **files) const {
     if(nfiles) {
       /* git-checkout can be used to reset individual modified files (included
@@ -137,24 +124,19 @@ public:
       }
       int rc = 0;
       if(newfiles.size()) {
-        int nnewfilelist;
-        char **newfilelist = git_set_to_file_list(&nnewfilelist, newfiles);
         rc = execute("git",
                      EXE_STR, "rm",
                      EXE_STR, "-f",
                      EXE_STR, "--",
-                     EXE_STRS, nnewfilelist, newfilelist,
+                     EXE_SET, &newfiles,
                      EXE_END);
       }
       if(!rc && revertfiles.size()) {
-        int nrevertfilelist;
-        char **revertfilelist = git_set_to_file_list(&nrevertfilelist,
-                                                     revertfiles);
         rc = execute("git",
                      EXE_STR, "checkout",
                      EXE_STR, "HEAD",
                      EXE_STR, "--",
-                     EXE_STRS, nrevertfilelist, revertfilelist,
+                     EXE_SET, &revertfiles,
                      EXE_END);
       }
       return rc;

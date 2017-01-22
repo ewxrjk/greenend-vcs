@@ -33,16 +33,6 @@ string svn_encode(const string &s) {
     return s + "@";
 }
 
-// Encode multiple filenames
-char **svn_encode(int nfiles, char **files) {
-  char **newfiles = (char **)calloc(nfiles, sizeof *files);
-  int n;
-
-  for(n = 0; n < nfiles; ++n)
-    newfiles[n] = xstrdup(svn_encode(files[n]).c_str());
-  return newfiles;
-}
-
 /*
 Local Variables:
 c-basic-offset:2

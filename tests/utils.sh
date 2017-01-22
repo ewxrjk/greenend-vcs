@@ -109,6 +109,7 @@ t_populate() {
     esac
     x vcs -v commit -m 'one and two'
 
+    echo Add a subdirectory and one file
     mkdir subdir
     x vcs -v add subdir
     cd subdir
@@ -119,16 +120,21 @@ t_populate() {
     grep '^+subone' delta
     x vcs commit -m 'added subone'
 
+    echo Add a second file in the subdirectory
     echo subtwo > subtwo
     cd ../
     x vcs add subdir/subtwo
     x vcs -v diff > delta || true
     cat delta
+    echo Existing file should not show as added
     grep '^+subone' delta && exit 1
+    echo New file should show as added
     grep '^+subtwo' delta > /dev/null
     x vcs -v diff subdir/subtwo > delta || true
     cat delta
+    echo Explicit diff of existing file should list it
     grep '^+subtwo' delta > /dev/null
+    echo Explicit diff of existing file should not list anything else
     grep '^+subone' delta && exit 1
     grep '^+one' delta && exit 1
     grep '^+two' delta && exit 1

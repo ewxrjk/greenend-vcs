@@ -169,7 +169,10 @@ char *xstrdup(const char *s);
 #define EXE_IFSTR_DOTSTUFF(COND, STR) (COND) ? EXE_STR|EXE_DOTSTUFF : EXE_SKIPSTR, (STR)
 #define EXE_NO_STDOUT 4
 #define EXE_NO_STDERR 5
+#define EXE_SET 6
+#define EXE_VECTOR 7
 #define EXE_DOTSTUFF 16
+#define EXE_SVN 32
 int execute(const char *prog, ...);
 
 int capture(vector<string> &lines,
