@@ -69,33 +69,34 @@ public:
     for(size_t n = 0; n < files.size() && !rc; ++n) {
       InDirectory id(dirname_(files[n]));
       string base = basename_(files[n]);
+      string option = "-y" + msg;
       if(is_tracked(base)) {
         rc = execute("sccs",
                      EXE_STR, "delget",
-                     EXE_STR, ("-y" + string(msg)).c_str(),
-                     EXE_STR|EXE_DOTSTUFF, base.c_str(),
+                     EXE_STRING, &option,
+                     EXE_STRING|EXE_DOTSTUFF, &base,
                      EXE_END);
       } else {
         // TODO binary files
         rc = execute("sccs",
                      EXE_STR, "create",
                      EXE_IFSTR(is_binary(base), "-b"),
-                     EXE_STR, ("-y" + string(msg)).c_str(),
-                     EXE_STR|EXE_DOTSTUFF, base.c_str(),
+                     EXE_STRING, &option,
+                     EXE_STRING|EXE_DOTSTUFF, &base,
                      EXE_END);
       }
     }
     return rc;
   }
 
-  int native_revert(int nfiles, char **files) const {
+  int native_revert(const vector<string> &files) const {
     int rc = 0;
-    for(int n = 0; n < nfiles && !rc; ++n) {
+    for(size_t n = 0; n < files.size() && !rc; ++n) {
       InDirectory id(dirname_(files[n]));
       string base = basename_(files[n]);
       rc = execute("sccs",
                    EXE_STR, "unedit",
-                   EXE_STR|EXE_DOTSTUFF, base.c_str(),
+                   EXE_STRING|EXE_DOTSTUFF, &base,
                    EXE_END);
     }
     return rc;
@@ -108,30 +109,30 @@ public:
       string base = basename_(files[n]);
       rc = execute("sccs",
                    EXE_STR, "get",
-                   EXE_STR|EXE_DOTSTUFF, base.c_str(),
+                   EXE_STRING|EXE_DOTSTUFF, &base,
                    EXE_END);
     }
     return rc;
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     if(!path)
       fatal("'vcs log' requires a filename with SCCS");
     // sccs prs works OK on nontrivial paths
     return execute("sccs",
                    EXE_STR, "prs",
-                   EXE_STR|EXE_DOTSTUFF, path,
+                   EXE_STRING|EXE_DOTSTUFF, path,
                    EXE_END);
   }
 
-  int native_edit(int nfiles, char **files) const {
+  int native_edit(const vector<string> &files) const {
     int rc = 0;
-    for(int n = 0; n < nfiles && !rc; ++n) {
+    for(size_t n = 0; n < files.size() && !rc; ++n) {
       InDirectory id(dirname_(files[n]));
       string base = basename_(files[n]);
       rc = execute("sccs",
                    EXE_STR, "edit",
-                   EXE_STR|EXE_DOTSTUFF, base.c_str(),
+                   EXE_STRING|EXE_DOTSTUFF, &base,
                    EXE_END);
     }
     return rc;

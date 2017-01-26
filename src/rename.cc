@@ -60,7 +60,8 @@ public:
     const char *destination = argv[argc - 1];
     if(nsources > 1 && !isdir(destination))
       fatal("When renaming multiple files, destination must be a directory.\n");
-    return guess()->rename(nsources, sources, destination);
+    return guess()->rename(vector<string>(sources, sources+nsources),
+                           destination);
   }
 };
 

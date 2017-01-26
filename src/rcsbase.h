@@ -57,18 +57,18 @@ public:
   virtual int native_diff(const vector<string> &files) const = 0;
   virtual int native_commit(const vector<string> &files,
                             const string &msg) const = 0;
-  virtual int native_edit(int nfiles, char **files) const = 0;
+  virtual int native_edit(const vector<string> &files) const = 0;
   virtual int native_update(const vector<string> &files) const = 0;
-  virtual int native_revert(int nfiles, char **files) const = 0;
+  virtual int native_revert(const vector<string> &files) const = 0;
 
-  int diff(int nfiles, char **files) const;
-  virtual int add(int binary, int nfiles, char **files) const;
-  int commit(const char *msg, int nfiles, char **files) const;
-  int remove(int force, int nfiles, char **files) const;
+  int diff(const vector<string> &files) const;
+  virtual int add(int binary, const vector<string> &files) const;
+  int commit(const string *msg, const vector<string> &files) const;
+  int remove(int force, const vector<string> &files) const;
   int status() const;
-  int edit(int nfiles, char **files) const;
+  int edit(const vector<string> &files) const;
   int update() const;
-  int revert(int nfiles, char **files) const;
+  int revert(const vector<string> &files) const;
 
   bool detect(void) const;
 };

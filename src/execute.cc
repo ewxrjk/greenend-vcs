@@ -17,6 +17,7 @@
  */
 #include "vcs.h"
 #include "svnutils.h"
+#include "p4utils.h"
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -387,6 +388,21 @@ static int exec(const vector<string> &args,
   fatal("%s exited with unknown wait status %#x", cargs[0], w);
 }
 
+static string dotstuff(const string &s) {
+  if(s.size() && s.at(0) == '-')
+    return "./" + s;
+  else
+    return s;
+}
+
+static string dotstuff_p4(const string &s) {
+  return dotstuff(p4_encode(s));
+}
+
+static string identity(const string &s) {
+  return s;
+}
+
 // Assemble a command from an argument list
 static void assemble(vector<string> &cmd,
                      const char *prog,
@@ -395,61 +411,50 @@ static void assemble(vector<string> &cmd,
   cmd.push_back(prog);
   int op;
   while((op = va_arg(ap, int)) != EXE_END) {
+    string (*transform)(const string &);
+    int tbits = op & (EXE_DOTSTUFF|EXE_SVN|EXE_P4);
+    switch(tbits) {
+    case EXE_DOTSTUFF: transform = dotstuff; break;
+    case EXE_SVN: transform = svn_encode; break;
+    case EXE_P4: transform = p4_encode; break;
+    case EXE_DOTSTUFF|EXE_P4: transform = dotstuff_p4; break;
+    case 0: transform = identity; break;
+    default: assert(!"unsupported execute() op tbits");
+    }
+    op ^= tbits;
     switch(op) {
     case EXE_STR:
-      cmd.push_back(va_arg(ap, char *));
+      cmd.push_back(transform(va_arg(ap, char *)));
       break;
-    case EXE_STR|EXE_DOTSTUFF: {
-      const char *str = va_arg(ap, const char *);
-      if(str[0] == '-')
-        cmd.push_back(string("./") + str);
-      else
-        cmd.push_back(str);
+    case EXE_STRING:
+    case EXE_STRING|EXE_OPT: {
+      const string *str = va_arg(ap, const string *);
+      if(str || !(op & EXE_OPT))
+        cmd.push_back(transform(*str));
       break;
     }
-    case EXE_STR|EXE_SVN:
-      cmd.push_back(svn_encode(va_arg(ap, const char *)));
-      break;
     case EXE_SKIPSTR:
-    case EXE_SKIPSTR|EXE_DOTSTUFF:
-    case EXE_SKIPSTR|EXE_SVN:
       va_arg(ap, char *);
       break;
-    case EXE_STRS:
-    case EXE_STRS|EXE_DOTSTUFF:
-    case EXE_STRS|EXE_SVN: {
+    case EXE_STRS: {
       int count = va_arg(ap, int);
       char **strs = va_arg(ap, char **);
       while(count-- > 0) {
-        const char *s = *strs++;
-        if(op & EXE_SVN)
-          cmd.push_back(svn_encode(s));
-        else if(s[0] == '-' && (op & EXE_DOTSTUFF))
-          cmd.push_back(string("./") + s);
-        else
-          cmd.push_back(s);
+        cmd.push_back(transform(*strs++));
       }
       break;
     }
     case EXE_SET: {
       const set<string> *ss = va_arg(ap, const set<string> *);
       for(set<string>::const_iterator it = ss->begin(); it != ss->end(); ++it)
-        cmd.push_back(*it);
+        cmd.push_back(transform(*it));
       break;
     }
-    case EXE_VECTOR:
-    case EXE_VECTOR|EXE_DOTSTUFF:
-    case EXE_VECTOR|EXE_SVN: {
+    case EXE_VECTOR: {
       const vector<string> *ss = va_arg(ap, const vector<string> *);
       for(vector<string>::const_iterator it = ss->begin(); it != ss->end();
           ++it) {
-        const string &s = *it;
-        if(op & EXE_SVN)
-          cmd.push_back(svn_encode(s));
-        else if(s[0] == '-' && (op & EXE_DOTSTUFF))
-          cmd.push_back(string("./") + s);
-        else
-          cmd.push_back(s);
+        cmd.push_back(transform(*it));
       }
       break;
     }

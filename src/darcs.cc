@@ -24,55 +24,55 @@ public:
     register_subdir("_darcs");
   }
 
-  int diff(int nfiles, char **files) const {
+  int diff(const vector<string> &files) const {
     return execute("darcs",
                    EXE_STR, "diff",
                    EXE_STR, "-u",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int add(int /*binary*/, int nfiles, char **files) const {
+  int add(int /*binary*/, const vector<string> &files) const {
     return execute("darcs",
                    EXE_STR, "add",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int remove(int force, int nfiles, char **files) const {
+  int remove(int force, const vector<string> &files) const {
     if(force)
       return execute("rm",
                      EXE_STR, "-f",
                      EXE_STR, "--",
-                     EXE_STRS, nfiles, files,
+                     EXE_VECTOR, &files,
                      EXE_END);
     else
       return execute("darcs",
                      EXE_STR, "remove",
                      EXE_STR, "--",
-                     EXE_STRS, nfiles, files,
+                     EXE_VECTOR, &files,
                      EXE_END);
   }
 
-  int commit(const char *msg, int nfiles, char **files) const {
+  int commit(const string *msg, const vector<string> &files) const {
     return execute("darcs",
                    EXE_STR, "record",
                    EXE_STR, "--all",
                    EXE_IFSTR(msg, "-m"),
-                   EXE_IFSTR(msg, msg),
+                   EXE_STRING|EXE_OPT, msg,
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int revert(int nfiles, char **files) const {
+  int revert(const vector<string> &files) const {
     return execute("darcs",
                    EXE_STR, "revert",
                    EXE_STR, "--all",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
@@ -92,46 +92,46 @@ public:
                    EXE_END);
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     return execute("darcs",
                    EXE_STR, "changes",
                    EXE_STR, "--",
-                   EXE_IFSTR(path, path),
+                   EXE_STRING|EXE_OPT, path,
                    EXE_END);
   }
 
-  int annotate(const char *path) const {
+  int annotate(const string &path) const {
     return execute("darcs",
                    EXE_STR, "annotate",
                    EXE_STR, "--",
-                   EXE_STR, path,
+                   EXE_STRING, &path,
                    EXE_END);
   }
 
-  int clone(const char *uri, const char *dir) const {
+  int clone(const string &uri, const string *dir) const {
     return execute("darcs",
                    EXE_STR, "get",
                    EXE_STR, "--",
-                   EXE_STR, uri,
-                   EXE_IFSTR(dir, dir),
+                   EXE_STRING, &uri,
+                   EXE_STRING|EXE_OPT, dir,
                    EXE_END);
   }
 
-  int rename(int nsources, char **sources, const char *destination) const {
+  int rename(const vector<string> &sources, const string &destination) const {
     return execute("darcs",
                    EXE_STR, "mv",
                    EXE_STR, "--",
-                   EXE_STRS, nsources, sources,
-                   EXE_STR, destination,
+                   EXE_VECTOR, &sources,
+                   EXE_STRING, &destination,
                    EXE_END);
   }
 
-  int show(const char *change) const {
+  int show(const string &change) const {
     return execute("darcs",
                    EXE_STR, "diff",
                    EXE_STR, "-u",
                    EXE_STR, "--match",
-                   EXE_STR, change,
+                   EXE_STRING, &change,
                    EXE_END);
   }
 };

@@ -51,21 +51,22 @@ public:
 
   virtual bool detect(void) const;
 
-  virtual int diff(int nfiles, char **files) const = 0;
-  virtual int add(int binary, int nfiles, char **files) const = 0;
-  virtual int remove(int force, int nfiles, char **files) const = 0;
-  virtual int commit(const char *msg, int nfiles, char **files) const = 0;
-  virtual int revert(int nfiles, char **files) const = 0;
+  virtual int diff(const vector<string> &files) const = 0;
+  virtual int add(int binary, const vector<string> &files) const = 0;
+  virtual int remove(int force, const vector<string> &files) const = 0;
+  virtual int commit(const string *msg, const vector<string> &files) const = 0;
+  virtual int revert(const vector<string> &files) const = 0;
   virtual int status() const = 0;
   virtual int update() const = 0;
-  virtual int log(const char *file) const = 0;
-  virtual int edit(int nfiles, char **files) const; // optional
-  virtual int annotate(const char *file) const;     // optional
-  virtual int clone(const char *uri, const char *dir) const; // optional
-  virtual int rename(int nsources, char **sources, const char *destination) const;
+  virtual int log(const string *file) const = 0;
+  virtual int edit(const vector<string> &files) const; // optional
+  virtual int annotate(const string &file) const;     // optional
+  virtual int clone(const string &uri, const string *dir) const; // optional
+  virtual int rename(const vector<string> &sources,
+                     const string &destination) const;
 
   virtual void rename_one(const string &source, const string &destination) const;
-  virtual int show(const char *change) const; // optional for now
+  virtual int show(const string &change) const; // optional for now
 
   static const vcs *guess();
   static const vcs *guess_branch(string uri);
@@ -171,8 +172,11 @@ char *xstrdup(const char *s);
 #define EXE_NO_STDERR 5
 #define EXE_SET 6
 #define EXE_VECTOR 7
+#define EXE_STRING 8
 #define EXE_DOTSTUFF 16
 #define EXE_SVN 32
+#define EXE_OPT 64
+#define EXE_P4 128
 int execute(const char *prog, ...);
 
 int capture(vector<string> &lines,
@@ -194,7 +198,7 @@ void listfiles(string path,
                set<string> &ignored,
                const string *followrcs = NULL);
 int version_compare(const string &a, const string &b);
-void remove_directories(int &nfiles, char **files);
+vector<string> remove_directories(const vector<string> &files);
 int execute(const vector<string> &command,
             const vector<string> *input = NULL,
             vector<string> *output = NULL,
@@ -212,7 +216,7 @@ void report_lines(const vector<string> &l,
                   FILE *fp = stderr);
 string get_relative_path(const string &s);
 int editor(vector<string> &file);
-int generic_rename(int nsources, char **sources, const char *destination,
+int generic_rename(const vector<string> &sources, const char *destination,
                    void (*rename_one)(const string &source,
                                       const string &destination));
 

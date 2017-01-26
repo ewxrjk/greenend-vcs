@@ -48,11 +48,11 @@ bool vcs::detect(void) const {
   return false;
 }
 
-int vcs::edit(int, char **) const {
+int vcs::edit(const vector<string> &) const {
   return 0;
 }
 
-int vcs::clone(const char *, const char *) const {
+int vcs::clone(const string &, const string *) const {
   fatal("guess_branch returned VCS '%s' which has no clone method!",
         name);
 }
@@ -136,19 +136,19 @@ const vcs *vcs::guess_branch(string uri) {
   fatal("cannot identify version control system");
 }
 
-int vcs::rename(int nsources, char **sources, const char *destination) const {
+int vcs::rename(const vector<string> &sources, const string &destination) const {
   if(exists(destination)) {
     if(!isdir(destination))
-      fatal("%s already exists (and is not a directory)", destination);
+      fatal("%s already exists (and is not a directory)", destination.c_str());
     // We're renaming files and/or directories "into" a directory
-    for(int n = 0; n < nsources; ++n) {
+    for(size_t n = 0; n < sources.size(); ++n) {
       rename_one(sources[n],
-                 string(destination) + "/" + basename_(sources[n]));
+                 destination + "/" + basename_(sources[n]));
     }
   } else {
-    if(nsources != 1)
+    if(sources.size() != 1)
       fatal("Cannot rename multiple sources to (nonexistent) destination %s",
-            destination);
+            destination.c_str());
     // We're just changing the name of one file or directory
     rename_one(sources[0], destination);
   }
@@ -159,11 +159,11 @@ void vcs::rename_one(const string &, const string &) const {
   fatal("%s does not support renaming.", name);
 }
 
-int vcs::show(const char *) const {
+int vcs::show(const string &) const {
   fatal("%s does not support 'vcs show'.", name);
 }
 
-int vcs::annotate(const char */*path*/) const {
+int vcs::annotate(const string &/*path*/) const {
   fatal("%s does not support 'vcs annotate'.", name);
 }
 

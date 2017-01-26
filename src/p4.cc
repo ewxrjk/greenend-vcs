@@ -46,16 +46,17 @@ public:
     return false;
   }
 
-  int edit(int nfiles, char **files) const {
+  int edit(const vector<string> &files) const {
+    vector<string> encoded = p4_encode(files);
     return execute("p4",
                    EXE_STR, "edit",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
+                   EXE_VECTOR|EXE_DOTSTUFF, &encoded,
                    EXE_END);
   }
 
-  int diff(int nfiles, char **files) const {
-    if(nfiles) {
-      for(int n = 0; n < nfiles; ++n)
+  int diff(const vector<string> &files) const {
+    if(files.size()) {
+      for(size_t n = 0; n < files.size(); ++n)
         diff_one(files[n]);
     } else {
       diff_all();
@@ -63,26 +64,27 @@ public:
     return 0;
   }
 
-  int add(int /*binary*/, int nfiles, char **files) const {
+  int add(int /*binary*/, const vector<string> &files) const {
     // 'p4 add' doesn't take encoded names - instead it encodes them for you.
-    remove_directories(nfiles, files);
-    if(!nfiles)
+    vector<string> nondirs = remove_directories(files);
+    if(!nondirs.size())
       return 0;
     return execute("p4",
                    EXE_STR, "add",
                    EXE_STR, "-f",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &nondirs,
                    EXE_END);
   }
 
-  int remove(int /*force*/, int nfiles, char **files) const {
+  int remove(int /*force*/, const vector<string> &files) const {
+    vector<string> encoded = p4_encode(files);
     return execute("p4",
                    EXE_STR, "delete",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
+                   EXE_VECTOR|EXE_DOTSTUFF, &encoded,
                    EXE_END);
   }
 
-  int commit(const char *msg, int nfiles, char **files) const {
+  int commit(const string *msg, const vector<string> &files) const {
     // We have an optional message and an optional list of files, giving
     // four possibilities.  If the message isn't present then we need to
     // bring up a change form for the user to fill in.
@@ -100,12 +102,12 @@ public:
     //    "p4 submit -i".
 
     // The easy case is when there are no files listed.
-    if(!nfiles) {
+    if(!files.size()) {
       if(msg)
         return execute("p4",
                        EXE_STR, "submit",
                        EXE_STR, "-d",
-                       EXE_STR, msg,
+                       EXE_STRING, msg,
                        EXE_STR, "...",
                        EXE_END);
       else
@@ -138,7 +140,7 @@ public:
                 || change[n].at(0) == ' '))
         change.erase(change.begin() + n);
       // Insert the user's message instead
-      change.insert(change.begin() + n, string("\t") + msg);
+      change.insert(change.begin() + n, "\t" + *msg);
       ++n;
       // ..pointing just after the message text
     } else {
@@ -166,9 +168,9 @@ public:
     vector<string> where;
     cmd.push_back("p4");
     cmd.push_back("where");
-    for(m = 0; m < (size_t)nfiles; ++m) {
+    for(m = 0; m < files.size(); ++m) {
       if(!exists(files[m]))
-        fatal("%s does not exist", files[m]);
+        fatal("%s does not exist", files[m].c_str());
       cmd.push_back(p4_encode(files[m]));
     }
     if((rc = vcapture(where, cmd)))
@@ -196,13 +198,14 @@ public:
     return inject(change, "p4", "submit", "-i", (char *)NULL);
   }
 
-  int revert(int nfiles, char **files) const {
-    if(nfiles)
+  int revert(const vector<string> &files) const {
+    if(files.size()) {
+      vector<string> encoded = p4_encode(files);
       return execute("p4",
                      EXE_STR, "revert",
-                     EXE_STRS|EXE_DOTSTUFF, nfiles, p4_encode(nfiles, files),
+                     EXE_VECTOR|EXE_DOTSTUFF, &encoded,
                      EXE_END);
-    else
+    } else
       return execute("p4",
                      EXE_STR, "revert",
                      EXE_STR, "...",
@@ -291,19 +294,19 @@ public:
                    EXE_END);
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     return execute("p4",
                    EXE_STR, "changes",
                    EXE_STR, "-lt",
-                   EXE_STR|EXE_DOTSTUFF, path ? path : "...",
+                   EXE_STR|EXE_DOTSTUFF, path ? path->c_str() : "...",
                    EXE_END);
   }
 
-  int annotate(const char *path) const {
+  int annotate(const string &path) const {
     return execute("p4",
                    EXE_STR, "annotate",
                    EXE_STR, "-c",
-                   EXE_STR|EXE_DOTSTUFF, p4_encode(path).c_str(),
+                   EXE_STRING|EXE_DOTSTUFF|EXE_P4, &path,
                    EXE_END);
   }
 
@@ -319,22 +322,22 @@ public:
     if(execute("p4",
                EXE_STR, "integrate",
                EXE_STR, "-t",
-               EXE_STR|EXE_DOTSTUFF, p4_encode(sp).c_str(),
-               EXE_STR|EXE_DOTSTUFF, p4_encode(dp).c_str(),
+               EXE_STRING|EXE_DOTSTUFF|EXE_P4, &sp,
+               EXE_STRING|EXE_DOTSTUFF|EXE_P4, &dp,
                EXE_END))
       exit(1);
     if(execute("p4",
                EXE_STR, "delete",
-               EXE_STR|EXE_DOTSTUFF, p4_encode(sp).c_str(),
+               EXE_STRING|EXE_DOTSTUFF|EXE_P4, &sp,
                EXE_END))
       exit(1);
   }
 
-  int show(const char *change) const {
+  int show(const string &change) const {
     string type;
     vector<string> lines;
     static const char diffs[] = "Differences ...";
-    P4Describe description(change);
+    P4Describe description(change.c_str());
     for(size_t n = 0;
         (n < description.lines.size()
          && description.lines[n] != diffs);
@@ -395,7 +398,7 @@ private:
     }
   }
 
-  void diff_one(const char *path) const {
+  void diff_one(const string &path) const {
     P4Info info;
     list<string> files;
     info.gather();
@@ -417,7 +420,7 @@ private:
       execute("p4",
               EXE_STR, "diff",
               EXE_STR, "-du",
-              EXE_STR|EXE_DOTSTUFF, info.depot_path.c_str(),
+              EXE_STRING|EXE_DOTSTUFF, &info.depot_path,
               EXE_END);
     } else if(info.action == "branch" || info.action == "add") {
       diff_new(info);

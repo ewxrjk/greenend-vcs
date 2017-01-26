@@ -75,7 +75,7 @@ public:
     if(change)
       return guess()->show(change);
     else
-      return guess()->diff(argc - optind, argv + optind);
+      return guess()->diff(vector<string>(argv+optind, argv+argc));
   }
 
 };

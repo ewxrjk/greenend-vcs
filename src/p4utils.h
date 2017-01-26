@@ -111,7 +111,7 @@ public:
 };
 
 string p4_encode(const string &s);
-char **p4_encode(int nfiles, char **files);
+vector<string> p4_encode(const vector<string> &files);
 string p4_decode(const string &s);
 void p4__where(vector<string> &where, const list<string> &files);
 void p4__where(const list<string> &files,

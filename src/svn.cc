@@ -28,45 +28,45 @@ public:
     register_scheme("svn+ssh");
   }
 
-  int diff(int nfiles, char **files) const {
+  int diff(const vector<string> &files) const {
     return execute("svn",
                    EXE_STR, "diff",
                    EXE_STR, "--",
-                   EXE_STRS|EXE_SVN, nfiles, files,
+                   EXE_VECTOR|EXE_SVN, &files,
                    EXE_END);
   }
 
-  int add(int /*binary*/, int nfiles, char **files) const {
+  int add(int /*binary*/, const vector<string> &files) const {
     return execute("svn",
                    EXE_STR, "add",
                    EXE_STR, "--",
-                   EXE_STRS|EXE_SVN, nfiles, files,
+                   EXE_VECTOR|EXE_SVN, &files,
                    EXE_END);
   }
 
-  int remove(int force, int nfiles, char **files) const {
+  int remove(int force, const vector<string> &files) const {
     return execute("svn",
                    EXE_STR, "delete",
                    EXE_IFSTR(force, "--force"),
                    EXE_STR, "--",
-                   EXE_STRS|EXE_SVN, nfiles, files,
+                   EXE_VECTOR|EXE_SVN, &files,
                    EXE_END);
   }
 
-  int commit(const char *msg, int nfiles, char **files) const {
+  int commit(const string *msg, const vector<string> &files) const {
     return execute("svn",
                    EXE_STR, "commit",
                    EXE_IFSTR(msg, "-m"),
-                   EXE_IFSTR(msg, msg),
+                   EXE_STRING|EXE_OPT, msg,
                    EXE_STR, "--",
-                   EXE_STRS|EXE_SVN, nfiles, files,
+                   EXE_VECTOR|EXE_SVN, &files,
                    EXE_END);
   }
 
-  int revert(int nfiles, char **files) const {
+  int revert(const vector<string> &files) const {
     // Subversion's revert insist you tell it what files to revert.  So if
     // we want to revert everything we must cobble together a list.
-    if(!nfiles) {
+    if(!files.size()) {
       // Establish the current state
       vector<string> status;
       int rc;
@@ -143,7 +143,7 @@ public:
       return execute("svn",
                      EXE_STR, "revert",
                      EXE_STR, "--",
-                     EXE_STRS|EXE_SVN, nfiles, files,
+                     EXE_VECTOR|EXE_SVN, &files,
                      EXE_END);
   }
 
@@ -177,28 +177,28 @@ public:
                    EXE_END);
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     return execute("svn",
                    EXE_STR, "log",
                    EXE_STR, "--",
-                   EXE_IFSTR(path, path),
+                   EXE_STRING|EXE_OPT, path,
                    EXE_END);
   }
 
-  int annotate(const char *path) const {
+  int annotate(const string &path) const {
     return execute("svn",
                    EXE_STR, "blame",
                    EXE_STR, "--",
-                   EXE_STR, path,
+                   EXE_STRING, &path,
                    EXE_END);
   }
 
-  int clone(const char *uri, const char *dir) const {
+  int clone(const string &uri, const string *dir) const {
     return execute("svn",
                    EXE_STR, "checkout",
                    EXE_STR, "--",
-                   EXE_STR, uri,
-                   EXE_IFSTR(dir, dir),
+                   EXE_STRING, &uri,
+                   EXE_STRING|EXE_OPT, dir,
                    EXE_END);
   }
 
@@ -210,17 +210,17 @@ public:
     if(execute("svn",
                EXE_STR, "mv",
                    EXE_STR, "--",
-               EXE_STR, source.c_str(),
-               EXE_STR, destination.c_str(),
+               EXE_STRING, &source,
+               EXE_STRING, &destination,
                EXE_END))
       exit(1);
   }
 
-  int show(const char *change) const {
+  int show(const string &change) const {
     return execute("svn",
                    EXE_STR, "diff",
                    EXE_STR, "-c",
-                   EXE_STR, change,
+                   EXE_STRING, &change,
                    EXE_END);
   }
 };

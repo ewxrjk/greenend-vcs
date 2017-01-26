@@ -60,7 +60,7 @@ public:
       help(stderr);
       return 1;
     }
-    return guess()->remove(force, argc - optind, argv + optind);
+    return guess()->remove(force, vector<string>(argv+optind, argv+argc));
   }
 };
 

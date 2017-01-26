@@ -51,7 +51,7 @@ public:
         return 1;
       }
     }
-    return guess()->revert(argc - optind, argv + optind);
+    return guess()->revert(vector<string>(argv+optind, argv+argc));
   }
 };
 

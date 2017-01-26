@@ -44,7 +44,8 @@ public:
 
   int execute(int argc, char **argv) const {
     int n;
-    const char *msg = 0;
+    const string *msg = 0;
+    string m;
 
     optind = 1;
     while((n = getopt_long(argc, argv, "+hm:", commit_options, 0)) >= 0) {
@@ -53,13 +54,14 @@ public:
         help();
         return 0;
       case 'm':
-        msg = optarg;
+        m = optarg;
+        msg = &m;
         break;
       default:
         return 1;
       }
     }
-    return guess()->commit(msg, argc - optind, argv + optind);
+    return guess()->commit(msg, vector<string>(argv+optind, argv+argc));
   }
 
 };

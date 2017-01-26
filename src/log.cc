@@ -55,7 +55,12 @@ public:
       return 1;
     }
     redirect(getenv("VCS_PAGER"));
-    return guess()->log(argc == optind ? NULL : argv[optind]);
+    if(argc == optind)
+      return guess()->log(0);
+    else {
+      string path = argv[optind];
+      return guess()->log(&path);
+    }
   }
 };
 

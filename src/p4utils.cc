@@ -55,12 +55,10 @@ string p4_encode(const string &s) {
 }
 
 // Replace metacharacters in multiple filesnames
-char **p4_encode(int nfiles, char **files) {
-  char **newfiles = (char **)calloc(nfiles, sizeof *files);
-  int n;
-
-  for(n = 0; n < nfiles; ++n)
-    newfiles[n] = xstrdup(p4_encode(files[n]).c_str());
+vector<string> p4_encode(const vector<string> &files) {
+  vector<string> newfiles;
+  for(size_t n = 0; n < files.size(); ++n)
+    newfiles.push_back(p4_encode(files[n]));
   return newfiles;
 }
 

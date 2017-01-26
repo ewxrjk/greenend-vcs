@@ -59,7 +59,7 @@ public:
       help(stderr);
       return 1;
     }
-    return guess()->add(binary, argc - optind, argv + optind);
+    return guess()->add(binary, vector<string>(argv+optind, argv+argc));
   }
 };
 

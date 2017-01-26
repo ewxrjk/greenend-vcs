@@ -281,14 +281,12 @@ int readline(const string &path, FILE *fp, string &l) {
     return 1;
 }
 
-void remove_directories(int &nfiles, char **files) {
-  vector<char *> nondirs;
-  int n, m = 0;
-
-  for(n = 0; n < nfiles; ++n)
+vector<string> remove_directories(const vector<string> &files) {
+  vector<string> nondirs;
+  for(size_t n = 0; n < files.size(); ++n)
     if(!isdir(files[n]))
-      files[m++] = files[n];
-  nfiles = m;
+      nondirs.push_back(files[n]);
+  return nondirs;
 }
 
 // Return true if d is a prefix of s; D must have a trailing slash.
@@ -353,20 +351,21 @@ string get_relative_path(const string &s) {
 
 string tempfile() {
   // Pick a random filename
-  ostringstream s;
+  string s;
   int fd;
   const char *tmpdir = getenv("TMPDIR");
   if(!tmpdir)
     tmpdir = "/tmp";
   do {
-    s.str().clear();
-    s << tmpdir << "/vcs." << rand() << ".txt";
-    fd = open(s.str().c_str(), O_WRONLY|O_CREAT|O_EXCL, 0600);
+    ostringstream ss;
+    ss << tmpdir << "/vcs." << rand() << ".txt";
+    s = ss.str();
+    fd = open(s.c_str(), O_WRONLY|O_CREAT|O_EXCL, 0600);
   } while(fd < 0 && errno == EEXIST);
   if(fd < 0)
-    fatal("creating %s: %s", s.str().c_str(), strerror(errno));
+    fatal("creating %s: %s", s.c_str(), strerror(errno));
   close(fd);
-  return s.str();
+  return s;
 }
 
 /*

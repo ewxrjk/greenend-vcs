@@ -25,40 +25,40 @@ public:
     register_subdir("CVS");
   }
 
-  int diff(int nfiles, char **files) const {
+  int diff(const vector<string> &files) const {
     return execute("cvs",
                    EXE_STR, "diff",
                    EXE_STR, "-Nu",
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int add(int binary, int nfiles, char **files) const {
+  int add(int binary, const vector<string> &files) const {
     return execute("cvs",
                    EXE_STR, "add",
                    EXE_IFSTR(binary, "-kb"),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int remove(int force, int nfiles, char **files) const {
+  int remove(int force, const vector<string> &files) const {
     return execute("cvs",
                    EXE_STR, "remove",
                    EXE_IFSTR(force, "-f"),
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
-  int commit(const char *msg, int nfiles, char **files) const {
+  int commit(const string *msg, const vector<string> &files) const {
     return execute("cvs",
                    EXE_STR, "commit",
                    EXE_IFSTR(msg, "-m"),
-                   EXE_IFSTR(msg, msg),
+                   EXE_STRING|EXE_OPT, msg,
                    EXE_STR, "--",
-                   EXE_STRS, nfiles, files,
+                   EXE_VECTOR, &files,
                    EXE_END);
   }
 
@@ -72,7 +72,7 @@ public:
     }
   }
 
-  int revert(int nfiles, char **files) const {
+  int revert(const vector<string> &files) const {
     // Reverting is a bit ugly in CVS.  We can 'cvs up -C' files that have just
     // been edited.  For added files we must use 'cvs rm -f'.  For deleted files
     // we must 'cvs add' them again.  Fortunately the translation (-kb) appears
@@ -110,11 +110,11 @@ public:
     if(rc && !conflicted.size())
       fatal("cvs -n up exited with status %d", rc);
     // If files were specified limit to just those
-    if(nfiles) {
+    if(files.size()) {
       set<string> limit;
 
-      while(nfiles--)
-        limit.insert(*files++);
+      for(size_t n = 0; n < files.size(); ++n)
+        limit.insert(files[n]);
       limit_set(modified, limit);
       limit_set(added, limit);
       limit_set(removed, limit);
@@ -132,14 +132,14 @@ public:
         if(execute("rm",
                    EXE_STR, "-f",
                    EXE_STR, "--",
-                   EXE_STR, it->c_str(),
+                   EXE_STRING, &*it,
                    EXE_END))
           return 1;
       if(execute("cvs",
                  EXE_STR, "up",
                  EXE_STR, "-C",
                  EXE_STR, "--",
-                 EXE_STR, it->c_str(),
+                 EXE_STRING, &*it,
                  EXE_END))
         return 1;
     }
@@ -150,7 +150,7 @@ public:
       if(execute("cvs",
                  EXE_STR, "add",
                  EXE_STR, "--",
-                 EXE_STR, it->c_str(),
+                 EXE_STRING, &*it,
                  EXE_END))
         return 1;
     // Remove added files
@@ -175,20 +175,20 @@ public:
       const string save = s.str();
       if(execute("mv",
                  EXE_STR, "--",
-                 EXE_STR, it->c_str(),
-                 EXE_STR, save.c_str(),
+                 EXE_STRING, &*it,
+                 EXE_STRING, &save,
                  EXE_END))
         return 1;
       if(execute("cvs",
                  EXE_STR, "rm",
                  EXE_STR, "--",
-                 EXE_STR, it->c_str(),
+                 EXE_STRING, &*it,
                  EXE_END))
         failed = 1;
       if(execute("mv",
                  EXE_STR, "--",
-                 EXE_STR, save.c_str(),
-                 EXE_STR, it->c_str(),
+                 EXE_STRING, &save,
+                 EXE_STRING, &*it,
                  EXE_END))
         return 1;
       if(failed)
@@ -210,19 +210,19 @@ public:
                    EXE_END);
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     return execute("cvs",
                    EXE_STR, "log",
                    EXE_STR, "--",
-                   EXE_IFSTR_DOTSTUFF(path, path),
+                   EXE_STRING|EXE_OPT|EXE_DOTSTUFF, path,
                    EXE_END);
   }
 
-  int annotate(const char *path) const {
+  int annotate(const string &path) const {
     return execute("cvs",
                    EXE_STR, "annotate",
                    EXE_STR, "--",
-                   EXE_STR, path,
+                   EXE_STRING, &path,
                    EXE_END);
   }
 };

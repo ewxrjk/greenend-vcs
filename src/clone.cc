@@ -55,7 +55,14 @@ public:
       return 1;
     }
     const vcs *v = vcs::guess_branch(argv[optind]);
-    return v->clone(argv[optind], argc - optind == 2 ? argv[optind + 1] : NULL);
+    const string *dir;
+    string d;
+    if(argc - optind == 2) {
+      d = argv[optind+1];
+      dir = &d;
+    } else
+      dir = 0;
+    return v->clone(argv[optind], dir);
   }
 };
 

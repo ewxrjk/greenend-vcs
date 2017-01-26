@@ -121,10 +121,10 @@ void rcsbase::enumerate(map<string,int> &files) const {
   }
 }
 
-int rcsbase::diff(int nfiles, char **files) const {
+int rcsbase::diff(const vector<string> &files) const {
   vector<string> native;
   vector<string> added;
-  if(nfiles == 0) {
+  if(files.size() == 0) {
     map<string,int> allFiles;
     enumerate(allFiles);
     for(map<string,int>::iterator it = allFiles.begin();
@@ -138,7 +138,7 @@ int rcsbase::diff(int nfiles, char **files) const {
         added.push_back(it->first);
     }
   } else {
-    for(int n = 0; n < nfiles; ++n) {
+    for(size_t n = 0; n < files.size(); ++n) {
       if(is_tracked(files[n])) {
         if(!writable(files[n]) || !exists(files[n]))
           continue;
@@ -147,9 +147,9 @@ int rcsbase::diff(int nfiles, char **files) const {
         added.push_back(files[n]);
       } else if(exists(files[n])) {
         fprintf(stderr, "WARNING: %s is not under %s control\n",
-                name, files[n]);
+                name, files[n].c_str());
       } else {
-        fprintf(stderr, "WARNING: %s does not exist\n", files[n]);
+        fprintf(stderr, "WARNING: %s does not exist\n", files[n].c_str());
       }
     }
   }
@@ -160,28 +160,28 @@ int rcsbase::diff(int nfiles, char **files) const {
     rc |= execute("diff",
                   EXE_STR, "-u",
                   EXE_STR, "/dev/null",
-                  EXE_STR|EXE_DOTSTUFF, added[n].c_str(),
+                  EXE_STRING|EXE_DOTSTUFF, &added[n],
                   EXE_END);
   return (rc & 2 ? 2 : rc);
 }
 
-int rcsbase::add(int binary, int nfiles, char **files) const {
+int rcsbase::add(int binary, const vector<string> &files) const {
   vector<string> flags;
-  for(int n = 0; n < nfiles; ++n) {
+  for(size_t n = 0; n < files.size(); ++n) {
     if(isdir(files[n])) {
-      const std::string rcsdir = std::string(files[n]) + "/" + tracking_directory();
+      const std::string rcsdir = files[n] + "/" + tracking_directory();
       if(!exists(rcsdir)) {
         int rc = execute("mkdir",
-                         EXE_STR|EXE_DOTSTUFF, rcsdir.c_str(),
+                         EXE_STRING|EXE_DOTSTUFF, &rcsdir,
                          EXE_END);
         if(rc)
           return rc;
       }
     } else if(isreg(files[n])) {
       if(!is_tracked(files[n]))
-        flags.push_back(flag_path(files[n]).c_str());
+        flags.push_back(flag_path(files[n]));
     } else
-      fatal("%s is not a regular file", files[n]);
+      fatal("%s is not a regular file", files[n].c_str());
   }
   if(!dryrun) {
     for(size_t n = 0; n < flags.size(); ++n) {
@@ -196,9 +196,9 @@ int rcsbase::add(int binary, int nfiles, char **files) const {
   return 0;
 }
 
-int rcsbase::commit(const char *msg, int nfiles, char **files) const {
+int rcsbase::commit(const string *msg, const vector<string> &files) const {
   vector<string> newfiles;
-  if(nfiles == 0) {
+  if(files.size() == 0) {
     map<string,int> allFiles;
     enumerate(allFiles);
     for(map<string,int>::iterator it = allFiles.begin();
@@ -212,9 +212,9 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
           newfiles.push_back(it->first.c_str());
     }
   } else {
-    for(int n = 0; n < nfiles; ++n)
-      newfiles.push_back(files[n]);
+    newfiles = files;
   }
+  string s;
   if(!msg) {
     // Gather one commit message for all the files
     vector<string> message;
@@ -224,7 +224,6 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
     int rc = editor(message);
     if(rc)
       return rc;
-    string s;
     for(size_t n = 0; n < message.size(); ++n) {
       if(message[n].size() && message[n][0] == '#')
         continue;             // Exclude comments
@@ -234,9 +233,9 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
     // Zap trailing newlines
     while(s.size() && s[s.size()-1] == '\n')
       s.erase(s.size()-1);
-    msg = xstrdup(s.c_str());
+    msg = &s;
   }
-  int rc = native_commit(newfiles, msg);
+  int rc = native_commit(newfiles, *msg);
   // Clean up .#add# files
   vector<string> cleanup;
   for(size_t n = 0; n < newfiles.size(); ++n)
@@ -250,21 +249,21 @@ int rcsbase::commit(const char *msg, int nfiles, char **files) const {
   return rc;
 }
 
-int rcsbase::remove(int force, int nfiles, char **files) const {
+int rcsbase::remove(int force, const vector<string> &files) const {
   // Use rm as a convenient way of making -n/-v work properly.
-  for(int n = 0; n < nfiles; ++n) {
+  for(size_t n = 0; n < files.size(); ++n) {
     if(is_tracked(files[n])) {
       string tpath = tracking_path(files[n]);
       if(execute("rm",
                  EXE_STR, "-f",
                  EXE_STR, "--",
-                 EXE_STR, tpath.c_str(),
+                 EXE_STRING, &tpath,
                  EXE_END))
         return 1;
       if(force && exists(files[n]) && execute("rm",
                                               EXE_STR, "-f",
                                               EXE_STR, "--",
-                                              EXE_STR, files[n],
+                                              EXE_STRING, &files[n],
                                               EXE_END))
         return 1;
     }
@@ -300,15 +299,15 @@ int rcsbase::status() const {
   return 0;
 }
 
-int rcsbase::edit(int nfiles, char **files) const {
+int rcsbase::edit(const vector<string> &files) const {
   // Filter down to files not already edited
-  std::vector<char *> filtered;
-  for(int n = 0; n < nfiles; ++n)
+  vector<string> filtered;
+  for(size_t n = 0; n < files.size(); ++n)
     if(!exists(files[n]) || !writable(files[n]))
       filtered.push_back(files[n]);
   if(!filtered.size())
     return 0;
-  return native_edit(filtered.size(), &filtered[0]);
+  return native_edit(filtered);
 }
 
 int rcsbase::update() const {
@@ -332,9 +331,9 @@ int rcsbase::update() const {
   return native_update(missing);
 }
 
-int rcsbase::revert(int nfiles, char **files) const {
-  vector<char *> checkout, unadd;
-  if(nfiles == 0) {
+int rcsbase::revert(const vector<string> &files) const {
+  vector<string> checkout, unadd;
+  if(files.size() == 0) {
     map<string,int> allFiles;
     enumerate(allFiles);
     for(map<string,int>::iterator it = allFiles.begin();
@@ -344,12 +343,12 @@ int rcsbase::revert(int nfiles, char **files) const {
       if((flags & fileTracked)
          && ((flags & fileWritable)
              || !(flags & fileExists)))
-        checkout.push_back(xstrdup(it->first.c_str()));
+        checkout.push_back(it->first);
       else if(flags & fileAdded)
-        unadd.push_back(xstrdup(it->first.c_str()));
+        unadd.push_back(it->first);
     }
   } else {
-    for(int n = 0; n < nfiles; ++n) {
+    for(size_t n = 0; n < files.size(); ++n) {
       if(is_tracked(files[n])) {
         // This file is tracked.  Restore to pristine state either if its
         // modifed or if the working file is missing.
@@ -360,15 +359,16 @@ int rcsbase::revert(int nfiles, char **files) const {
     }
   }
   for(size_t n = 0; n < unadd.size(); ++n) {
+    string f = flag_path(unadd[n]);
     int rc = execute("rm",
                      EXE_STR, "-f",
-                     EXE_STR, flag_path(unadd[n]).c_str(),
+                     EXE_STRING, &f,
                      EXE_END);
     if(rc)
       return rc;
   }
   if(checkout.size())
-    return native_revert((int)checkout.size(), &checkout[0]);
+    return native_revert(checkout);
   return 0;
 }
 

@@ -47,21 +47,21 @@ public:
                    EXE_END);
   }
 
-  int add(int binary, int nfiles, char **files) const {
+  int add(int binary, const vector<string> &files) const {
     if(binary)
       fatal("--binary option not supported for RCS");
-    return rcsbase::add(binary, nfiles, files);
+    return rcsbase::add(binary, files);
   }
 
   int native_commit(const vector<string> &files, const string &msg) const {
     vector<string> command;
     command.push_back("ci");
     command.push_back("-u");    // don't delete work file
-    command.push_back("-t-" + string(msg));
-    command.push_back("-m" + string(msg));
+    command.push_back("-t-" + msg);
+    command.push_back("-m" + msg);
     for(size_t n = 0; n < files.size(); ++n)
       if(n == 0 && files[n][0] == '-')
-        command.push_back("./" + std::string(files[n]));
+        command.push_back("./" + files[n]);
       else
         command.push_back(files[n]);
     if(dryrun || verbose)
@@ -71,10 +71,10 @@ public:
     return execute(command);
   }
 
-  int native_revert(int nfiles, char **files) const {
+  int native_revert(const vector<string> &files) const {
     return execute("co",
                    EXE_STR, "-f",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
 
@@ -84,18 +84,18 @@ public:
                    EXE_END);
   }
 
-  int log(const char *path) const {
+  int log(const string *path) const {
     if(!path)
       fatal("'vcs log' requires a filename with RCS");
     return execute("rlog",
-                   EXE_STR|EXE_DOTSTUFF, path,
+                   EXE_STRING|EXE_DOTSTUFF, path,
                    EXE_END);
   }
 
-  int native_edit(int nfiles, char **files) const {
+  int native_edit(const vector<string> &files) const {
     return execute("co",
                    EXE_STR, "-l", // make work file writable
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
 
