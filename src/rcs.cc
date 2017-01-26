@@ -78,9 +78,9 @@ public:
                    EXE_END);
   }
 
-  int native_update(int nfiles, char **files) const {
+  int native_update(const vector<string> &files) const {
     return execute("co",
-                   EXE_STRS|EXE_DOTSTUFF, nfiles, files,
+                   EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
 

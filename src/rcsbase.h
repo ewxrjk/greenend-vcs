@@ -58,7 +58,7 @@ public:
   virtual int native_commit(const vector<string> &files,
                             const string &msg) const = 0;
   virtual int native_edit(int nfiles, char **files) const = 0;
-  virtual int native_update(int nfiles, char **files) const = 0;
+  virtual int native_update(const vector<string> &files) const = 0;
   virtual int native_revert(int nfiles, char **files) const = 0;
 
   int diff(int nfiles, char **files) const;

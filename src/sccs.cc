@@ -101,9 +101,9 @@ public:
     return rc;
   }
 
-  int native_update(int nfiles, char **files) const {
+  int native_update(const vector<string> &files) const {
     int rc = 0;
-    for(int n = 0; n < nfiles && !rc; ++n) {
+    for(size_t n = 0; n < files.size() && !rc; ++n) {
       InDirectory id(dirname_(files[n]));
       string base = basename_(files[n]);
       rc = execute("sccs",

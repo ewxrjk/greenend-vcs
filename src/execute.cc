@@ -438,12 +438,15 @@ static void assemble(vector<string> &cmd,
       break;
     }
     case EXE_VECTOR:
-    case EXE_VECTOR|EXE_DOTSTUFF: {
+    case EXE_VECTOR|EXE_DOTSTUFF:
+    case EXE_VECTOR|EXE_SVN: {
       const vector<string> *ss = va_arg(ap, const vector<string> *);
       for(vector<string>::const_iterator it = ss->begin(); it != ss->end();
           ++it) {
         const string &s = *it;
-        if(s[0] == '-' && (op & EXE_DOTSTUFF))
+        if(op & EXE_SVN)
+          cmd.push_back(svn_encode(s));
+        else if(s[0] == '-' && (op & EXE_DOTSTUFF))
           cmd.push_back(string("./") + s);
         else
           cmd.push_back(s);

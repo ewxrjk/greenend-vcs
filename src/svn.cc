@@ -112,7 +112,7 @@ public:
       //
       if((rc = capture(status, "svn", "status", "--xml", (char *)0)))
         fatal("svn status exited with status %d", rc);
-      vector<char *> files;
+      vector<string> files;
       const XMLNode *root = xmlparse(status, false);
       const XMLElement *status_ = dynamic_cast<const XMLElement *>(root);
       const XMLElement *target = dynamic_cast<const XMLElement *>(status_->contents[0]);
@@ -129,11 +129,16 @@ public:
            || item == "merged"
            || item == "conflicted"
            || item == "obstructed")
-          files.push_back((char *)entry->attributes["path"].c_str());
+          files.push_back(entry->attributes["path"]);
       }
+      delete root;
       if(!files.size())
         return 0;
-      return revert((int)files.size(), &files[0]);
+      return execute("svn",
+                     EXE_STR, "revert",
+                     EXE_STR, "--",
+                     EXE_VECTOR|EXE_SVN, &files,
+                     EXE_END);
     } else
       return execute("svn",
                      EXE_STR, "revert",

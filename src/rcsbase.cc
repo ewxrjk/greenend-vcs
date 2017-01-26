@@ -317,7 +317,7 @@ int rcsbase::update() const {
   // It would be nice to merge in changes made subsequent to the current
   // version of the working file being checked out (i.e. what cvs up does).
   // But vcs has no idea what the base revision is, so this is not possible.
-  std::vector<char *> missing;
+  std::vector<string> missing;
   map<string,int> allFiles;
   enumerate(allFiles);
   for(map<string,int>::iterator it = allFiles.begin();
@@ -325,11 +325,11 @@ int rcsbase::update() const {
       ++it) {
     int flags = it->second;
     if(!(flags & fileExists))
-      missing.push_back(xstrdup(it->first.c_str()));
+      missing.push_back(it->first);
   }
   if(missing.size() == 0)
     return 0;
-  return native_update(missing.size(), &missing[0]);
+  return native_update(missing);
 }
 
 int rcsbase::revert(int nfiles, char **files) const {
