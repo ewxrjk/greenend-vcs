@@ -26,10 +26,10 @@ command::command(const char *name_,
 command::~command() {
 }
 
-void command::register_alias(const char *alias) {
+void command::register_alias(const string &alias) {
   if(!commands)
     commands = new commands_t();
-  commands->insert(commands_t::value_type(string(alias), this));
+  commands->insert(commands_t::value_type(alias, this));
 }
 
 void command::list() {

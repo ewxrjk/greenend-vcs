@@ -102,7 +102,7 @@ public:
 
   static inline const vcs *guess() { return vcs::guess(); }
 protected:
-  void register_alias(const char *alias);
+  void register_alias(const string &alias);
 
 private:
   const string name, description;
