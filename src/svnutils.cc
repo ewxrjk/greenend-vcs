@@ -27,7 +27,7 @@
 //
 // See: http://svnbook.red-bean.com/en/1.7/svn.advanced.pegrevs.html
 string svn_encode(const string &s) {
-  if(s.find('@') == std::string::npos)
+  if(s.find('@') == string::npos)
     return s;
   else
     return s + "@";

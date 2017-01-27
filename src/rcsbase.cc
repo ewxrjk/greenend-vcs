@@ -77,7 +77,7 @@ bool rcsbase::is_binary(const string &path) const {
 
 string rcsbase::work_path(const string &path) const {
   if(is_add_flag(path)) {
-    if(path.find('/') == std::string::npos)
+    if(path.find('/') == string::npos)
       return path.substr(6);
     else
       return parentdir(path) + "/" + basename_(path).substr(6);
@@ -169,7 +169,7 @@ int rcsbase::add(int binary, const vector<string> &files) const {
   vector<string> flags;
   for(size_t n = 0; n < files.size(); ++n) {
     if(isdir(files[n])) {
-      const std::string rcsdir = files[n] + "/" + tracking_directory();
+      const string rcsdir = files[n] + "/" + tracking_directory();
       if(!exists(rcsdir)) {
         int rc = execute("mkdir",
                          EXE_STRING|EXE_DOTSTUFF, &rcsdir,
@@ -316,7 +316,7 @@ int rcsbase::update() const {
   // It would be nice to merge in changes made subsequent to the current
   // version of the working file being checked out (i.e. what cvs up does).
   // But vcs has no idea what the base revision is, so this is not possible.
-  std::vector<string> missing;
+  vector<string> missing;
   map<string,int> allFiles;
   enumerate(allFiles);
   for(map<string,int>::iterator it = allFiles.begin();

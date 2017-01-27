@@ -73,7 +73,7 @@ int exists(const string &path) {
 }
 
 // Return true if the file is writable
-bool writable(const std::string &path) {
+bool writable(const string &path) {
   return access(path.c_str(), W_OK) == 0;
 }
 

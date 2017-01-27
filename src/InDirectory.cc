@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-InDirectory::InDirectory(const std::string &dir): fd(-1) {
+InDirectory::InDirectory(const string &dir): fd(-1) {
   // If we're already in the right directory do nothing
   struct stat stat_cwd, stat_dot;
   if(stat(".", &stat_dot) < 0)

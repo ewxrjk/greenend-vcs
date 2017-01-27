@@ -486,7 +486,7 @@ private:
     // Deleted file, retrieve the old text with p4 print and print it with a
     // suitable header.  As with diff_new() we write a p4-like header.
     vector<string> lines;
-    std::string type;
+    string type;
     retrieve_file(info.depot_path, lines, &type);
     writef(stdout, "stdout", "==== %s - ====\n", info.depot_path.c_str());
     if(type == "binary")

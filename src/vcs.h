@@ -113,17 +113,17 @@ private:
 class FatalError: public runtime_error {
 public:
   FatalError(const char *s): runtime_error(s) {}
-  FatalError(const std::string &s): runtime_error(s) {}
+  FatalError(const string &s): runtime_error(s) {}
 };
 
 class TempFile {
 public:
   TempFile();
   ~TempFile();
-  const std::string &path() const { return name; }
+  const string &path() const { return name; }
   const char *c_str() const { return name.c_str(); }
 private:
-  std::string name;
+  string name;
 };
 
 class InDirectory {

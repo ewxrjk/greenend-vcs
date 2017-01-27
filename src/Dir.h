@@ -9,17 +9,17 @@
 class Dir {
 public:
   Dir();
-  Dir(const std::string &path_);
+  Dir(const string &path_);
   ~Dir();
 
-  void open(const std::string &path_);
-  bool get(std::string &name) const;
+  void open(const string &path_);
+  bool get(string &name) const;
 
-  static void getFiles(std::vector<std::string> &files,
-                       const std::string &dir);
+  static void getFiles(vector<string> &files,
+                       const string &dir);
 
 private:
-  std::string path;
+  string path;
   DIR *dp;
 };
 

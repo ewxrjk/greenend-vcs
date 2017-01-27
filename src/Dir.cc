@@ -1,14 +1,14 @@
 #include <config.h>
-#include "Dir.h"
 #include "vcs.h"
+#include "Dir.h"
 
 Dir::Dir(): dp(NULL) {}
 
-Dir::Dir(const std::string &path_): dp(NULL) {
+Dir::Dir(const string &path_): dp(NULL) {
   open(path_);
 }
 
-void Dir::open(const std::string &path_) {
+void Dir::open(const string &path_) {
   if(dp) {
     closedir(dp);
     dp = NULL;
@@ -23,7 +23,7 @@ Dir::~Dir() {
     closedir(dp);
 }
 
-bool Dir::get(std::string &name) const {
+bool Dir::get(string &name) const {
   errno = 0;
   struct dirent *de = readdir(dp);
   if(de) {
@@ -36,11 +36,11 @@ bool Dir::get(std::string &name) const {
   }
 }
 
-void Dir::getFiles(std::vector<std::string> &files,
-                   const std::string &dir) {
+void Dir::getFiles(vector<string> &files,
+                   const string &dir) {
   files.clear();
   Dir d(dir);
-  std::string name;
+  string name;
   while(d.get(name))
     files.push_back(name);
 }

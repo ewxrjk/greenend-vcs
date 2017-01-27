@@ -51,7 +51,7 @@ public:
         fatal("'bzr rm --help' exited with status %d", rc);
       bool force_available = false;
       for(size_t n = 0; n < help.size(); ++n)
-        if(help[n].find("--force") != std::string::npos)
+        if(help[n].find("--force") != string::npos)
           force_available = true;
       if(!force_available)
         force = false;
