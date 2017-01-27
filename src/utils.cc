@@ -146,18 +146,6 @@ void fatal(const char *msg, ...) {
   throw FatalError(formatted);
 }
 
-void *xmalloc(size_t n) {
-  void *ptr;
-
-  if(!(ptr = malloc(n)) && n)
-    fatal("out of memory");
-  return ptr;
-}
-
-char *xstrdup(const char *s) {
-  return strcpy((char *)xmalloc(strlen(s) + 1), s);
-}
-
 // Remove a file and report any errors
 int erase(const char *s) {
   if(remove(s) < 0) {

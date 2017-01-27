@@ -159,9 +159,6 @@ void fatal(const char *msg, ...)
 int erase(const char *s);
 string tempfile();
 
-void *xmalloc(size_t n);
-char *xstrdup(const char *s);
-
 #define EXE_END 0
 #define EXE_STR 1
 #define EXE_SKIPSTR 2
