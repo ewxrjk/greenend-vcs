@@ -208,10 +208,10 @@ public:
     return 0;
   }
 
-  int show(const char *change) const {
+  int show(const string &change) const {
     return execute("git",
                    EXE_STR, "show",
-                   EXE_STR, change,
+                   EXE_STRING, &change,
                    EXE_END);
   }
 };

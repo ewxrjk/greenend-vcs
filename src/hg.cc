@@ -143,7 +143,7 @@ public:
                    EXE_END);
   }
 
-  int annotate(const string path) const {
+  int annotate(const string &path) const {
     return execute("hg",
                    EXE_STR, "annotate",
                    EXE_STR, "--",
