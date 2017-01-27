@@ -429,7 +429,9 @@ static void assemble(vector<string> &cmd,
     case EXE_STRING:
     case EXE_STRING|EXE_OPT: {
       const string *str = va_arg(ap, const string *);
-      if(str || !(op & EXE_OPT))
+      if(!(op & EXE_OPT))
+        assert(str);
+      if(str)
         cmd.push_back(transform(*str));
       break;
     }
