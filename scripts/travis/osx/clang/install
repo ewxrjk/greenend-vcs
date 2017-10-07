@@ -1,0 +1,5 @@
+#! /bin/sh
+brew install expat curl bazaar cvs darcs rcs
+# svn, git in xcode
+# mercurial already installed and brew errors if you ask for it again(!)
+# no sccs in homebrew?

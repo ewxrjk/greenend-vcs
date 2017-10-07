@@ -1,5 +1,5 @@
 # This file is part of VCS
-# Copyright (C) 2009 Richard Kettlewell
+# Copyright (C) 2009, 2017 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@ EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/override.vcs \
 	debian/rules scripts/setversion \
 	images/vcs-55.png images/vcs-55.svg \
-	README.developers scripts/coverage scripts/dist scripts/htmlman
+	README.developers scripts/coverage scripts/dist		\
+	scripts/htmlman scripts/travis/linux/clang/configure	\
+	scripts/travis/linux/gcc/configure			\
+	scripts/travis/osx/clang/configure			\
+	scripts/travis/osx/clang/install
+
 SUBDIRS=src tests
 
 clean-local:

@@ -1,7 +1,7 @@
 *.o
 *.a
 .deps
-INSTALL
+/INSTALL
 Makefile
 Makefile.in
 aclocal.m4
@@ -10,7 +10,7 @@ config.aux
 config.h
 config.h.in
 config.status
-configure
+/configure
 config.log
 stamp-h1
 src/vcs
