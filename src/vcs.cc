@@ -107,7 +107,7 @@ const vcs *vcs::guess_branch(string uri) {
     if(uri.size() && uri.at(0) == '/')
       uri = "file://" + uri;
     else
-      uri = "file:///" + cwd() + "/" + uri;
+      uri = "file://" + cwd() + "/" + uri;
   }
 
   // Otherwise we must inspect what we find there.
