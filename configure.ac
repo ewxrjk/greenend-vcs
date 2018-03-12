@@ -18,6 +18,7 @@
 AC_INIT([vcs], [0.8], [rjk@greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
 AM_INIT_AUTOMAKE([foreign])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_SRCDIR([src/vcs.cc])
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
