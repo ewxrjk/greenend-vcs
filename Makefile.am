@@ -18,7 +18,7 @@ EXTRA_DIST=CHANGES.html debian/changelog debian/control debian/copyright \
 	debian/override.vcs \
 	debian/rules scripts/setversion \
 	images/vcs-55.png images/vcs-55.svg \
-	README.developers scripts/coverage scripts/dist		\
+	README.md DEVELOPERS.md scripts/coverage scripts/dist		\
 	scripts/htmlman scripts/travis/linux/clang/configure	\
 	scripts/travis/linux/gcc/configure			\
 	scripts/travis/osx/clang/configure			\
