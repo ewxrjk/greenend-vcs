@@ -26,7 +26,14 @@ build() {
 
     tar xf ${archive}
     cd ${dir}
-    schroot -pc${chroot} fakeroot debian/rules build binary
+    case "$chroot" in
+        "" )
+            fakeroot debian/rules build binary
+            ;;
+        * )
+            schroot -pc${chroot} fakeroot debian/rules build binary
+            ;;
+    esac
     cd ..
     mv ${package}_${version}_${arch}.deb products/.
     rm -rf ${dir}
@@ -42,10 +49,10 @@ archive=${package}-${version}.tar.gz
 rm -rf products ${dir}
 mkdir products
 cp ${archive} products/.
-cp README products/vcs-README.txt
+cp README.md products/vcs-README.md
 cp CHANGES.html products/vcs-CHANGES.html
 scripts/htmlman vcs.1 > products/vcs.1.html
 
-build i386 lenny32
-build amd64 lenny64
+build i386 stretch32
+build amd64 ""
 ls -l products
