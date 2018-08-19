@@ -40,6 +40,7 @@ build() {
 }
 
 make distcheck
+fakeroot make dist
 
 package=$(awk '/^PACKAGE_NAME =/ { print $3 }' < Makefile)
 version=$(awk '/^PACKAGE_VERSION =/ { print $3 }' < Makefile)
