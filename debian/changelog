@@ -1,3 +1,11 @@
+vcs (1) stable; urgency=medium
+
+  * git, bzr: keep up with recent versions.
+  * svn: fix filename encoding.
+  * svn: stable 'status' output.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 19 Aug 2018 10:52:23 +0100
+
 vcs (0.8) unstable; urgency=low
 
   * RCS and SCCS support
