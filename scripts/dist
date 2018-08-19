@@ -49,7 +49,7 @@ archive=${package}-${version}.tar.gz
 rm -rf products ${dir}
 mkdir products
 cp ${archive} products/.
-cp README.md products/vcs-README.md
+markdown README.md > products/vcs-README.html
 cp CHANGES.html products/vcs-CHANGES.html
 scripts/htmlman vcs.1 > products/vcs.1.html
 
