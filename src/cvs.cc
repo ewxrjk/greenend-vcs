@@ -20,7 +20,6 @@
 
 class cvs: public vcs {
 public:
-
   cvs(): vcs("CVS") {
     register_subdir("CVS");
   }

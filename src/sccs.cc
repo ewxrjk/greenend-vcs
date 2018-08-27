@@ -137,7 +137,6 @@ public:
     }
     return rc;
   }
-
 };
 
 static const sccs vcs_sccs;

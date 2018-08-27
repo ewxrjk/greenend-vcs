@@ -98,7 +98,6 @@ public:
                    EXE_VECTOR|EXE_DOTSTUFF, &files,
                    EXE_END);
   }
-
 };
 
 static const rcs vcs_rcs;

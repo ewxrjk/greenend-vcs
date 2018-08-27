@@ -21,7 +21,6 @@
 
 class svn: public vcs {
 public:
-
   svn(): vcs("Subversion") {
     register_subdir(".svn");
     register_scheme("svn");

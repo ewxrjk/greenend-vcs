@@ -122,6 +122,7 @@ public:
   ~TempFile();
   const string &path() const { return name; }
   const char *c_str() const { return name.c_str(); }
+
 private:
   string name;
 };
@@ -130,6 +131,7 @@ class InDirectory {
 public:
   InDirectory(const string &dir);
   ~InDirectory();
+
 private:
   int fd;
 };

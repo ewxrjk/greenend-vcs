@@ -19,7 +19,6 @@
 
 class git: public vcs {
 public:
-
   git(): vcs("Git") {
     register_subdir(".git");
     register_subdir("HEAD");

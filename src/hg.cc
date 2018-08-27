@@ -19,7 +19,6 @@
 
 class hg: public vcs {
 public:
-
   hg(): vcs("Mercurial") {
     register_subdir(".hg");
     register_scheme("hg");

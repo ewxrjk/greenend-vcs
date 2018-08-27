@@ -77,7 +77,6 @@ public:
     else
       return guess()->diff(vector<string>(argv+optind, argv+argc));
   }
-
 };
 
 static diff command_diff;

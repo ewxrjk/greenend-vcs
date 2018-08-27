@@ -26,7 +26,6 @@ int writef(FILE *fp, const char *what, const char *fmt, ...) {
   if(rc < 0)
     fatal("writing to %s: %s", what, strerror(errno));
   return rc;
-
 }
 
 /*

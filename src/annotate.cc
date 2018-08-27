@@ -57,8 +57,6 @@ public:
     redirect(getenv("VCS_PAGER"));
     return guess()->annotate(argv[optind]);
   }
-
-
 };
 
 static annotate command_annotate;

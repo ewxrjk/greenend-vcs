@@ -21,7 +21,6 @@
 
 class p4: public vcs {
 public:
-
   p4(): vcs("Perforce") {
   }
 

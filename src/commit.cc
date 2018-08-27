@@ -63,7 +63,6 @@ public:
     }
     return guess()->commit(msg, vector<string>(argv+optind, argv+argc));
   }
-
 };
 
 static commit command_commit;

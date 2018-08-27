@@ -61,7 +61,6 @@ public:
     redirect(pager);
     return guess()->show(argv[optind]);
   }
-
 };
 
 static show command_show;

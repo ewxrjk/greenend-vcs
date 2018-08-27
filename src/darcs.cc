@@ -19,7 +19,6 @@
 
 class darcs: public vcs {
 public:
-
   darcs(): vcs("Darcs") {
     register_subdir("_darcs");
   }

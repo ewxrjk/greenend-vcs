@@ -19,7 +19,6 @@
 
 class bzr: public vcs {
 public:
-
   bzr(): vcs("Bazaar") {
     register_subdir(".bzr");
     register_substring("bzr");

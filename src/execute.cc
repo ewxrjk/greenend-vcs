@@ -232,7 +232,6 @@ public:
 // Read from a child's redirected FD into a sintrg
 class readtostring: public readfromfd {
 public:
-
   void init(int childid = 1) {
     readfromfd::init(childid);
   }
@@ -240,13 +239,13 @@ public:
   inline const string &str() {
     return s;
   }
+
 private:
   string s;
 
   void read(void *ptr, size_t nbytes) {
     s.append((char *)ptr, nbytes);
   }
-
 };
 
 static string shellquote(const string &s) {
