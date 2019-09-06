@@ -10,7 +10,7 @@ Build-Depends: libcurl-dev,libexpat-dev
 Package: vcs
 Architecture: any
 Section: devel
-Priority: extra
+Priority: optional
 Depends: ${shlibs:Depends}
 Description: Wrapper for version control systems giving a uniform interface
  VCS is a wrapper for version control systems.  It presents an
