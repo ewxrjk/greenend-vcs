@@ -9,6 +9,8 @@ Bazaar, Git, CVS, Subversion, Mercurial, Darcs, Perforce, RCS and SCCS
 are supported, with a small set of commands.  See the man page for
 more details.
 
+⚠ I don't use this program any more, do not expect updates. ⚠
+
 # Installation
 
 To build VCS, you will need:
