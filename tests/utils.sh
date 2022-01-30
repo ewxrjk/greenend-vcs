@@ -475,6 +475,6 @@ PATH=$builddir/../src:$PATH
 
 # Run in a private directory
 workdir=`mktemp -d $builddir/tmp.XXXXXX`
-trap "rm -rf $workdir" EXIT INT HUP TERM
+trap "rm -rf $workdir" EXIT
 cd $workdir
 pwd

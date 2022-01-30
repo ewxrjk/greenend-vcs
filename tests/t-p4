@@ -32,7 +32,7 @@ p4d -p 6661 -r . &
 p4dpid=$!
 cd ..
 
-trap "kill $p4dpid && wait $p4dpid; rm -rf $workdir" EXIT INT HUP TERM
+trap "kill $p4dpid && wait $p4dpid; rm -rf $workdir" EXIT
 
 export P4PORT=localhost:6661
 
